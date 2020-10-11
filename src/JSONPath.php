@@ -232,9 +232,9 @@ class JSONPath implements ArrayAccess, Iterator, JsonSerializable, Countable
     /**
      * Return the current element
      *
-     * @return $this|mixed
+     * @return mixed
      */
-    public function current(): self
+    public function current()
     {
         $value = current($this->data);
 
