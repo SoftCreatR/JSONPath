@@ -127,7 +127,7 @@ here [Peekmo/JsonPath](https://github.com/Peekmo/JsonPath).
 Changelog
 ---------
 
-### 0.6.0
+### 0.6.0 - 0.6.1
  - Dropped support for PHP < 7.2
  - Switched from (broken) PSR-0 to PSR-4
  - Updated PHPUnit to 8.5 / 9.4
