@@ -244,6 +244,20 @@ class JSONPathLexer
 
             return new JSONPathToken(JSONPathToken::T_INDEX, $value);
         }
+        // This idea could work for multi index matching
+        // Calling and on each of the objects i.e.
+        // if(preg_match('/^'. static::MATCH_MULTI_INDEX . '/$xu',$value,$matches)){
+        //     $value = explode(",",trim($value,","))
+        //     $len = count($value);
+        //     $objs = array()
+        //     for($value as $i=>$v){
+        //         array_push($objs,new JSONPathToken(JSONPathToken::T_INDEX, $v));
+        //     }
+        // Result of prev obj is the base for the query in the next object
+        // That is if the prev object returns all the person starting with A
+        // And the next is the age
+        // Then the One's named A is the search space for the age one's
+        // }
 
         throw new JSONPathException("Unable to parse token {$value} in expression: $this->expression");
     }
