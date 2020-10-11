@@ -30,9 +30,12 @@ jobs:
           php-version: ${{ matrix.php }}
           extensions: json
           coverage: none
-          tools: phpunit
+          tools: cs2pr, phpstan, phpunit
         env:
           COMPOSER_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Run PHPStan
+        run: phpstan analyse --error-format=checkstyle src | cs2pr
 
       - name: Setup problem matchers for PHPUnit
         run: echo "::add-matcher::${{ runner.tool_cache }}/phpunit.json"
