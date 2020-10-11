@@ -168,6 +168,14 @@ class JSONPath implements ArrayAccess, Iterator, JsonSerializable, Countable
     }
 
     /**
+     * @deprecated Please use getData()
+     */
+    public function data()
+    {
+        return $this->getData();
+    }
+
+    /**
      * @param $data
      * @return $this
      */
