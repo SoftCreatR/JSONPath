@@ -29,7 +29,7 @@ class JSONPathLexer
     public const MATCH_QUERY_MATCH = '\s* \?\(.+?\) \s*'; // Eg. ?(@.foo = "bar")
     public const MATCH_INDEX_IN_SINGLE_QUOTES = '\s* \' (.+?) \' \s*'; // Eg. 'bar'
     public const MATCH_INDEX_IN_DOUBLE_QUOTES = '\s* " (.+?) " \s*'; // Eg. 'bar'
-    public const MATCH_MULTI_INDEX = '[\w+]+[^\,]|[\"\']+'  // Matches name,year or '''name''','''year''' 
+    public const MATCH_MULTI_INDEX = '[\w+]+[^\,]|[\"\']+';  // Matches name,year or '''name''','''year''' 
     /**
      * The expression being lexed.
      *
