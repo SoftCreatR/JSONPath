@@ -1,4 +1,4 @@
-JSONPath ![Test](https://github.com/SoftCreatR/JSONPath/workflows/Test/badge.svg) 
+JSONPath ![Test](https://github.com/SoftCreatR/JSONPath/workflows/Test/badge.svg?branch=main) 
 =============
 
 This is a [JSONPath](http://goessner.net/articles/JsonPath/) implementation for PHP based on Stefan Goessner's JSONPath script.
@@ -106,7 +106,7 @@ So here are the types of query expressions that are supported:
 Known issues
 ------
 
-- This project has not implemented multiple string indexes eg. `$[name,year]` or `$["name","year"]`. I have no ETA on that feature and it would require some re-writing of the parser that uses a very basic regex implementation.
+- This project has not implemented multiple string indexes e.g. `$[name,year]` or `$["name","year"]`. I have no ETA on that feature, and it would require some re-writing of the parser that uses a very basic regex implementation.
 
 Similar projects
 ----------------
@@ -119,8 +119,7 @@ Similar projects
 
 The [Hash](http://book.cakephp.org/2.0/en/core-utility-libraries/hash.html) utility from CakePHP does some similar things 
 
-The original JsonPath implementations is available at [http://code.google.com/p/jsonpath]() and re-hosted for composer
-here [Peekmo/JsonPath](https://github.com/Peekmo/JsonPath).
+The original JsonPath implementations is available at [http://code.google.com/p/jsonpath]() and re-hosted for composer here [Peekmo/JsonPath](https://github.com/Peekmo/JsonPath).
 
 [ObjectPath](http://objectpath.org) ([https://github.com/adriank/ObjectPath]()) appears to be a Python/JS implementation with a new name and extra features.
 
@@ -135,15 +134,16 @@ Changelog
  - Added missing PHPDoc blocks
  - Added return type hints
  - Moved from Travis to GitHub actions
+ - Set `strict_types=1`
 
 ### 0.5.0
- - Fixed the slice notation (eg. [0:2:5] etc.). **Breaks code relying on the broken implementation**
+ - Fixed the slice notation (e.g. [0:2:5] etc.). **Breaks code relying on the broken implementation**
 
 ### 0.3.0
  - Added JSONPathToken class as value object
  - Lexer clean up and refactor
  - Updated the lexing and filtering of the recursive token ("..") to allow for a combination of recursion
-   and filters, eg. $..[?(@.type == 'suburb')].name
+   and filters, e.g. $..[?(@.type == 'suburb')].name
 
 ### 0.2.1 - 0.2.5
  - Various bug fixes and clean up

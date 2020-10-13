@@ -12,6 +12,7 @@ namespace Flow\JSONPath\Test;
 use Exception;
 use PHPUnit\Framework\TestCase;
 use Flow\JSONPath\JSONPath;
+use function json_decode;
 use function random_int;
 
 class JSONPathArrayAccessTest extends TestCase
@@ -22,7 +23,6 @@ class JSONPathArrayAccessTest extends TestCase
     public function testChaining(): void
     {
         $data = $this->exampleData(random_int(0, 1));
-
         $conferences = (new JSONPath($data))->find('.conferences.*');
         $teams = $conferences->find('..teams.*');
 
@@ -46,9 +46,7 @@ class JSONPathArrayAccessTest extends TestCase
     public function testIterating(): void
     {
         $data = $this->exampleData(random_int(0, 1));
-
         $conferences = (new JSONPath($data))->find('.conferences.*');
-
         $names = [];
 
         foreach ($conferences as $conference) {
@@ -67,11 +65,17 @@ class JSONPathArrayAccessTest extends TestCase
      */
     public function testDifferentStylesOfAccess(): void
     {
-        $data = $this->exampleData(random_int(0, 1));
+        $data = (new JSONPath($this->exampleData(random_int(0, 1))));
 
-        $firstConference = (new JSONPath($data))->conferences[0];
+        self::assertArrayHasKey('conferences', $data);
 
-        self::assertEquals('Western Conference', $firstConference->name);
+        $conferences = $data->__get('conferences')->getData();
+
+        if (is_array($conferences[0])) {
+            self::assertEquals('Western Conference', $conferences[0]['name']);
+        } else {
+            self::assertEquals('Western Conference', $conferences[0]->name);
+        }
     }
 
     /**
@@ -131,6 +135,6 @@ class JSONPathArrayAccessTest extends TestCase
            ]
         }';
 
-        return \json_decode($json, $asArray === 1);
+        return json_decode($json, $asArray === 1);
     }
 }

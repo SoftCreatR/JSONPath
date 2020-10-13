@@ -3,6 +3,8 @@ name: Test
 
 on:
   push:
+    tags-ignore:
+      - '**'
     paths:
       - '*.php'
       - 'composer.json'
