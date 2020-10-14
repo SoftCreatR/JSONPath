@@ -5,7 +5,6 @@
  * @copyright Copyright (c) 2018 Flow Communications
  * @license   MIT <https://github.com/SoftCreatR/JSONPath/blob/main/LICENSE>
  */
-declare(strict_types=1);
 
 namespace Flow\JSONPath\Filters;
 
@@ -18,7 +17,7 @@ use function strtolower;
 
 class QueryMatchFilter extends AbstractFilter
 {
-    public const MATCH_QUERY_OPERATORS = '
+    const MATCH_QUERY_OPERATORS = '
       @(\.(?<key>[^ =]+)|\[["\']?(?<keySquare>.*?)["\']?\])
       (\s*(?<operator>==|=|<>|!==|!=|>|<)\s*(?<comparisonValue>.+))?
     ';
@@ -27,7 +26,7 @@ class QueryMatchFilter extends AbstractFilter
      * @inheritDoc
      * @return array
      */
-    public function filter($collection): array
+    public function filter($collection)
     {
         $return = [];
 
@@ -43,8 +42,8 @@ class QueryMatchFilter extends AbstractFilter
             throw new RuntimeException('Malformed filter query: key was not set');
         }
 
-        $operator = $matches['operator'] ?? null;
-        $comparisonValue = $matches['comparisonValue'] ?? null;
+        $operator = isset($matches['operator']) ? $matches['operator'] : null;
+        $comparisonValue   = isset($matches['comparisonValue']) ? $matches['comparisonValue'] : null;
 
         if (is_string(($comparisonValue))) {
             if (strtolower($comparisonValue) === 'false') {

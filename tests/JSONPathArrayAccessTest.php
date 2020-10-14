@@ -5,7 +5,6 @@
  * @copyright Copyright (c) 2018 Flow Communications
  * @license   MIT <https://github.com/SoftCreatR/JSONPath/blob/main/LICENSE>
  */
-declare(strict_types=1);
 
 namespace Flow\JSONPath\Test;
 
@@ -13,16 +12,16 @@ use Exception;
 use PHPUnit\Framework\TestCase;
 use Flow\JSONPath\JSONPath;
 use function json_decode;
-use function random_int;
+use function mt_rand;
 
 class JSONPathArrayAccessTest extends TestCase
 {
     /**
      * @throws Exception
      */
-    public function testChaining(): void
+    public function testChaining()
     {
-        $data = $this->exampleData(random_int(0, 1));
+        $data = $this->exampleData(mt_rand(0, 1));
         $conferences = (new JSONPath($data))->find('.conferences.*');
         $teams = $conferences->find('..teams.*');
 
@@ -43,9 +42,9 @@ class JSONPathArrayAccessTest extends TestCase
     /**
      * @throws Exception
      */
-    public function testIterating(): void
+    public function testIterating()
     {
-        $data = $this->exampleData(random_int(0, 1));
+        $data = $this->exampleData(mt_rand(0, 1));
         $conferences = (new JSONPath($data))->find('.conferences.*');
         $names = [];
 
@@ -63,9 +62,9 @@ class JSONPathArrayAccessTest extends TestCase
     /**
      * @throws Exception
      */
-    public function testDifferentStylesOfAccess(): void
+    public function testDifferentStylesOfAccess()
     {
-        $data = (new JSONPath($this->exampleData(random_int(0, 1))));
+        $data = (new JSONPath($this->exampleData(mt_rand(0, 1))));
 
         self::assertArrayHasKey('conferences', $data);
 
@@ -82,7 +81,7 @@ class JSONPathArrayAccessTest extends TestCase
      * @param int $asArray
      * @return array|object
      */
-    public function exampleData(int $asArray = 1)
+    public function exampleData($asArray = 1)
     {
         $json = '{
            "name":"Major League Baseball",

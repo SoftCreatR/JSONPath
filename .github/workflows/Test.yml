@@ -8,10 +8,14 @@ on:
     paths:
       - '*.php'
       - 'composer.json'
+    branches:
+      - 'php56'
   pull_request:
     paths:
       - '*.php'
       - 'composer.json'
+    branches:
+      - 'php56'
   workflow_dispatch:
 
 jobs:
@@ -19,7 +23,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        php: [ '7.2', '7.3', '7.4' ]
+        php: [ '5.6' ]
     name: PHP ${{ matrix.php-versions }} Test
 
     steps:
@@ -32,12 +36,9 @@ jobs:
           php-version: ${{ matrix.php }}
           extensions: json
           coverage: none
-          tools: cs2pr, phpstan, phpunit
+          tools: phpunit
         env:
           COMPOSER_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Run PHPStan
-        run: phpstan analyse --error-format=checkstyle src | cs2pr
 
       - name: Setup problem matchers for PHPUnit
         run: echo "::add-matcher::${{ runner.tool_cache }}/phpunit.json"

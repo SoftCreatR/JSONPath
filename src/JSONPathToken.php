@@ -5,7 +5,6 @@
  * @copyright Copyright (c) 2018 Flow Communications
  * @license   MIT <https://github.com/SoftCreatR/JSONPath/blob/main/LICENSE>
  */
-declare(strict_types=1);
 
 namespace Flow\JSONPath;
 
@@ -19,12 +18,12 @@ class JSONPathToken
     /*
      * Tokens
      */
-    public const T_INDEX = 'index';
-    public const T_RECURSIVE = 'recursive';
-    public const T_QUERY_RESULT = 'queryResult';
-    public const T_QUERY_MATCH = 'queryMatch';
-    public const T_SLICE = 'slice';
-    public const T_INDEXES = 'indexes';
+    const T_INDEX = 'index';
+    const T_RECURSIVE = 'recursive';
+    const T_QUERY_RESULT = 'queryResult';
+    const T_QUERY_MATCH = 'queryMatch';
+    const T_SLICE = 'slice';
+    const T_INDEXES = 'indexes';
 
     public $type;
     public $value;
@@ -48,7 +47,7 @@ class JSONPathToken
      * @param $type
      * @throws JSONPathException
      */
-    public function validateType($type): void
+    public function validateType($type)
     {
         if (!in_array($type, static::getTypes(), true)) {
             throw new JSONPathException('Invalid token: ' . $type);
@@ -58,7 +57,7 @@ class JSONPathToken
     /**
      * @return string[]
      */
-    public static function getTypes(): array
+    public static function getTypes()
     {
         return [
             static::T_INDEX,

@@ -5,7 +5,6 @@
  * @copyright Copyright (c) 2018 Flow Communications
  * @license   MIT <https://github.com/SoftCreatR/JSONPath/blob/main/LICENSE>
  */
-declare(strict_types=1);
 
 namespace Flow\JSONPath\Filters;
 
@@ -16,7 +15,7 @@ class IndexesFilter extends AbstractFilter
     /**
      * @inheritDoc
      */
-    public function filter($collection): array
+    public function filter($collection)
     {
         $return = [];
 

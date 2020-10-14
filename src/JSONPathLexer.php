@@ -5,7 +5,6 @@
  * @copyright Copyright (c) 2018 Flow Communications
  * @license   MIT <https://github.com/SoftCreatR/JSONPath/blob/main/LICENSE>
  */
-declare(strict_types=1);
 
 namespace Flow\JSONPath;
 
@@ -22,13 +21,13 @@ class JSONPathLexer
      * Match within bracket groups
      * Matches are whitespace insensitive
      */
-    public const MATCH_INDEX = '(?!\-)[\-\w]+ | \*'; // Eg. foo or 40f35757-2563-4790-b0b1-caa904be455f
-    public const MATCH_INDEXES = '\s* -?\d+ [-?\d,\s]+'; // Eg. 0,1,2
-    public const MATCH_SLICE = '[-\d:]+ | :'; // Eg. [0:2:1]
-    public const MATCH_QUERY_RESULT = '\s* \( .+? \) \s*'; // Eg. ?(@.length - 1)
-    public const MATCH_QUERY_MATCH = '\s* \?\(.+?\) \s*'; // Eg. ?(@.foo = "bar")
-    public const MATCH_INDEX_IN_SINGLE_QUOTES = '\s* \' (.+?) \' \s*'; // Eg. 'bar'
-    public const MATCH_INDEX_IN_DOUBLE_QUOTES = '\s* " (.+?) " \s*'; // Eg. 'bar'
+    const MATCH_INDEX = '(?!\-)[\-\w]+ | \*'; // Eg. foo or 40f35757-2563-4790-b0b1-caa904be455f
+    const MATCH_INDEXES = '\s* -?\d+ [-?\d,\s]+'; // Eg. 0,1,2
+    const MATCH_SLICE = '[-\d:]+ | :'; // Eg. [0:2:1]
+    const MATCH_QUERY_RESULT = '\s* \( .+? \) \s*'; // Eg. ?(@.length - 1)
+    const MATCH_QUERY_MATCH = '\s* \?\(.+?\) \s*'; // Eg. ?(@.foo = "bar")
+    const MATCH_INDEX_IN_SINGLE_QUOTES = '\s* \' (.+?) \' \s*'; // Eg. 'bar'
+    const MATCH_INDEX_IN_DOUBLE_QUOTES = '\s* " (.+?) " \s*'; // Eg. 'bar'
 
     /**
      * The expression being lexed.
@@ -80,7 +79,7 @@ class JSONPathLexer
      * @return array
      * @throws JSONPathException
      */
-    public function parseExpressionTokens(): array
+    public function parseExpressionTokens()
     {
         $dotIndexDepth = 0;
         $squareBracketDepth = 0;
@@ -160,16 +159,16 @@ class JSONPathLexer
      * @param int $forward
      * @return string|null
      */
-    protected function lookAhead($pos, $forward = 1): ?string
+    protected function lookAhead($pos, $forward = 1)
     {
-        return $this->expression[$pos + $forward] ?? null;
+        return isset($this->expression[$pos + $forward]) ? $this->expression[$pos + $forward] : null;
     }
 
     /**
      * @param $pos
      * @return bool
      */
-    protected function atEnd($pos): bool
+    protected function atEnd($pos)
     {
         return $pos === $this->expressionLength;
     }
@@ -178,7 +177,7 @@ class JSONPathLexer
      * @return array
      * @throws JSONPathException
      */
-    public function parseExpression(): array
+    public function parseExpression()
     {
         return $this->parseExpressionTokens();
     }

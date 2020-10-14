@@ -5,7 +5,6 @@
  * @copyright Copyright (c) 2018 Flow Communications
  * @license   MIT <https://github.com/SoftCreatR/JSONPath/blob/main/LICENSE>
  */
-declare(strict_types=1);
 
 namespace Flow\JSONPath\Test;
 
@@ -18,7 +17,7 @@ class JSONPathDashedIndexTest extends TestCase
     /**
      * @return array[]
      */
-    public function indexDataProvider(): array
+    public function indexDataProvider()
     {
         return [
             // path, data, expected
@@ -54,7 +53,7 @@ class JSONPathDashedIndexTest extends TestCase
      * @param array $expected
      * @throws Exception
      */
-    public function testSlice(string $path, array $data, array $expected): void
+    public function testSlice($path, array $data, array $expected)
     {
         $jsonPath = new JSONPath($data);
         $result = $jsonPath->find($path)->getData();

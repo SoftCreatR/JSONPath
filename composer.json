@@ -1,7 +1,6 @@
 {
   "name": "softcreatr/jsonpath",
   "description": "JSONPath implementation for parsing, searching and flattening arrays",
-  "version": "0.6.2",
   "license": "MIT",
   "authors": [
     {
@@ -18,14 +17,14 @@
     }
   ],
   "require": {
-    "php": ">=7.2",
+    "php": "^5.6",
     "ext-json": "*"
   },
   "replace": {
     "flow/jsonpath": "*"
   },
   "require-dev": {
-    "phpunit/phpunit": "^8 || ^9"
+    "phpunit/phpunit": "^5.0"
   },
   "config": {
     "optimize-autoloader": true,
@@ -45,6 +44,6 @@
   "support": {
     "email": "hello@1-2.dev",
     "issues": "https://github.com/SoftCreatR/JSONPath/issues",
-    "source": "https://github.com/SoftCreatR/JSONPath"
+    "source": "https://github.com/SoftCreatR/JSONPath/tree/php-5.x"
   }
 }

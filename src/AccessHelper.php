@@ -5,7 +5,6 @@
  * @copyright Copyright (c) 2018 Flow Communications
  * @license   MIT <https://github.com/SoftCreatR/JSONPath/blob/main/LICENSE>
  */
-declare(strict_types=1);
 
 namespace Flow\JSONPath;
 
@@ -28,7 +27,7 @@ class AccessHelper
      * @param $collection
      * @return array
      */
-    public static function collectionKeys($collection): array
+    public static function collectionKeys($collection)
     {
         if (is_object($collection)) {
             return array_keys(get_object_vars($collection));
@@ -41,7 +40,7 @@ class AccessHelper
      * @param $collection
      * @return bool
      */
-    public static function isCollectionType($collection): bool
+    public static function isCollectionType($collection)
     {
         return is_array($collection) || is_object($collection);
     }
@@ -52,7 +51,7 @@ class AccessHelper
      * @param false $magicIsAllowed
      * @return bool
      */
-    public static function keyExists($collection, $key, $magicIsAllowed = false): bool
+    public static function keyExists($collection, $key, $magicIsAllowed = false)
     {
         if ($magicIsAllowed && is_object($collection) && method_exists($collection, '__get')) {
             return true;
@@ -153,7 +152,7 @@ class AccessHelper
      * @param $collection
      * @param $key
      */
-    public static function unsetValue(&$collection, $key): void
+    public static function unsetValue(&$collection, $key)
     {
         if (is_object($collection) && !$collection instanceof ArrayAccess) {
             unset($collection->$key);
@@ -167,7 +166,7 @@ class AccessHelper
      * @return array
      * @throws JSONPathException
      */
-    public static function arrayValues($collection): array
+    public static function arrayValues($collection)
     {
         if (is_array($collection)) {
             return array_values($collection);

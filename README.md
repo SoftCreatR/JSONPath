@@ -1,4 +1,4 @@
-JSONPath ![Test](https://github.com/SoftCreatR/JSONPath/workflows/Test/badge.svg?branch=main) 
+JSONPath for PHP 5.6 ![Test](https://github.com/SoftCreatR/JSONPath/workflows/Test/badge.svg?branch=php-56) 
 =============
 
 This is a [JSONPath](http://goessner.net/articles/JsonPath/) implementation for PHP based on Stefan Goessner's JSONPath script.
@@ -11,17 +11,14 @@ This project aims to be a clean and simple implementation with the following goa
  - Expressions are parsed into tokens using code inspired by the Doctrine Lexer. The tokens are cached internally to avoid re-parsing the expressions.
  - There is no `eval()` in use
  - Any combination of objects/arrays/ArrayAccess-objects can be used as the data input which is great if you're de-serializing JSON in to objects or if you want to process your own data structures.
+ 
+🔻 **Please note, that this branch (based on JSONPath 0.6.2) is protected. There are no intentions to make any updates here. Please consider upgrading to PHP 7.2 or newer.**
 
 Installation
 ---
 
-**PHP 7.2+**
-```bash
-composer require softcreatr/jsonpath
-```
-**PHP < 7.2**
-
-Support for PHP < 7.2 has been completely dropped. A legacy branch is maintained in the original repository in php-5.x and can be composer-installed as follows: `"flow/jsonpath": "dev-php-5.x"`
+1. Add to the `require`-section of your composer.json: `"softcreatr/jsonpath": "dev-php-56"`
+2. Execute `composer install`
 
 JSONPath Examples
 ---

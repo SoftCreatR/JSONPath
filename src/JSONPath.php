@@ -5,7 +5,6 @@
  * @copyright Copyright (c) 2018 Flow Communications
  * @license   MIT <https://github.com/SoftCreatR/JSONPath/blob/main/LICENSE>
  */
-declare(strict_types=1);
 
 namespace Flow\JSONPath;
 
@@ -31,7 +30,7 @@ class JSONPath implements ArrayAccess, Iterator, JsonSerializable, Countable
 
     protected $options;
 
-    public const ALLOW_MAGIC = 1;
+    const ALLOW_MAGIC = 1;
 
     /**
      * @param $data
@@ -50,7 +49,7 @@ class JSONPath implements ArrayAccess, Iterator, JsonSerializable, Countable
      * @return JSONPath
      * @throws Exception
      */
-    public function find($expression): self
+    public function find($expression)
     {
         $tokens = $this->parseTokens($expression);
 
@@ -86,7 +85,7 @@ class JSONPath implements ArrayAccess, Iterator, JsonSerializable, Countable
             return null;
         }
 
-        $value = $this->data[$keys[0]] ?? null;
+        $value = isset($this->data[$keys[0]]) ? $this->data[$keys[0]] : null;
 
         return AccessHelper::isCollectionType($value) ? new static($value, $this->options) : $value;
     }
@@ -143,7 +142,7 @@ class JSONPath implements ArrayAccess, Iterator, JsonSerializable, Countable
      * @return array
      * @throws Exception
      */
-    public function parseTokens($expression): array
+    public function parseTokens($expression)
     {
         $cacheKey = md5($expression);
 
@@ -179,7 +178,7 @@ class JSONPath implements ArrayAccess, Iterator, JsonSerializable, Countable
      * @param $data
      * @return $this
      */
-    public function setData($data): self
+    public function setData($data)
     {
         $this->data = $data;
 
@@ -190,7 +189,7 @@ class JSONPath implements ArrayAccess, Iterator, JsonSerializable, Countable
      * @param mixed $offset
      * @return bool
      */
-    public function offsetExists($offset): bool
+    public function offsetExists($offset)
     {
         return AccessHelper::keyExists($this->data, $offset);
     }
@@ -212,7 +211,7 @@ class JSONPath implements ArrayAccess, Iterator, JsonSerializable, Countable
      * @param mixed $offset
      * @param mixed $value
      */
-    public function offsetSet($offset, $value): void
+    public function offsetSet($offset, $value)
     {
         if ($offset === null) {
             $this->data[] = $value;
@@ -224,7 +223,7 @@ class JSONPath implements ArrayAccess, Iterator, JsonSerializable, Countable
     /**
      * @param mixed $offset
      */
-    public function offsetUnset($offset): void
+    public function offsetUnset($offset)
     {
         AccessHelper::unsetValue($this->data, $offset);
     }
@@ -252,7 +251,7 @@ class JSONPath implements ArrayAccess, Iterator, JsonSerializable, Countable
     /**
      * Move forward to next element
      */
-    public function next(): void
+    public function next()
     {
         next($this->data);
     }
@@ -272,7 +271,7 @@ class JSONPath implements ArrayAccess, Iterator, JsonSerializable, Countable
      *
      * @return bool
      */
-    public function valid(): bool
+    public function valid()
     {
         return key($this->data) !== null;
     }
@@ -280,7 +279,7 @@ class JSONPath implements ArrayAccess, Iterator, JsonSerializable, Countable
     /**
      * Rewind the Iterator to the first element
      */
-    public function rewind(): void
+    public function rewind()
     {
         reset($this->data);
     }
@@ -300,7 +299,7 @@ class JSONPath implements ArrayAccess, Iterator, JsonSerializable, Countable
      *
      * @return int
      */
-    public function count(): int
+    public function count()
     {
         return count($this->data);
     }
