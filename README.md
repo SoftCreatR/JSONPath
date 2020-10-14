@@ -1,4 +1,4 @@
-JSONPath ![Test](https://github.com/SoftCreatR/JSONPath/workflows/Test/badge.svg?branch=main) 
+JSONPath for PHP 7.1+ ![Test](https://github.com/SoftCreatR/JSONPath/workflows/Test/badge.svg?branch=main) 
 =============
 
 This is a [JSONPath](http://goessner.net/articles/JsonPath/) implementation for PHP based on Stefan Goessner's JSONPath script.
@@ -15,13 +15,18 @@ This project aims to be a clean and simple implementation with the following goa
 Installation
 ---
 
-**PHP 7.2+**
+**PHP 7.1+**
 ```bash
 composer require softcreatr/jsonpath
 ```
-**PHP < 7.2**
+**PHP < 7.1**
 
-Support for PHP < 7.2 has been completely dropped. A legacy branch is maintained in the original repository in php-5.x and can be composer-installed as follows: `"flow/jsonpath": "dev-php-5.x"`
+Support for PHP < 7.1 has been dropped. However, legacy branches exist for PHP 5.6 and 7.0 and can be composer-installed as follows:
+
+* PHP 7.0: `"flow/jsonpath": "dev-php-70"`
+* PHP 5.6: `"flow/jsonpath": "dev-php-56"`
+
+🔻 Please note, that these legacy branches (based on JSONPath 0.6.2) are protected. There are no intentions to make any updates here. Please consider upgrading to PHP 7.2 or newer.
 
 JSONPath Examples
 ---
@@ -127,7 +132,7 @@ Changelog
 ---------
 
 ### 0.6.x
- - Dropped support for PHP < 7.2
+ - Dropped support for PHP < 7.1
  - Switched from (broken) PSR-0 to PSR-4
  - Updated PHPUnit to 8.5 / 9.4
  - Updated tests

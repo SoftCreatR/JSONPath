@@ -3,15 +3,17 @@ name: Test
 
 on:
   push:
-    tags-ignore:
-      - '**'
     paths:
       - '*.php'
       - 'composer.json'
+    branches:
+      - main
   pull_request:
     paths:
       - '*.php'
       - 'composer.json'
+    branches:
+      - main
   workflow_dispatch:
 
 jobs:
@@ -19,7 +21,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        php: [ '7.2', '7.3', '7.4' ]
+        php: [ '7.1', '7.2', '7.3', '7.4' ]
     name: PHP ${{ matrix.php-versions }} Test
 
     steps:
@@ -32,12 +34,9 @@ jobs:
           php-version: ${{ matrix.php }}
           extensions: json
           coverage: none
-          tools: cs2pr, phpstan, phpunit
+          tools: phpunit
         env:
           COMPOSER_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Run PHPStan
-        run: phpstan analyse --error-format=checkstyle src | cs2pr
 
       - name: Setup problem matchers for PHPUnit
         run: echo "::add-matcher::${{ runner.tool_cache }}/phpunit.json"
