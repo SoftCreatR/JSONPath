@@ -23,8 +23,8 @@ composer require softcreatr/jsonpath
 
 Support for PHP < 7.1 has been dropped. However, legacy branches exist for PHP 5.6 and 7.0 and can be composer-installed as follows:
 
-* PHP 7.0: `"flow/jsonpath": "dev-php-70"`
-* PHP 5.6: `"flow/jsonpath": "dev-php-56"`
+* PHP 7.0: `"softcreatr/jsonpath": "dev-php-70"`
+* PHP 5.6: `"softcreatr/jsonpath": "dev-php-56"`
 
 🔻 Please note, that these legacy branches (based on JSONPath 0.6.2) are protected. There are no intentions to make any updates here. Please consider upgrading to PHP 7.2 or newer.
 
