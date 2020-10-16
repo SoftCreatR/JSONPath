@@ -31,6 +31,13 @@ class JSONPathTest extends TestCase
         self::assertEquals('Sayings of the Century', $result[0]);
     }
 
+    public function testIndexesObject(): void
+    {
+        $result = (new JSONPath($this->exampleIndexedObject(random_int(0, 1))))->find('$.store.books[3].title');
+
+        self::assertEquals('Sword of Honour', $result[0]);
+    }
+
     /**
      * $['store']['books'][0]['title']
      *
@@ -800,24 +807,63 @@ class JSONPathTest extends TestCase
     public function exampleDataWithDots(int $asArray = 1)
     {
         $json = '
-			{
-				"data": {
-					"tokens": [
-						{
-						  "Employee.FirstName": "Jack"
-						},
-						{
-						  "Employee.LastName": "Daniels"
-						},
-						{
-						  "Employee.Email": "jd@example.com"
-						}
-					]
-				}
-			}
-		';
+            {
+                "data": {
+                    "tokens": [
+                        {
+                          "Employee.FirstName": "Jack"
+                        },
+                        {
+                          "Employee.LastName": "Daniels"
+                        },
+                        {
+                          "Employee.Email": "jd@example.com"
+                        }
+                    ]
+                }
+            }
+        ';
 
         return json_decode($json, $asArray === 1);
+    }
+
+    public function exampleIndexedObject(int $asArray = 1)
+    {
+        $json = '
+        {
+           "store":{
+              "books":{
+                 "4": {
+                    "category":"reference",
+                    "author":"Nigel Rees",
+                    "title":"Sayings of the Century",
+                    "price":8.95
+                 },
+                 "3": {
+                    "category":"fiction",
+                    "author":"Evelyn Waugh",
+                    "title":"Sword of Honour",
+                    "price":12.99
+                 },
+                 "2": {
+                    "category":"fiction",
+                    "author":"Herman Melville",
+                    "title":"Moby Dick",
+                    "isbn":"0-553-21311-3",
+                    "price":8.99
+                 },
+                 "1": {
+                    "category":"fiction",
+                    "author":"J. R. R. Tolkien",
+                    "title":"The Lord of the Rings",
+                    "isbn":"0-395-19395-8",
+                    "price":22.99
+                 }
+              }
+           }
+        }';
+
+        return json_decode($json, true);
     }
 
     /**
