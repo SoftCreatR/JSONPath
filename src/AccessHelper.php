@@ -90,7 +90,7 @@ class AccessHelper
         }
 
         if (is_array($collection)) {
-            if (is_int($key)) {
+            if (is_int($key) && $key < 0) {
                 return array_slice($collection, $key, 1, false)[0];
             }
 
