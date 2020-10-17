@@ -33,16 +33,23 @@ jobs:
         with:
           php-version: ${{ matrix.php }}
           extensions: json
-          coverage: none
-          tools: phpunit
+          coverage: pcov
         env:
           COMPOSER_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Setup problem matchers for PHPUnit
         run: echo "::add-matcher::${{ runner.tool_cache }}/phpunit.json"
-
+       
       - name: Install dependencies
         run: composer install --prefer-dist --no-interaction --no-suggest
 
+      - name: Setup PCOV
+        run: |
+          composer require pcov/clobber
+          vendor/bin/pcov clobber
+
       - name: Execute tests
-        run: vendor/bin/phpunit --verbose
+        run: ./vendor/bin/phpunit -v --configuration ./phpunit.xml.dist --coverage-clover=coverage.xml
+        
+      - name: Run codecov
+        uses: codecov/codecov-action@v1
