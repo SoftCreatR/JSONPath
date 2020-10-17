@@ -102,11 +102,12 @@ Script expressions are not supported as the original author intended because:
 
 So here are the types of query expressions that are supported:
 
-	[?(@._KEY_ _OPERATOR_ _VALUE_)] // <, >, !=, and ==
+	[?(@._KEY_ _OPERATOR_ _VALUE_)] // <, >, !=, == and in
 	Eg.
 	[?(@.title == "A string")] //
 	[?(@.title = "A string")]
 	// A single equals is not an assignment but the SQL-style of '=='
+	[?(@.title in ["A string", "Another string"])]
 	
 Known issues
 ------
@@ -130,6 +131,10 @@ The original JsonPath implementations is available at [http://code.google.com/p/
 
 Changelog
 ---------
+
+### 0.6.3
+ - Added support for `IN` expressions
+ - Fixed evaluation on indexed object
 
 ### 0.6.x
  - Dropped support for PHP < 7.1
