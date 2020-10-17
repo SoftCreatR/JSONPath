@@ -863,7 +863,7 @@ class JSONPathTest extends TestCase
            }
         }';
 
-        return json_decode($json, true);
+        return json_decode($json, $asArray === 1);
     }
 
     /**
