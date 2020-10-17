@@ -4,13 +4,13 @@ name: Test
 on:
   push:
     paths:
-      - '*.php'
+      - '**.php'
       - 'composer.json'
     branches:
       - main
   pull_request:
     paths:
-      - '*.php'
+      - '**.php'
       - 'composer.json'
     branches:
       - main
