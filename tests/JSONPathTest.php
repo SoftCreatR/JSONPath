@@ -261,6 +261,19 @@ class JSONPathTest extends TestCase
     }
 
     /**
+     * $..books[?(@.author in ["J. R. R. Tolkien", "Nigel Rees"])]
+     * Filter books that have a title in ["...", "..."]
+     *
+     * @throws Exception
+     */
+    public function testQueryMatchIn(): void
+    {
+        $result = (new JSONPath($this->exampleData(random_int(0, 1))))->find('$..books[?(@.author in ["J. R. R. Tolkien", "Nigel Rees"])].title');
+
+        self::assertEquals(['Sayings of the Century', 'The Lord of the Rings'], $result->getData());
+    }
+
+    /**
      * $.store.books[*].author
      *
      * @throws Exception

@@ -20,7 +20,7 @@ class QueryMatchFilter extends AbstractFilter
 {
     public const MATCH_QUERY_OPERATORS = '
       @(\.(?<key>[^ =]+)|\[["\']?(?<keySquare>.*?)["\']?\])
-      (\s*(?<operator>==|=|<>|!==|!=|>|<)\s*(?<comparisonValue>.+))?
+      (\s*(?<operator>==|=|<>|!==|!=|>|<|in)\s*(?<comparisonValue>.+))?
     ';
 
     /**
@@ -47,20 +47,28 @@ class QueryMatchFilter extends AbstractFilter
         $comparisonValue = $matches['comparisonValue'] ?? null;
 
         if (is_string(($comparisonValue))) {
-            if (strtolower($comparisonValue) === 'false') {
-                $comparisonValue = false;
-            }
+            if (strpos($comparisonValue, "[") === 0 && substr($comparisonValue, -1) === "]") {
+                $comparisonValue = substr($comparisonValue, 1, -1);
+                $comparisonValue = preg_replace('/^[\'"]/', '', $comparisonValue);
+                $comparisonValue = preg_replace('/[\'"]$/', '', $comparisonValue);
+                $comparisonValue = preg_replace('/[\'"],[ ]*[\'"]/', ',', $comparisonValue);
+                $comparisonValue = explode(",", $comparisonValue);
+            } else {
+                if (strtolower($comparisonValue) === 'false') {
+                    $comparisonValue = false;
+                }
 
-            if (strtolower($comparisonValue) === 'true') {
-                $comparisonValue = true;
-            }
+                if (strtolower($comparisonValue) === 'true') {
+                    $comparisonValue = true;
+                }
 
-            if (strtolower($comparisonValue) === 'null') {
-                $comparisonValue = null;
-            }
+                if (strtolower($comparisonValue) === 'null') {
+                    $comparisonValue = null;
+                }
 
-            $comparisonValue = preg_replace('/^[\'"]/', '', $comparisonValue);
-            $comparisonValue = preg_replace('/[\'"]$/', '', $comparisonValue);
+                $comparisonValue = preg_replace('/^[\'"]/', '', $comparisonValue);
+                $comparisonValue = preg_replace('/[\'"]$/', '', $comparisonValue);
+            }
         }
 
         foreach ($collection as $value) {
@@ -84,6 +92,10 @@ class QueryMatchFilter extends AbstractFilter
                 }
 
                 if ($operator === '<' && $value1 < $comparisonValue) {
+                    $return[] = $value;
+                }
+
+                if ($operator === 'in' && is_array($comparisonValue) && in_array($value1, $comparisonValue, true)) {
                     $return[] = $value;
                 }
             }
