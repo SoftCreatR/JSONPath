@@ -79,11 +79,13 @@ class QueryMatchFilter extends AbstractFilter
                     $return[] = $value;
                 }
 
-                if (($operator === '=' || $operator === '==') && (string)$value1 === (string)$comparisonValue) {
+                /** @noinspection TypeUnsafeComparisonInspection */
+                if (($operator === '=' || $operator === '==') && $value1 == $comparisonValue) {
                     $return[] = $value;
                 }
 
-                if (($operator === '!=' || $operator === '!==' || $operator === '<>') && (string)$value1 !== (string)$comparisonValue) {
+                /** @noinspection TypeUnsafeComparisonInspection */
+                if (($operator === '!=' || $operator === '!==' || $operator === '<>') && $value1 != $comparisonValue) {
                     $return[] = $value;
                 }
 
