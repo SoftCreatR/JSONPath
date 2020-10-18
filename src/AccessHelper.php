@@ -97,10 +97,6 @@ class AccessHelper
             return $collection[$key];
         }
 
-        if (is_object($collection) && !$collection instanceof ArrayAccess) {
-            return $collection->$key;
-        }
-
         /*
          * Find item in php collection by index
          * Written this way to handle instances ArrayAccess or Traversable objects
