@@ -57,6 +57,7 @@ class JSONPath implements ArrayAccess, Iterator, JsonSerializable, Countable
         $collectionData = [$this->data];
 
         foreach ($tokens as $token) {
+            /** @var JSONPathToken $token */
             $filter = $token->buildFilter($this->options);
 
             $filteredData = [];

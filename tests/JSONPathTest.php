@@ -31,6 +31,9 @@ class JSONPathTest extends TestCase
         self::assertEquals('Sayings of the Century', $result[0]);
     }
 
+    /**
+     * @throws Exception
+     */
     public function testIndexesObject(): void
     {
         $result = (new JSONPath($this->exampleIndexedObject(random_int(0, 1))))->find('$.store.books[3].title');
@@ -271,6 +274,19 @@ class JSONPathTest extends TestCase
         $result = (new JSONPath($this->exampleData(random_int(0, 1))))->find('$..books[?(@.author in ["J. R. R. Tolkien", "Nigel Rees"])].title');
 
         self::assertEquals(['Sayings of the Century', 'The Lord of the Rings'], $result->getData());
+    }
+
+    /**
+     * $..books[?(@.author not in ["J. R. R. Tolkien", "Nigel Rees"])]
+     * Filter books that don't have a title in ["...", "..."]
+     *
+     * @throws Exception
+     */
+    public function testQueryMatchNotIn(): void
+    {
+        $result = (new JSONPath($this->exampleData(random_int(0, 1))))->find('$..books[?(@.author !in ["J. R. R. Tolkien", "Nigel Rees"])].title');
+
+        self::assertEquals(['Sword of Honour', 'Moby Dick'], $result->getData());
     }
 
     /**
