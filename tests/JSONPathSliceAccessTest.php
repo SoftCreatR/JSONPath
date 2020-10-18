@@ -16,7 +16,7 @@ use Flow\JSONPath\JSONPath;
 class JSONPathSliceAccessTest extends TestCase
 {
     /**
-     * @return array[]
+     * @return array
      */
     public function sliceDataProvider(): array
     {

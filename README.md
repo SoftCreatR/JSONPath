@@ -107,7 +107,7 @@ Script expressions are not supported as the original author intended because:
 
 So here are the types of query expressions that are supported:
 
-	[?(@._KEY_ _OPERATOR_ _VALUE_)] // <, >, !=, ==, in and nin
+	[?(@._KEY_ _OPERATOR_ _VALUE_)] // <, >, <=, >=, !=, ==, in and nin
 	Eg.
 	[?(@.title == "A string")] //
 	[?(@.title = "A string")]
@@ -138,8 +138,14 @@ The original JsonPath implementations is available at [http://code.google.com/p/
 Changelog
 ---------
 
+### 0.6.4
+ - Removed unnecessary type casting, that caused problems under certain circumstances
+ - Added support for `nin` operator
+ - Added support for greater than or equal operator (`>=`)
+ - Added support for less or equal operator (`<=`)
+
 ### 0.6.3
- - Added support for `IN` expressions
+ - Added support for `in` operator
  - Fixed evaluation on indexed object
 
 ### 0.6.x

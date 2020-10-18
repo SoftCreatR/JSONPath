@@ -216,6 +216,45 @@ class JSONPathTest extends TestCase
     }
 
     /**
+     * $.store.books[?(@.price > 10)].title
+     * Filter books that have a price more than 10
+     *
+     * @throws Exception
+     */
+    public function testQueryMatchMoreThan(): void
+    {
+        $result = (new JSONPath($this->exampleData(random_int(0, 1))))->find('$.store.books[?(@.price > 10)].title');
+
+        self::assertEquals(['Sword of Honour', 'The Lord of the Rings'], $result->getData());
+    }
+
+    /**
+     * $.store.books[?(@.price <= 12.99)].title
+     * Filter books that have a price less or equal to 12.99
+     *
+     * @throws Exception
+     */
+    public function testQueryMatchLessOrEqual(): void
+    {
+        $result = (new JSONPath($this->exampleData(random_int(0, 1))))->find('$.store.books[?(@.price <= 12.99)].title');
+
+        self::assertEquals(['Sayings of the Century', 'Sword of Honour', 'Moby Dick'], $result->getData());
+    }
+
+    /**
+     * $.store.books[?(@.price >= 12.99)].title
+     * Filter books that have a price less or equal to 12.99
+     *
+     * @throws Exception
+     */
+    public function testQueryMatchEqualOrMore(): void
+    {
+        $result = (new JSONPath($this->exampleData(random_int(0, 1))))->find('$.store.books[?(@.price >= 12.99)].title');
+
+        self::assertEquals(['Sword of Honour', 'The Lord of the Rings'], $result->getData());
+    }
+
+    /**
      * $..books[?(@.author == "J. R. R. Tolkien")]
      * Filter books that have a title equal to "..."
      *
@@ -282,9 +321,22 @@ class JSONPathTest extends TestCase
      *
      * @throws Exception
      */
-    public function testQueryMatchNotIn(): void
+    public function testQueryMatchNin(): void
     {
         $result = (new JSONPath($this->exampleData(random_int(0, 1))))->find('$..books[?(@.author nin ["J. R. R. Tolkien", "Nigel Rees"])].title');
+
+        self::assertEquals(['Sword of Honour', 'Moby Dick'], $result->getData());
+    }
+
+    /**
+     * $..books[?(@.author nin ["J. R. R. Tolkien", "Nigel Rees"])]
+     * Filter books that don't have a title in ["...", "..."]
+     *
+     * @throws Exception
+     */
+    public function testQueryMatchNotIn(): void
+    {
+        $result = (new JSONPath($this->exampleData(random_int(0, 1))))->find('$..books[?(@.author !in ["J. R. R. Tolkien", "Nigel Rees"])].title');
 
         self::assertEquals(['Sword of Honour', 'Moby Dick'], $result->getData());
     }
