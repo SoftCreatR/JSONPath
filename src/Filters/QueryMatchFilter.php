@@ -20,7 +20,7 @@ class QueryMatchFilter extends AbstractFilter
 {
     public const MATCH_QUERY_OPERATORS = '
       @(\.(?<key>[^ =]+)|\[["\']?(?<keySquare>.*?)["\']?\])
-      (\s*(?<operator>==|=|<>|!==|!=|>|<|in|!in)\s*(?<comparisonValue>.+))?
+      (\s*(?<operator>==|=|<>|!==|!=|>|<|in|nin)\s*(?<comparisonValue>.+))?
     ';
 
     /**
@@ -101,7 +101,7 @@ class QueryMatchFilter extends AbstractFilter
                     $return[] = $value;
                 }
 
-                if ($operator === '!in' && is_array($comparisonValue) && !in_array($value1, $comparisonValue, true)) {
+                if ($operator === 'nin' && is_array($comparisonValue) && !in_array($value1, $comparisonValue, true)) {
                     $return[] = $value;
                 }
             }

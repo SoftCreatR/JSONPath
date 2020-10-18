@@ -277,14 +277,14 @@ class JSONPathTest extends TestCase
     }
 
     /**
-     * $..books[?(@.author not in ["J. R. R. Tolkien", "Nigel Rees"])]
+     * $..books[?(@.author nin ["J. R. R. Tolkien", "Nigel Rees"])]
      * Filter books that don't have a title in ["...", "..."]
      *
      * @throws Exception
      */
     public function testQueryMatchNotIn(): void
     {
-        $result = (new JSONPath($this->exampleData(random_int(0, 1))))->find('$..books[?(@.author !in ["J. R. R. Tolkien", "Nigel Rees"])].title');
+        $result = (new JSONPath($this->exampleData(random_int(0, 1))))->find('$..books[?(@.author nin ["J. R. R. Tolkien", "Nigel Rees"])].title');
 
         self::assertEquals(['Sword of Honour', 'Moby Dick'], $result->getData());
     }
