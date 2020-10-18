@@ -28,11 +28,11 @@ class RecursiveFilter extends AbstractFilter
     }
 
     /**
-     * @param $result
-     * @param $data
+     * @param array $result
+     * @param array|object $data
      * @throws JSONPathException
      */
-    private function recurse(&$result, $data): void
+    private function recurse(array &$result, $data): void
     {
         $result[] = $data;
 

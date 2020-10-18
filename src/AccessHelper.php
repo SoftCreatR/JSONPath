@@ -25,7 +25,7 @@ use function property_exists;
 class AccessHelper
 {
     /**
-     * @param $collection
+     * @param array|ArrayAccess $collection
      * @return array
      */
     public static function collectionKeys($collection): array
@@ -38,7 +38,7 @@ class AccessHelper
     }
 
     /**
-     * @param $collection
+     * @param array|ArrayAccess $collection
      * @return bool
      */
     public static function isCollectionType($collection): bool
@@ -47,12 +47,12 @@ class AccessHelper
     }
 
     /**
-     * @param $collection
-     * @param $key
-     * @param false $magicIsAllowed
+     * @param array|ArrayAccess $collection
+     * @param mixed $key
+     * @param bool $magicIsAllowed
      * @return bool
      */
-    public static function keyExists($collection, $key, $magicIsAllowed = false): bool
+    public static function keyExists($collection, $key, bool $magicIsAllowed = false): bool
     {
         if ($magicIsAllowed && is_object($collection) && method_exists($collection, '__get')) {
             return true;
@@ -74,12 +74,12 @@ class AccessHelper
     }
 
     /**
-     * @param $collection
-     * @param $key
-     * @param false $magicIsAllowed
+     * @param array|ArrayAccess $collection
+     * @param mixed $key
+     * @param bool $magicIsAllowed
      * @return mixed
      */
-    public static function getValue($collection, $key, $magicIsAllowed = false)
+    public static function getValue($collection, $key, bool $magicIsAllowed = false)
     {
         if ($magicIsAllowed && is_object($collection) && !$collection instanceof ArrayAccess && method_exists($collection, '__get')) {
             return $collection->__get($key);
@@ -97,33 +97,8 @@ class AccessHelper
             return $collection[$key];
         }
 
-        /*
-         * Find item in php collection by index
-         * Written this way to handle instances ArrayAccess or Traversable objects
-         */
         if (is_int($key)) {
-            $i = 0;
-
-            foreach ($collection as $val) {
-                if ($i === $key) {
-                    return $val;
-                }
-
-                ++$i;
-            }
-
-            if ($key < 0) {
-                $total = $i;
-                $i = 0;
-
-                foreach ($collection as $val) {
-                    if ($i - $total === $key) {
-                        return $val;
-                    }
-
-                    ++$i;
-                }
-            }
+            self::getValueByIndex($collection, $key);
         }
 
         // Finally, try anything
@@ -131,9 +106,45 @@ class AccessHelper
     }
 
     /**
-     * @param $collection
-     * @param $key
-     * @param $value
+     * Find item in php collection by index
+     * Written this way to handle instances ArrayAccess or Traversable objects
+     *
+     * @param array|ArrayAccess $collection
+     * @param mixed $key
+     * @return mixed
+     */
+    private static function getValueByIndex($collection, $key)
+    {
+        $i = 0;
+
+        foreach ($collection as $val) {
+            if ($i === $key) {
+                return $val;
+            }
+
+            ++$i;
+        }
+
+        if ($key < 0) {
+            $total = $i;
+            $i = 0;
+
+            foreach ($collection as $val) {
+                if ($i - $total === $key) {
+                    return $val;
+                }
+
+                ++$i;
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * @param array|ArrayAccess $collection
+     * @param mixed $key
+     * @param mixed $value
      * @return mixed
      */
     public static function setValue(&$collection, $key, $value)
@@ -146,8 +157,8 @@ class AccessHelper
     }
 
     /**
-     * @param $collection
-     * @param $key
+     * @param array|ArrayAccess $collection
+     * @param mixed $key
      */
     public static function unsetValue(&$collection, $key): void
     {
@@ -159,7 +170,7 @@ class AccessHelper
     }
 
     /**
-     * @param $collection
+     * @param array|ArrayAccess $collection
      * @return array
      * @throws JSONPathException
      */

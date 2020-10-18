@@ -27,17 +27,26 @@ class JSONPath implements ArrayAccess, Iterator, JsonSerializable, Countable
 {
     protected static $tokenCache = [];
 
-    protected $data;
-
-    protected $options;
-
-    public const ALLOW_MAGIC = 1;
+    /**
+     * @var array
+     */
+    protected $data = [];
 
     /**
-     * @param $data
-     * @param int $options
+     * @var bool
      */
-    public function __construct($data = null, $options = 0)
+    protected $options = false;
+
+    /**
+     * @var bool
+     */
+    public const ALLOW_MAGIC = true;
+
+    /**
+     * @param array|ArrayAccess $data
+     * @param bool $options
+     */
+    final public function __construct($data = [], bool $options = false)
     {
         $this->data = $data;
         $this->options = $options;
@@ -46,11 +55,11 @@ class JSONPath implements ArrayAccess, Iterator, JsonSerializable, Countable
     /**
      * Evaluate an expression
      *
-     * @param $expression
+     * @param string $expression
      * @return JSONPath
      * @throws Exception
      */
-    public function find($expression): self
+    public function find(string $expression): self
     {
         $tokens = $this->parseTokens($expression);
 
@@ -94,6 +103,7 @@ class JSONPath implements ArrayAccess, Iterator, JsonSerializable, Countable
 
     /**
      * Evaluate an expression and return the last result
+     *
      * @return mixed
      */
     public function last()
@@ -111,6 +121,7 @@ class JSONPath implements ArrayAccess, Iterator, JsonSerializable, Countable
 
     /**
      * Evaluate an expression and return the first key
+     *
      * @return mixed
      */
     public function firstKey()
@@ -126,6 +137,7 @@ class JSONPath implements ArrayAccess, Iterator, JsonSerializable, Countable
 
     /**
      * Evaluate an expression and return the last key
+     *
      * @return mixed
      */
     public function lastKey()
@@ -140,11 +152,11 @@ class JSONPath implements ArrayAccess, Iterator, JsonSerializable, Countable
     }
 
     /**
-     * @param $expression
+     * @param string $expression
      * @return array
      * @throws Exception
      */
-    public function parseTokens($expression): array
+    public function parseTokens(string $expression): array
     {
         $cacheKey = md5($expression);
 
@@ -161,129 +173,11 @@ class JSONPath implements ArrayAccess, Iterator, JsonSerializable, Countable
     }
 
     /**
-     * @return mixed
+     * @return array
      */
-    public function getData()
+    public function getData(): array
     {
         return $this->data;
-    }
-
-    /**
-     * @deprecated Please use getData()
-     */
-    public function data()
-    {
-        return $this->getData();
-    }
-
-    /**
-     * @param $data
-     * @return $this
-     */
-    public function setData($data): self
-    {
-        $this->data = $data;
-
-        return $this;
-    }
-
-    /**
-     * @param mixed $offset
-     * @return bool
-     */
-    public function offsetExists($offset): bool
-    {
-        return AccessHelper::keyExists($this->data, $offset);
-    }
-
-    /**
-     * @param mixed $offset
-     * @return $this|mixed
-     */
-    public function offsetGet($offset)
-    {
-        $value = AccessHelper::getValue($this->data, $offset);
-
-        return AccessHelper::isCollectionType($value)
-            ? new static($value, $this->options)
-            : $value;
-    }
-
-    /**
-     * @param mixed $offset
-     * @param mixed $value
-     */
-    public function offsetSet($offset, $value): void
-    {
-        if ($offset === null) {
-            $this->data[] = $value;
-        } else {
-            AccessHelper::setValue($this->data, $offset, $value);
-        }
-    }
-
-    /**
-     * @param mixed $offset
-     */
-    public function offsetUnset($offset): void
-    {
-        AccessHelper::unsetValue($this->data, $offset);
-    }
-
-    /**
-     * @return mixed
-     */
-    public function jsonSerialize()
-    {
-        return $this->data;
-    }
-
-    /**
-     * Return the current element
-     *
-     * @return mixed
-     */
-    public function current()
-    {
-        $value = current($this->data);
-
-        return AccessHelper::isCollectionType($value) ? new static($value, $this->options) : $value;
-    }
-
-    /**
-     * Move forward to next element
-     */
-    public function next(): void
-    {
-        next($this->data);
-    }
-
-    /**
-     * Return the key of the current element
-     *
-     * @return mixed
-     */
-    public function key()
-    {
-        return key($this->data);
-    }
-
-    /**
-     * Checks if current position is valid
-     *
-     * @return bool
-     */
-    public function valid(): bool
-    {
-        return key($this->data) !== null;
-    }
-
-    /**
-     * Rewind the Iterator to the first element
-     */
-    public function rewind(): void
-    {
-        reset($this->data);
     }
 
     /**
@@ -297,9 +191,97 @@ class JSONPath implements ArrayAccess, Iterator, JsonSerializable, Countable
     }
 
     /**
-     * Count elements of an object
-     *
-     * @return int
+     * @inheritDoc
+     */
+    public function offsetExists($offset): bool
+    {
+        return AccessHelper::keyExists($this->data, $offset);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function offsetGet($offset)
+    {
+        $value = AccessHelper::getValue($this->data, $offset);
+
+        return AccessHelper::isCollectionType($value)
+            ? new static($value, $this->options)
+            : $value;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function offsetSet($offset, $value): void
+    {
+        if ($offset === null) {
+            $this->data[] = $value;
+        } else {
+            AccessHelper::setValue($this->data, $offset, $value);
+        }
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function offsetUnset($offset): void
+    {
+        AccessHelper::unsetValue($this->data, $offset);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function jsonSerialize(): array
+    {
+        return $this->getData();
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function current()
+    {
+        $value = current($this->data);
+
+        return AccessHelper::isCollectionType($value) ? new static($value, $this->options) : $value;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function next(): void
+    {
+        next($this->data);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function key()
+    {
+        return key($this->data);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function valid(): bool
+    {
+        return key($this->data) !== null;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function rewind(): void
+    {
+        reset($this->data);
+    }
+
+    /**
+     * @inheritDoc
      */
     public function count(): int
     {

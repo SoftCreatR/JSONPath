@@ -16,7 +16,7 @@ use Flow\JSONPath\JSONPath;
 class JSONPathDashedIndexTest extends TestCase
 {
     /**
-     * @return array[]
+     * @return array
      */
     public function indexDataProvider(): array
     {

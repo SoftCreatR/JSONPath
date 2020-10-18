@@ -256,15 +256,15 @@ class JSONPathTest extends TestCase
 
     /**
      * $..books[?(@.author == "J. R. R. Tolkien")]
-     * Filter books that have a title equal to "..."
+     * Filter books that have an author equal to "..."
      *
      * @throws Exception
      */
     public function testQueryMatchEquals(): void
     {
-        $results = (new JSONPath($this->exampleData(random_int(0, 1))))->find('$..books[?(@.author == "J. R. R. Tolkien")].title');
+        $result = (new JSONPath($this->exampleData(random_int(0, 1))))->find('$..books[?(@.author == "J. R. R. Tolkien")].title');
 
-        self::assertEquals('The Lord of the Rings', $results[0]);
+        self::assertEquals('The Lord of the Rings', $result[0]);
     }
 
     /**
@@ -283,7 +283,7 @@ class JSONPathTest extends TestCase
 
     /**
      * $..books[?(@.author != "J. R. R. Tolkien")]
-     * Filter books that have a title not equal to "..."
+     * Filter books that have an author not equal to "..."
      *
      * @throws Exception
      */
@@ -291,15 +291,47 @@ class JSONPathTest extends TestCase
     {
         $results = (new JSONPath($this->exampleData(random_int(0, 1))))->find('$..books[?(@.author != "J. R. R. Tolkien")].title');
         self::assertcount(3, $results);
-        self::assertEquals(['Sayings of the Century', 'Sword of Honour', 'Moby Dick'], [$results[0], $results[1], $results[2]]);
+        self::assertEquals(['Sayings of the Century', 'Sword of Honour', 'Moby Dick'], $results->getData());
 
         $results = (new JSONPath($this->exampleData(random_int(0, 1))))->find('$..books[?(@.author !== "J. R. R. Tolkien")].title');
         self::assertcount(3, $results);
-        self::assertEquals(['Sayings of the Century', 'Sword of Honour', 'Moby Dick'], [$results[0], $results[1], $results[2]]);
+        self::assertEquals(['Sayings of the Century', 'Sword of Honour', 'Moby Dick'], $results->getData());
 
         $results = (new JSONPath($this->exampleData(random_int(0, 1))))->find('$..books[?(@.author <> "J. R. R. Tolkien")].title');
         self::assertcount(3, $results);
-        self::assertEquals(['Sayings of the Century', 'Sword of Honour', 'Moby Dick'], [$results[0], $results[1], $results[2]]);
+        self::assertEquals(['Sayings of the Century', 'Sword of Honour', 'Moby Dick'], $results->getData());
+    }
+
+    /**
+     * $..books[?(@.author =~ /nigel ree?s/i)]
+     * Filter books where author matches regex
+     *
+     * @throws Exception
+     */
+    public function testQueryMatchWithRegexCaseSensitive(): void
+    {
+        $result = (new JSONPath($this->exampleData(random_int(0, 1))))->find('$..books[?(@.author =~ /nigel ree?s/i)].title');
+
+        self::assertcount(1, $result);
+        self::assertEquals(['Sayings of the Century'], $result->getData());
+
+        $result = (new JSONPath($this->exampleData(random_int(0, 1))))->find('$..books[?(@.title =~ /^(Say|The).*/)].title');
+
+        self::assertcount(2, $result);
+        self::assertEquals(['Sayings of the Century', 'The Lord of the Rings'], $result->getData());
+    }
+
+    /**
+     * $..books[?(@.author =~ "J. R. R. Tolkien")]
+     * Filter books where author matches invalid regex
+     *
+     * @throws Exception
+     */
+    public function testQueryMatchWithInvalidRegex(): void
+    {
+        $result = (new JSONPath($this->exampleData(random_int(0, 1))))->find('$..books[?(@.author =~ "J. R. R. Tolkien")].title');
+
+        self::assertEmpty($result->getData());
     }
 
     /**
@@ -310,9 +342,9 @@ class JSONPathTest extends TestCase
      */
     public function testQueryMatchIn(): void
     {
-        $result = (new JSONPath($this->exampleData(random_int(0, 1))))->find('$..books[?(@.author in ["J. R. R. Tolkien", "Nigel Rees"])].title');
+        $results = (new JSONPath($this->exampleData(random_int(0, 1))))->find('$..books[?(@.author in ["J. R. R. Tolkien", "Nigel Rees"])].title');
 
-        self::assertEquals(['Sayings of the Century', 'The Lord of the Rings'], $result->getData());
+        self::assertEquals(['Sayings of the Century', 'The Lord of the Rings'], $results->getData());
     }
 
     /**
@@ -323,9 +355,9 @@ class JSONPathTest extends TestCase
      */
     public function testQueryMatchNin(): void
     {
-        $result = (new JSONPath($this->exampleData(random_int(0, 1))))->find('$..books[?(@.author nin ["J. R. R. Tolkien", "Nigel Rees"])].title');
+        $results = (new JSONPath($this->exampleData(random_int(0, 1))))->find('$..books[?(@.author nin ["J. R. R. Tolkien", "Nigel Rees"])].title');
 
-        self::assertEquals(['Sword of Honour', 'Moby Dick'], $result->getData());
+        self::assertEquals(['Sword of Honour', 'Moby Dick'], $results->getData());
     }
 
     /**
@@ -336,9 +368,9 @@ class JSONPathTest extends TestCase
      */
     public function testQueryMatchNotIn(): void
     {
-        $result = (new JSONPath($this->exampleData(random_int(0, 1))))->find('$..books[?(@.author !in ["J. R. R. Tolkien", "Nigel Rees"])].title');
+        $results = (new JSONPath($this->exampleData(random_int(0, 1))))->find('$..books[?(@.author !in ["J. R. R. Tolkien", "Nigel Rees"])].title');
 
-        self::assertEquals(['Sword of Honour', 'Moby Dick'], $result->getData());
+        self::assertEquals(['Sword of Honour', 'Moby Dick'], $results->getData());
     }
 
     /**
@@ -348,9 +380,9 @@ class JSONPathTest extends TestCase
      */
     public function testWildcardAltNotation(): void
     {
-        $result = (new JSONPath($this->exampleData(random_int(0, 1))))->find('$.store.books[*].author');
+        $results = (new JSONPath($this->exampleData(random_int(0, 1))))->find('$.store.books[*].author');
 
-        self::assertEquals(['Nigel Rees', 'Evelyn Waugh', 'Herman Melville', 'J. R. R. Tolkien'], $result->getData());
+        self::assertEquals(['Nigel Rees', 'Evelyn Waugh', 'Herman Melville', 'J. R. R. Tolkien'], $results->getData());
     }
 
     /**
@@ -375,6 +407,7 @@ class JSONPathTest extends TestCase
     public function testWildCard(): void
     {
         $result = (new JSONPath($this->exampleData(random_int(0, 1))))->find('$.store.*');
+
         if (is_object($result[0][0])) {
             self::assertEquals('Sayings of the Century', $result[0][0]->title);
         } else {

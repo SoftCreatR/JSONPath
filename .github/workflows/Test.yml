@@ -7,13 +7,13 @@ on:
       - '**.php'
       - 'composer.json'
     branches:
-      - main
+      - '0.7.0'
   pull_request:
     paths:
       - '**.php'
       - 'composer.json'
     branches:
-      - main
+      - '0.7.0'
   workflow_dispatch:
 
 jobs:
@@ -39,7 +39,7 @@ jobs:
 
       - name: Setup problem matchers for PHPUnit
         run: echo "::add-matcher::${{ runner.tool_cache }}/phpunit.json"
-       
+
       - name: Install dependencies
         run: composer install --prefer-dist --no-interaction --no-suggest
 
@@ -50,6 +50,6 @@ jobs:
 
       - name: Execute tests
         run: ./vendor/bin/phpunit -v --configuration ./phpunit.xml.dist --coverage-clover=coverage.xml
-        
+
       - name: Run codecov
         uses: codecov/codecov-action@v1

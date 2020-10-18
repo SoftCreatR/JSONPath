@@ -20,7 +20,7 @@ class QueryMatchFilter extends AbstractFilter
 {
     public const MATCH_QUERY_OPERATORS = '
       @(\.(?<key>[^ =]+)|\[["\']?(?<keySquare>.*?)["\']?\])
-      (\s*(?<operator>==|=|<>|!==|!=|>=|<=|>|<|in|!in|nin)\s*(?<comparisonValue>.+))?
+      (\s*(?<operator>==|=~|=|<>|!==|!=|>=|<=|>|<|in|!in|nin)\s*(?<comparisonValue>.+))?
     ';
 
     /**
@@ -86,6 +86,10 @@ class QueryMatchFilter extends AbstractFilter
 
                 /** @noinspection TypeUnsafeComparisonInspection */
                 if (($operator === '!=' || $operator === '!==' || $operator === '<>') && $value1 != $comparisonValue) {
+                    $return[] = $value;
+                }
+
+                if ($operator === '=~' && @preg_match($comparisonValue, $value1)) {
                     $return[] = $value;
                 }
 

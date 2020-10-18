@@ -9,7 +9,6 @@ declare(strict_types=1);
 
 namespace Flow\JSONPath;
 
-
 use function class_exists;
 use function in_array;
 use function ucfirst;
@@ -26,17 +25,24 @@ class JSONPathToken
     public const T_SLICE = 'slice';
     public const T_INDEXES = 'indexes';
 
+    /**
+     * @var string
+     */
     public $type;
+
+    /**
+     * @var mixed
+     */
     public $value;
 
     /**
      * JSONPathToken constructor.
      *
-     * @param $type
-     * @param $value
+     * @param string $type
+     * @param mixed $value
      * @throws JSONPathException
      */
-    public function __construct($type, $value)
+    public function __construct(string $type, $value)
     {
         $this->validateType($type);
 
@@ -45,10 +51,10 @@ class JSONPathToken
     }
 
     /**
-     * @param $type
+     * @param string $type
      * @throws JSONPathException
      */
-    public function validateType($type): void
+    public function validateType(string $type): void
     {
         if (!in_array($type, static::getTypes(), true)) {
             throw new JSONPathException('Invalid token: ' . $type);
@@ -56,7 +62,7 @@ class JSONPathToken
     }
 
     /**
-     * @return string[]
+     * @return array
      */
     public static function getTypes(): array
     {
@@ -71,11 +77,11 @@ class JSONPathToken
     }
 
     /**
-     * @param $options
+     * @param bool $options
      * @return mixed
      * @throws JSONPathException
      */
-    public function buildFilter($options)
+    public function buildFilter(bool $options)
     {
         $filterClass = 'Flow\\JSONPath\\Filters\\' . ucfirst($this->type) . 'Filter';
 

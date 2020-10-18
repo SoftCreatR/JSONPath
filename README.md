@@ -1,10 +1,10 @@
 JSONPath for PHP 7.1+
 =============
 
-[![Build Status](https://img.shields.io/github/workflow/status/SoftCreatR/JSONPath/Test/main?label=Build%20Status)](https://github.com/SoftCreatR/JSONPath/actions?query=workflow%3ATest)
+[![Build Status](https://img.shields.io/github/workflow/status/SoftCreatR/JSONPath/Test/0.7.0?label=Build%20Status)](https://github.com/SoftCreatR/JSONPath/actions?query=workflow%3ATest)
 [![Latest Release](https://img.shields.io/packagist/v/SoftCreatR/JSONPath?color=blue&label=Latest%20Release)](https://packagist.org/packages/softcreatr/jsonpath)
 [![MIT licensed](https://img.shields.io/badge/license-MIT-blue.svg)](./LICENSE.txt)
-[![Codecov branch](https://img.shields.io/codecov/c/github/SoftCreatR/JSONPath/main)](https://codecov.io/gh/SoftCreatR/JSONPath/)
+[![Codecov branch](https://img.shields.io/codecov/c/github/SoftCreatR/JSONPath/0.7.0)](https://codecov.io/gh/SoftCreatR/JSONPath/branch/0.7.0)
 
 This is a [JSONPath](http://goessner.net/articles/JsonPath/) implementation for PHP based on Stefan Goessner's JSONPath script.
 
@@ -39,18 +39,18 @@ JSONPath Examples
 JSONPath                  | Result
 --------------------------|-------------------------------------
 `$.store.books[*].author` | the authors of all books in the store
-`$..author`                | all authors
-`$.store..price`           | the price of everything in the store.
-`$..books[2]`              | the third book
-`$..books[(@.length-1)]`   | the last book in order.
-`$..books[-1:]`            | the last book in order.
-`$..books[0,1]`            | the first two books
-`$..books[:2]`             | the first two books
-`$..books[::2]`            | every second book starting from first one
-`$..books[1:6:3]`          | every third book starting from 1 till 6
-`$..books[?(@.isbn)]`      | filter all books with isbn number
-`$..books[?(@.price<10)]`  | filter all books cheapier than 10
-`$..*`                     | all elements in the data (recursively extracted)
+`$..author`               | all authors
+`$.store..price`          | the price of everything in the store.
+`$..books[2]`             | the third book
+`$..books[(@.length-1)]`  | the last book in order.
+`$..books[-1:]`           | the last book in order.
+`$..books[0,1]`           | the first two books
+`$..books[:2]`            | the first two books
+`$..books[::2]`           | every second book starting from first one
+`$..books[1:6:3]`         | every third book starting from 1 till 6
+`$..books[?(@.isbn)]`     | filter all books with isbn number
+`$..books[?(@.price<10)]` | filter all books cheaper than 10
+`$..*`                    | all elements in the data (recursively extracted)
 
 
 Expression syntax
@@ -107,11 +107,12 @@ Script expressions are not supported as the original author intended because:
 
 So here are the types of query expressions that are supported:
 
-	[?(@._KEY_ _OPERATOR_ _VALUE_)] // <, >, <=, >=, !=, ==, in and nin
-	Eg.
+	[?(@._KEY_ _OPERATOR_ _VALUE_)] // <, >, <=, >=, !=, ==, =~, in and nin
+	e.g.
 	[?(@.title == "A string")] //
 	[?(@.title = "A string")]
 	// A single equals is not an assignment but the SQL-style of '=='
+	[?(@.title =~ /^a(nother)? string$/i)]
 	[?(@.title in ["A string", "Another string"])]
 	[?(@.title nin ["A string", "Another string"])]
 	
@@ -137,6 +138,16 @@ The original JsonPath implementations is available at [http://code.google.com/p/
 
 Changelog
 ---------
+
+### 0.7.0
+🔻 Breaking changes ahead:
+
+ - Made JSONPath::__construct final
+ - Removed deprecated method `data()` from JSONPath (use `getData()` or `jsonSerialize()` instead)
+ - Added missing type hints
+ - Partially reduced complexity
+ - Performed some code optimizations
+ - Added support for regular expression operator (`=~`)
 
 ### 0.6.4
  - Removed unnecessary type casting, that caused problems under certain circumstances

@@ -19,26 +19,6 @@ class JSONPathLexerTest extends TestCase
     /**
      * @throws JSONPathException
      */
-    public function testEmptyExpression(): void
-    {
-        $tokens = (new JSONPathLexer(''))->parseExpression();
-
-        self::assertEmpty($tokens);
-    }
-
-    /**
-     * @throws JSONPathException
-     */
-    public function testDollarOnlyExpression(): void
-    {
-        $tokens = (new JSONPathLexer('$'))->parseExpression();
-
-        self::assertEmpty($tokens);
-    }
-
-    /**
-     * @throws JSONPathException
-     */
     public function testIndexWildcard(): void
     {
         $tokens = (new JSONPathLexer('.*'))->parseExpression();
