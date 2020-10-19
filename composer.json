@@ -18,14 +18,17 @@
     }
   ],
   "require": {
-    "php": ">=7.1 || <8.1",
+    "php": ">=7.1",
     "ext-json": "*"
   },
   "replace": {
     "flow/jsonpath": "*"
   },
-  "require-dev": {
+  "conflict": {
     "phpunit/phpunit": "<7.0 || >= 10.0"
+  },
+  "require-dev": {
+    "phpunit/phpunit": ">=7.0"
   },
   "config": {
     "optimize-autoloader": true,

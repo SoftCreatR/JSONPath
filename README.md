@@ -147,6 +147,7 @@ Changelog
  - Added missing type hints
  - Partially reduced complexity
  - Performed some code optimizations
+ - Updated composer.json for proper PHPUnit/PHP usage
  - Added support for regular expression operator (`=~`)
 
 ### 0.6.4
