@@ -3,7 +3,7 @@ JSONPath for PHP 7.1+
 
 [![Build Status](https://img.shields.io/github/workflow/status/SoftCreatR/JSONPath/Test/0.7.0?label=Build%20Status)](https://github.com/SoftCreatR/JSONPath/actions?query=workflow%3ATest)
 [![Latest Release](https://img.shields.io/packagist/v/SoftCreatR/JSONPath?color=blue&label=Latest%20Release)](https://packagist.org/packages/softcreatr/jsonpath)
-[![MIT licensed](https://img.shields.io/badge/license-MIT-blue.svg)](./LICENSE.txt)
+[![MIT licensed](https://img.shields.io/badge/license-MIT-blue.svg)](./LICENSE)
 [![Codecov branch](https://img.shields.io/codecov/c/github/SoftCreatR/JSONPath/0.7.0)](https://codecov.io/gh/SoftCreatR/JSONPath/branch/0.7.0)
 
 This is a [JSONPath](http://goessner.net/articles/JsonPath/) implementation for PHP based on Stefan Goessner's JSONPath script.

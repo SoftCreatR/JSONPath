@@ -9,8 +9,8 @@ declare(strict_types=1);
 
 namespace Flow\JSONPath\Filters;
 
-use RuntimeException;
 use Flow\JSONPath\AccessHelper;
+use RuntimeException;
 use function is_string;
 use function preg_match;
 use function preg_replace;
@@ -19,7 +19,7 @@ use function strtolower;
 class QueryMatchFilter extends AbstractFilter
 {
     public const MATCH_QUERY_OPERATORS = '
-      @(\.(?<key>[^ =]+)|\[["\']?(?<keySquare>.*?)["\']?\])
+      @(\.(?<key>[^\s<>!=]+)|\[["\']?(?<keySquare>.*?)["\']?\])
       (\s*(?<operator>==|=~|=|<>|!==|!=|>=|<=|>|<|in|!in|nin)\s*(?<comparisonValue>.+))?
     ';
 
@@ -29,8 +29,6 @@ class QueryMatchFilter extends AbstractFilter
      */
     public function filter($collection): array
     {
-        $return = [];
-
         preg_match('/^' . static::MATCH_QUERY_OPERATORS . '$/x', $this->token->value, $matches);
 
         if (!isset($matches[1])) {
@@ -66,6 +64,8 @@ class QueryMatchFilter extends AbstractFilter
                 }
             }
         }
+
+        $return = [];
 
         foreach ($collection as $value) {
             if (AccessHelper::keyExists($value, $key, $this->magicIsAllowed)) {
