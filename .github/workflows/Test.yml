@@ -7,13 +7,13 @@ on:
       - '**.php'
       - 'composer.json'
     branches:
-      - main
+      - 'main'
   pull_request:
     paths:
       - '**.php'
       - 'composer.json'
     branches:
-      - main
+      - 'main'
   workflow_dispatch:
 
 jobs:
@@ -21,7 +21,8 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        php: [ '7.1', '7.2', '7.3', '7.4' ]
+        php: [ '7.1', '7.2', '7.3', '7.4', '8.0' ]
+    continue-on-error: ${{ matrix.php == '8.0' }}
     name: PHP ${{ matrix.php-versions }} Test
 
     steps:
@@ -39,17 +40,18 @@ jobs:
 
       - name: Setup problem matchers for PHPUnit
         run: echo "::add-matcher::${{ runner.tool_cache }}/phpunit.json"
-       
+
       - name: Install dependencies
         run: composer install --prefer-dist --no-interaction --no-suggest
 
       - name: Setup PCOV
+        if: matrix.php == '7.1'
         run: |
           composer require pcov/clobber
           vendor/bin/pcov clobber
 
       - name: Execute tests
         run: ./vendor/bin/phpunit -v --configuration ./phpunit.xml.dist --coverage-clover=coverage.xml
-        
+
       - name: Run codecov
         uses: codecov/codecov-action@v1
