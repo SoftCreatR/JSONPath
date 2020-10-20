@@ -61,7 +61,7 @@ class AccessHelper
         }
 
         if (is_int($key) && $key < 0) {
-            $key = abs((int)$key);
+            $key = abs($key);
         }
 
         if (is_array($collection) || $collection instanceof ArrayAccess) {
@@ -69,7 +69,7 @@ class AccessHelper
         }
 
         if (is_object($collection)) {
-            return property_exists($collection, (string)$key);
+            return property_exists($collection, $key);
         }
 
         return false;

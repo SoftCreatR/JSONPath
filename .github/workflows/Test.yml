@@ -35,7 +35,6 @@ jobs:
           php-version: ${{ matrix.php }}
           extensions: json
           coverage: pcov
-          #tools: cs2pr
         env:
           COMPOSER_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -46,7 +45,7 @@ jobs:
         run: composer install --prefer-dist --no-interaction --no-suggest
 
       - name: Run phpcs
-        run: composer cs-check #| cs2pr
+        run: composer cs-check -- -v
 
       - name: Setup PCOV
         if: matrix.php == '7.1'
@@ -55,7 +54,7 @@ jobs:
           vendor/bin/pcov clobber
 
       - name: Execute tests
-        run: ./vendor/bin/phpunit -v --configuration ./phpunit.xml.dist --coverage-clover=coverage.xml
+        run: composer test -- -v --coverage-clover=coverage.xml
 
       - name: Run codecov
         uses: codecov/codecov-action@v1

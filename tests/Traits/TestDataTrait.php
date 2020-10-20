@@ -10,6 +10,7 @@ declare(strict_types=1);
 
 namespace Flow\JSONPath\Test\Traits;
 
+use ArrayAccess;
 use RuntimeException;
 
 trait TestDataTrait
@@ -19,7 +20,7 @@ trait TestDataTrait
      *
      * @param string $type
      * @param bool|int $asArray
-     * @return mixed
+     * @return array|ArrayAccess|null
      */
     protected function getData(string $type, $asArray = true)
     {

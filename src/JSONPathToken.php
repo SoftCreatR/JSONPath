@@ -26,10 +26,14 @@ class JSONPathToken
     public const T_SLICE = 'slice';
     public const T_INDEXES = 'indexes';
 
-    /** @var string */
+    /**
+     * @var string
+     */
     public $type;
 
-    /** @var mixed */
+    /**
+     * @var mixed
+     */
     public $value;
 
     /**
