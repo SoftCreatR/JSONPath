@@ -62,13 +62,11 @@ class JSONPath implements ArrayAccess, Iterator, JsonSerializable, Countable
     public function find(string $expression): self
     {
         $tokens = $this->parseTokens($expression);
-
         $collectionData = [$this->data];
 
         foreach ($tokens as $token) {
             /** @var JSONPathToken $token */
             $filter = $token->buildFilter($this->options);
-
             $filteredData = [];
 
             foreach ($collectionData as $value) {

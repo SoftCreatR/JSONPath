@@ -67,7 +67,7 @@ class AccessHelper
         }
 
         if (is_object($collection)) {
-            return property_exists($collection, (string) $key);
+            return property_exists($collection, (string)$key);
         }
 
         return false;
@@ -81,28 +81,25 @@ class AccessHelper
      */
     public static function getValue($collection, $key, bool $magicIsAllowed = false)
     {
+        $return = null;
+
         if ($magicIsAllowed && is_object($collection) && !$collection instanceof ArrayAccess && method_exists($collection, '__get')) {
-            return $collection->__get($key);
-        }
-
-        if (is_object($collection) && !$collection instanceof ArrayAccess) {
-            return $collection->$key;
-        }
-
-        if (is_array($collection)) {
+            $return = $collection->__get($key);
+        } elseif (is_object($collection) && !$collection instanceof ArrayAccess) {
+            $return = $collection->$key;
+        } elseif (is_array($collection)) {
             if (is_int($key) && $key < 0) {
-                return array_slice($collection, $key, 1, false)[0];
+                $return = array_slice($collection, $key, 1, false)[0];
+            } else {
+                $return = $collection[$key];
             }
-
-            return $collection[$key];
+        } elseif (is_int($key)) {
+            $return = self::getValueByIndex($collection, $key);
+        } else {
+            $return = $collection[$key];
         }
 
-        if (is_int($key)) {
-            self::getValueByIndex($collection, $key);
-        }
-
-        // Finally, try anything
-        return $collection[$key];
+        return $return;
     }
 
     /**
