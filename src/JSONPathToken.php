@@ -1,10 +1,11 @@
 <?php
+
 /**
  * JSONPath implementation for PHP.
  *
- * @copyright Copyright (c) 2018 Flow Communications
- * @license   MIT <https://github.com/SoftCreatR/JSONPath/blob/main/LICENSE>
+ * @license https://github.com/SoftCreatR/JSONPath/blob/main/LICENSE  MIT License
  */
+
 declare(strict_types=1);
 
 namespace Flow\JSONPath;
@@ -25,19 +26,13 @@ class JSONPathToken
     public const T_SLICE = 'slice';
     public const T_INDEXES = 'indexes';
 
-    /**
-     * @var string
-     */
+    /** @var string */
     public $type;
 
-    /**
-     * @var mixed
-     */
+    /** @var mixed */
     public $value;
 
     /**
-     * JSONPathToken constructor.
-     *
      * @param string $type
      * @param mixed $value
      * @throws JSONPathException
@@ -61,9 +56,6 @@ class JSONPathToken
         }
     }
 
-    /**
-     * @return array
-     */
     public static function getTypes(): array
     {
         return [

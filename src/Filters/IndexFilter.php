@@ -1,16 +1,16 @@
 <?php
+
 /**
  * JSONPath implementation for PHP.
  *
- * @copyright Copyright (c) 2018 Flow Communications
- * @license   MIT <https://github.com/SoftCreatR/JSONPath/blob/main/LICENSE>
+ * @license https://github.com/SoftCreatR/JSONPath/blob/main/LICENSE  MIT License
  */
+
 declare(strict_types=1);
 
 namespace Flow\JSONPath\Filters;
 
-use Flow\JSONPath\AccessHelper;
-use Flow\JSONPath\JSONPathException;
+use Flow\JSONPath\{AccessHelper, JSONPathException};
 
 class IndexFilter extends AbstractFilter
 {
@@ -22,7 +22,7 @@ class IndexFilter extends AbstractFilter
     {
         if (AccessHelper::keyExists($collection, $this->token->value, $this->magicIsAllowed)) {
             return [
-                AccessHelper::getValue($collection, $this->token->value, $this->magicIsAllowed)
+                AccessHelper::getValue($collection, $this->token->value, $this->magicIsAllowed),
             ];
         }
 

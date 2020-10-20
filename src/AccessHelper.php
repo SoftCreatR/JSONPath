@@ -1,15 +1,17 @@
 <?php
+
 /**
  * JSONPath implementation for PHP.
  *
- * @copyright Copyright (c) 2018 Flow Communications
- * @license   MIT <https://github.com/SoftCreatR/JSONPath/blob/main/LICENSE>
+ * @license https://github.com/SoftCreatR/JSONPath/blob/main/LICENSE  MIT License
  */
+
 declare(strict_types=1);
 
 namespace Flow\JSONPath;
 
 use ArrayAccess;
+
 use function abs;
 use function array_key_exists;
 use function array_keys;
@@ -74,16 +76,22 @@ class AccessHelper
     }
 
     /**
+     * @todo Optimize conditions
      * @param array|ArrayAccess $collection
      * @param mixed $key
      * @param bool $magicIsAllowed
      * @return mixed
+     * @noinspection NotOptimalIfConditionsInspection
      */
     public static function getValue($collection, $key, bool $magicIsAllowed = false)
     {
         $return = null;
 
-        if ($magicIsAllowed && is_object($collection) && !$collection instanceof ArrayAccess && method_exists($collection, '__get')) {
+        if (
+            $magicIsAllowed &&
+            is_object($collection) &&
+            !$collection instanceof ArrayAccess && method_exists($collection, '__get')
+        ) {
             $return = $collection->__get($key);
         } elseif (is_object($collection) && !$collection instanceof ArrayAccess) {
             $return = $collection->$key;
@@ -108,7 +116,7 @@ class AccessHelper
      *
      * @param array|ArrayAccess $collection
      * @param mixed $key
-     * @return mixed
+     * @return mixed|null
      */
     private static function getValueByIndex($collection, $key)
     {

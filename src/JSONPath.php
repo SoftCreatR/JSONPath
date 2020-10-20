@@ -1,19 +1,20 @@
 <?php
+
 /**
  * JSONPath implementation for PHP.
  *
- * @copyright Copyright (c) 2018 Flow Communications
- * @license   MIT <https://github.com/SoftCreatR/JSONPath/blob/main/LICENSE>
+ * @license https://github.com/SoftCreatR/JSONPath/blob/main/LICENSE  MIT License
  */
+
 declare(strict_types=1);
 
 namespace Flow\JSONPath;
 
 use ArrayAccess;
 use Countable;
-use Exception;
 use Iterator;
 use JsonSerializable;
+
 use function array_merge;
 use function count;
 use function current;
@@ -25,6 +26,11 @@ use function reset;
 
 class JSONPath implements ArrayAccess, Iterator, JsonSerializable, Countable
 {
+    public const ALLOW_MAGIC = true;
+
+    /**
+     * @var array
+     */
     protected static $tokenCache = [];
 
     /**
@@ -36,11 +42,6 @@ class JSONPath implements ArrayAccess, Iterator, JsonSerializable, Countable
      * @var bool
      */
     protected $options = false;
-
-    /**
-     * @var bool
-     */
-    public const ALLOW_MAGIC = true;
 
     /**
      * @param array|ArrayAccess $data
@@ -56,8 +57,8 @@ class JSONPath implements ArrayAccess, Iterator, JsonSerializable, Countable
      * Evaluate an expression
      *
      * @param string $expression
-     * @return JSONPath
-     * @throws Exception
+     * @return static
+     * @throws JSONPathException
      */
     public function find(string $expression): self
     {
@@ -79,12 +80,11 @@ class JSONPath implements ArrayAccess, Iterator, JsonSerializable, Countable
             $collectionData = $filteredData;
         }
 
-
         return new static($collectionData, $this->options);
     }
 
     /**
-     * @return mixed
+     * @return mixed|null
      */
     public function first()
     {
@@ -102,7 +102,7 @@ class JSONPath implements ArrayAccess, Iterator, JsonSerializable, Countable
     /**
      * Evaluate an expression and return the last result
      *
-     * @return mixed
+     * @return mixed|null
      */
     public function last()
     {
@@ -120,7 +120,7 @@ class JSONPath implements ArrayAccess, Iterator, JsonSerializable, Countable
     /**
      * Evaluate an expression and return the first key
      *
-     * @return mixed
+     * @return mixed|null
      */
     public function firstKey()
     {
@@ -136,7 +136,7 @@ class JSONPath implements ArrayAccess, Iterator, JsonSerializable, Countable
     /**
      * Evaluate an expression and return the last key
      *
-     * @return mixed
+     * @return mixed|null
      */
     public function lastKey()
     {
@@ -152,7 +152,7 @@ class JSONPath implements ArrayAccess, Iterator, JsonSerializable, Countable
     /**
      * @param string $expression
      * @return array
-     * @throws Exception
+     * @throws JSONPathException
      */
     public function parseTokens(string $expression): array
     {
@@ -170,17 +170,14 @@ class JSONPath implements ArrayAccess, Iterator, JsonSerializable, Countable
         return $tokens;
     }
 
-    /**
-     * @return array
-     */
     public function getData(): array
     {
         return $this->data;
     }
 
     /**
-     * @param $key
-     * @return mixed
+     * @param mixed $key
+     * @return mixed|null
      * @noinspection MagicMethodsValidityInspection
      */
     public function __get($key)

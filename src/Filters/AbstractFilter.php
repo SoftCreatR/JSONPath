@@ -1,16 +1,17 @@
 <?php
+
 /**
  * JSONPath implementation for PHP.
  *
- * @copyright Copyright (c) 2018 Flow Communications
- * @license   MIT <https://github.com/SoftCreatR/JSONPath/blob/main/LICENSE>
+ * @license https://github.com/SoftCreatR/JSONPath/blob/main/LICENSE  MIT License
  */
+
 declare(strict_types=1);
 
 namespace Flow\JSONPath\Filters;
 
-use Flow\JSONPath\JSONPath;
-use Flow\JSONPath\JSONPathToken;
+use ArrayAccess;
+use Flow\JSONPath\{JSONPath, JSONPathToken};
 
 abstract class AbstractFilter
 {
@@ -25,8 +26,6 @@ abstract class AbstractFilter
     protected $magicIsAllowed = false;
 
     /**
-     * AbstractFilter constructor.
-     *
      * @param JSONPathToken $token
      * @param int|bool $options
      */
@@ -37,7 +36,7 @@ abstract class AbstractFilter
     }
 
     /**
-     * @param array|object $collection
+     * @param array|ArrayAccess $collection
      * @return array
      */
     abstract public function filter($collection): array;

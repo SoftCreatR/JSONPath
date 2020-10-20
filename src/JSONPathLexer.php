@@ -1,10 +1,11 @@
 <?php
+
 /**
  * JSONPath implementation for PHP.
  *
- * @copyright Copyright (c) 2018 Flow Communications
- * @license   MIT <https://github.com/SoftCreatR/JSONPath/blob/main/LICENSE>
+ * @license https://github.com/SoftCreatR/JSONPath/blob/main/LICENSE  MIT License
  */
+
 declare(strict_types=1);
 
 namespace Flow\JSONPath;
@@ -44,9 +45,6 @@ class JSONPathLexer
      */
     protected $expressionLength = 0;
 
-    /**
-     * @param string $expression
-     */
     public function __construct(string $expression)
     {
         $expression = trim($expression);
@@ -69,7 +67,6 @@ class JSONPathLexer
     }
 
     /**
-     * @return array
      * @throws JSONPathException
      */
     public function parseExpressionTokens(): array
@@ -146,27 +143,17 @@ class JSONPathLexer
         return $tokens;
     }
 
-    /**
-     * @param int $pos
-     * @param int $forward
-     * @return string|null
-     */
     protected function lookAhead(int $pos, int $forward = 1): ?string
     {
         return $this->expression[$pos + $forward] ?? null;
     }
 
-    /**
-     * @param int $pos
-     * @return bool
-     */
     protected function atEnd(int $pos): bool
     {
         return $pos === $this->expressionLength;
     }
 
     /**
-     * @return array
      * @throws JSONPathException
      */
     public function parseExpression(): array

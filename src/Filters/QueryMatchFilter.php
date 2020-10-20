@@ -1,31 +1,37 @@
 <?php
+
 /**
  * JSONPath implementation for PHP.
  *
- * @copyright Copyright (c) 2018 Flow Communications
- * @license   MIT <https://github.com/SoftCreatR/JSONPath/blob/main/LICENSE>
+ * @license https://github.com/SoftCreatR/JSONPath/blob/main/LICENSE  MIT License
  */
+
 declare(strict_types=1);
 
 namespace Flow\JSONPath\Filters;
 
 use Flow\JSONPath\AccessHelper;
 use RuntimeException;
+
+use function explode;
+use function in_array;
+use function is_array;
 use function is_string;
 use function preg_match;
 use function preg_replace;
+use function strpos;
 use function strtolower;
+use function substr;
 
 class QueryMatchFilter extends AbstractFilter
 {
-    public const MATCH_QUERY_OPERATORS = '
+    protected const MATCH_QUERY_OPERATORS = '
       @(\.(?<key>[^\s<>!=]+)|\[["\']?(?<keySquare>.*?)["\']?\])
       (\s*(?<operator>==|=~|=|<>|!==|!=|>=|<=|>|<|in|!in|nin)\s*(?<comparisonValue>.+))?
     ';
 
     /**
      * @inheritDoc
-     * @return array
      */
     public function filter($collection): array
     {
@@ -44,7 +50,7 @@ class QueryMatchFilter extends AbstractFilter
         $operator = $matches['operator'] ?? null;
         $comparisonValue = $matches['comparisonValue'] ?? null;
 
-        if (is_string(($comparisonValue))) {
+        if (is_string($comparisonValue)) {
             if (strpos($comparisonValue, "[") === 0 && substr($comparisonValue, -1) === "]") {
                 $comparisonValue = substr($comparisonValue, 1, -1);
                 $comparisonValue = preg_replace('/^[\'"]/', '', $comparisonValue);
@@ -76,11 +82,13 @@ class QueryMatchFilter extends AbstractFilter
                 }
 
                 /** @noinspection TypeUnsafeComparisonInspection */
+                // phpcs:ignore -- This is a loose comparison by design.
                 if (($operator === '=' || $operator === '==') && $value1 == $comparisonValue) {
                     $return[] = $value;
                 }
 
                 /** @noinspection TypeUnsafeComparisonInspection */
+                // phpcs:ignore -- This is a loose comparison by design.
                 if (($operator === '!=' || $operator === '!==' || $operator === '<>') && $value1 != $comparisonValue) {
                     $return[] = $value;
                 }
@@ -109,7 +117,11 @@ class QueryMatchFilter extends AbstractFilter
                     $return[] = $value;
                 }
 
-                if (($operator === 'nin' || $operator === '!in') && is_array($comparisonValue) && !in_array($value1, $comparisonValue, true)) {
+                if (
+                    ($operator === 'nin' || $operator === '!in') &&
+                    is_array($comparisonValue) &&
+                    !in_array($value1, $comparisonValue, true)
+                ) {
                     $return[] = $value;
                 }
             }
