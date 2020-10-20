@@ -53,12 +53,17 @@ class QueryMatchFilter extends AbstractFilter
                 $comparisonValue = preg_replace('/[\'"]$/', '', $comparisonValue);
                 $comparisonValue = preg_replace('/[\'"],[ ]*[\'"]/', ',', $comparisonValue);
                 $comparisonValue = explode(",", $comparisonValue);
-            } elseif (strtolower($comparisonValue) === 'false') {
-                $comparisonValue = false;
-            } elseif (strtolower($comparisonValue) === 'true') {
-                $comparisonValue = true;
-            } elseif (strtolower($comparisonValue) === 'null') {
-                $comparisonValue = null;
+            } else {
+                $comparisonValue = preg_replace('/^[\'"]/', '', $comparisonValue);
+                $comparisonValue = preg_replace('/[\'"]$/', '', $comparisonValue);
+
+                if (strtolower($comparisonValue) === 'false') {
+                    $comparisonValue = false;
+                } elseif (strtolower($comparisonValue) === 'true') {
+                    $comparisonValue = true;
+                } elseif (strtolower($comparisonValue) === 'null') {
+                    $comparisonValue = null;
+                }
             }
         }
 
