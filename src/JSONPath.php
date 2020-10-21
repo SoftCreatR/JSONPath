@@ -24,6 +24,8 @@ use function md5;
 use function next;
 use function reset;
 
+use const E_USER_DEPRECATED;
+
 class JSONPath implements ArrayAccess, Iterator, JsonSerializable, Countable
 {
     public const ALLOW_MAGIC = true;
@@ -173,6 +175,19 @@ class JSONPath implements ArrayAccess, Iterator, JsonSerializable, Countable
     public function getData(): array
     {
         return $this->data;
+    }
+
+    /**
+     * @deprecated Please use getData() instead
+     */
+    public function data(): array
+    {
+        trigger_error(
+            'Calling JSONPath::data() is deprecated, please use JSONPath::getData() instead.',
+            E_USER_DEPRECATED
+        );
+
+        return $this->getData();
     }
 
     /**
