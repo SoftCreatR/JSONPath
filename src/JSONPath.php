@@ -70,16 +70,19 @@ class JSONPath implements ArrayAccess, Iterator, JsonSerializable, Countable
         foreach ($tokens as $token) {
             /** @var JSONPathToken $token */
             $filter = $token->buildFilter($this->options);
-            $filteredData = [];
+            $filteredDataList = [];
 
             foreach ($collectionData as $value) {
                 if (AccessHelper::isCollectionType($value)) {
-                    $filteredValue = $filter->filter($value);
-                    $filteredData = array_merge($filteredData, $filteredValue);
+                    $filteredDataList[] = $filter->filter($value);
                 }
             }
 
-            $collectionData = $filteredData;
+            if (!empty($filteredDataList)) {
+                $collectionData = array_merge(...$filteredDataList);
+            } else {
+                $collectionData = [];
+            }
         }
 
         return new static($collectionData, $this->options);
