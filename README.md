@@ -1,10 +1,11 @@
 JSONPath for PHP 7.1+
 =============
 
-[![Build Status](https://img.shields.io/github/workflow/status/SoftCreatR/JSONPath/Test/0.7.0?label=Build%20Status)](https://github.com/SoftCreatR/JSONPath/actions?query=workflow%3ATest)
+[![Build Status](https://img.shields.io/github/workflow/status/SoftCreatR/JSONPath/Test/main?label=Build%20Status)](https://github.com/SoftCreatR/JSONPath/actions?query=workflow%3ATest)
 [![Latest Release](https://img.shields.io/packagist/v/SoftCreatR/JSONPath?color=blue&label=Latest%20Release)](https://packagist.org/packages/softcreatr/jsonpath)
 [![MIT licensed](https://img.shields.io/badge/license-MIT-blue.svg)](./LICENSE)
-[![Codecov branch](https://img.shields.io/codecov/c/github/SoftCreatR/JSONPath/0.7.0)](https://codecov.io/gh/SoftCreatR/JSONPath/branch/0.7.0)
+[![Codecov branch](https://img.shields.io/codecov/c/github/SoftCreatR/JSONPath)](https://codecov.io/gh/SoftCreatR/JSONPath)
+[![Code Climate maintainability](https://img.shields.io/codeclimate/maintainability-percentage/SoftCreatR/JSONPath)](https://codeclimate.com/github/SoftCreatR/JSONPath)
 
 This is a [JSONPath](http://goessner.net/articles/JsonPath/) implementation for PHP based on Stefan Goessner's JSONPath script.
 
@@ -143,12 +144,13 @@ Changelog
 🔻 Breaking changes ahead:
 
  - Made JSONPath::__construct final
- - Removed deprecated method `data()` from JSONPath (use `getData()` or `jsonSerialize()` instead)
  - Added missing type hints
  - Partially reduced complexity
  - Performed some code optimizations
  - Updated composer.json for proper PHPUnit/PHP usage
  - Added support for regular expression operator (`=~`)
+ - Added QueryTest to perform tests against all queries from https://cburgmer.github.io/json-path-comparison/
+ - Switched Code Style from PSR-2 to PSR-12
 
 ### 0.6.4
  - Removed unnecessary type casting, that caused problems under certain circumstances

@@ -7,13 +7,13 @@ on:
       - '**.php'
       - 'composer.json'
     branches:
-      - '0.7.0'
+      - 'main'
   pull_request:
     paths:
       - '**.php'
       - 'composer.json'
     branches:
-      - '0.7.0'
+      - 'main'
   workflow_dispatch:
 
 jobs:
