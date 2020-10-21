@@ -17,10 +17,10 @@ use JsonSerializable;
 
 use function array_merge;
 use function count;
+use function crc32;
 use function current;
 use function end;
 use function key;
-use function md5;
 use function next;
 use function reset;
 
@@ -161,7 +161,7 @@ class JSONPath implements ArrayAccess, Iterator, JsonSerializable, Countable
      */
     public function parseTokens(string $expression): array
     {
-        $cacheKey = md5($expression);
+        $cacheKey = crc32($expression);
 
         if (isset(static::$tokenCache[$cacheKey])) {
             return static::$tokenCache[$cacheKey];
