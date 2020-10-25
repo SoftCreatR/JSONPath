@@ -69,7 +69,7 @@ class AccessHelper
         }
 
         if (is_object($collection)) {
-            return property_exists($collection, $key);
+            return property_exists($collection, (string)$key);
         }
 
         return false;
