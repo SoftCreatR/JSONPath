@@ -139,6 +139,10 @@ The original JsonPath implementations is available at [http://code.google.com/p/
 
 Changelog
 ---------
+### 0.7.1
+ - Fixed issues with empty tokens (`['']` and `[""]`)
+ - Fixed TypeError in AccessHelper::keyExists 
+ - Improved QueryTest
 
 ### 0.7.0
 🔻 Breaking changes ahead:
