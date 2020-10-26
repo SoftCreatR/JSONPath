@@ -27,23 +27,23 @@ class JSONPathArrayAccessTest extends TestCase
      */
     public function testChaining(): void
     {
-        $data = $this->getData('conferences');
+        $jsonPath = (new JSONPath($this->getData('conferences')));
 
-        $teams = (new JSONPath($data))
+        $teams = $jsonPath
             ->find('.conferences.*')
             ->find('..teams.*');
 
         self::assertEquals('Dodger', $teams[0]['name']);
         self::assertEquals('Mets', $teams[1]['name']);
 
-        $teams = (new JSONPath($data))
+        $teams = $jsonPath
             ->find('.conferences.*')
             ->find('..teams.*');
 
         self::assertEquals('Dodger', $teams[0]['name']);
         self::assertEquals('Mets', $teams[1]['name']);
 
-        $teams = (new JSONPath($data))
+        $teams = $jsonPath
             ->find('.conferences..teams.*');
 
         self::assertEquals('Dodger', $teams[0]['name']);

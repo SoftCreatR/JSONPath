@@ -15,6 +15,9 @@ use PHPUnit\Framework\TestCase;
 
 class JSONPathDashedIndexTest extends TestCase
 {
+    /**
+     * @return array[]
+     */
     public function indexDataProvider(): array
     {
         return [

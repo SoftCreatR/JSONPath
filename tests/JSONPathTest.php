@@ -337,19 +337,21 @@ class JSONPathTest extends TestCase
      */
     public function testQueryMatchNotEqualsTo(): void
     {
-        $results = (new JSONPath($this->getData('example')))
+        $jsonPath = (new JSONPath($this->getData('example')));
+
+        $results = $jsonPath
             ->find('$..books[?(@.author != "J. R. R. Tolkien")].title');
 
         self::assertcount(3, $results);
         self::assertEquals(['Sayings of the Century', 'Sword of Honour', 'Moby Dick'], $results->getData());
 
-        $results = (new JSONPath($this->getData('example')))
+        $results = $jsonPath
             ->find('$..books[?(@.author !== "J. R. R. Tolkien")].title');
 
         self::assertcount(3, $results);
         self::assertEquals(['Sayings of the Century', 'Sword of Honour', 'Moby Dick'], $results->getData());
 
-        $results = (new JSONPath($this->getData('example')))
+        $results = $jsonPath
             ->find('$..books[?(@.author <> "J. R. R. Tolkien")].title');
 
         self::assertcount(3, $results);
@@ -364,17 +366,19 @@ class JSONPathTest extends TestCase
      */
     public function testQueryMatchWithRegexCaseSensitive(): void
     {
-        $result = (new JSONPath($this->getData('example')))
+        $jsonPath = (new JSONPath($this->getData('example')));
+
+        $results = $jsonPath
             ->find('$..books[?(@.author =~ /nigel ree?s/i)].title');
 
-        self::assertcount(1, $result);
-        self::assertEquals(['Sayings of the Century'], $result->getData());
+        self::assertcount(1, $results);
+        self::assertEquals(['Sayings of the Century'], $results->getData());
 
-        $result = (new JSONPath($this->getData('example')))
+        $results = $jsonPath
             ->find('$..books[?(@.title =~ /^(Say|The).*/)].title');
 
-        self::assertcount(2, $result);
-        self::assertEquals(['Sayings of the Century', 'The Lord of the Rings'], $result->getData());
+        self::assertcount(2, $results);
+        self::assertEquals(['Sayings of the Century', 'The Lord of the Rings'], $results->getData());
     }
 
     /**
@@ -602,8 +606,7 @@ class JSONPathTest extends TestCase
      */
     public function testFilteringOnNoneArrays(): void
     {
-        $data = ['foo' => 'asdf'];
-        $result = (new JSONPath($data))
+        $result = (new JSONPath(['foo' => 'asdf']))
             ->find('$.foo.bar');
 
         self::assertEquals([], $result->getData());
@@ -636,8 +639,7 @@ class JSONPathTest extends TestCase
      */
     public function testQueryMatchWithRecursive(): void
     {
-        $locations = $this->getData('locations');
-        $result = (new JSONPath($locations))
+        $result = (new JSONPath($this->getData('locations')))
             ->find("..[?(@.type == 'suburb')].name");
 
         self::assertEquals(["Rosebank"], $result->getData());
@@ -681,12 +683,14 @@ class JSONPathTest extends TestCase
      */
     public function testCyrillicText(): void
     {
-        $result = (new JSONPath(["трололо" => 1]))
+        $jsonPath = (new JSONPath(["трололо" => 1]));
+
+        $result = $jsonPath
             ->find("$['трололо']");
 
         self::assertEquals([1], $result->getData());
 
-        $result = (new JSONPath(["трололо" => 1]))
+        $result = $jsonPath
             ->find("$.трололо");
 
         self::assertEquals([1], $result->getData());
@@ -697,14 +701,19 @@ class JSONPathTest extends TestCase
      */
     public function testOffsetUnset(): void
     {
-        $data = [
-            "route" => [
-                ["name" => "A", "type" => "type of A"],
-                ["name" => "B", "type" => "type of B"],
-            ],
-        ];
-        $data = json_encode($data);
-        $jsonIterator = new JSONPath(json_decode($data, false));
+        $jsonIterator = new JSONPath(
+            json_decode(
+                json_encode(
+                    [
+                        "route" => [
+                            ["name" => "A", "type" => "type of A"],
+                            ["name" => "B", "type" => "type of B"],
+                        ],
+                    ]
+                ),
+                false
+            )
+        );
 
         /** @var JSONPath $route */
         $route = $jsonIterator->offsetGet('route');
