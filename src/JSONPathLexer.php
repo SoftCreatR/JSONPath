@@ -28,8 +28,8 @@ class JSONPathLexer
     public const MATCH_SLICE = '[-\d:]+ | :'; // Eg. [0:2:1]
     public const MATCH_QUERY_RESULT = '\s* \( .+? \) \s*'; // Eg. ?(@.length - 1)
     public const MATCH_QUERY_MATCH = '\s* \?\(.+?\) \s*'; // Eg. ?(@.foo = "bar")
-    public const MATCH_INDEX_IN_SINGLE_QUOTES = '\s* \' (.+?) \' \s*'; // Eg. 'bar'
-    public const MATCH_INDEX_IN_DOUBLE_QUOTES = '\s* " (.+?) " \s*'; // Eg. 'bar'
+    public const MATCH_INDEX_IN_SINGLE_QUOTES = '\s* \' (.+?)? \' \s*'; // Eg. 'bar'
+    public const MATCH_INDEX_IN_DOUBLE_QUOTES = '\s* " (.+?)? " \s*'; // Eg. 'bar'
 
     /**
      * The expression being lexed.
@@ -207,13 +207,21 @@ class JSONPathLexer
 
             $ret = new JSONPathToken(JSONPathToken::T_QUERY_MATCH, $tokenValue);
         } elseif (preg_match('/^' . static::MATCH_INDEX_IN_SINGLE_QUOTES . '$/xu', $tokenValue, $matches)) {
-            $tokenValue = $matches[1];
-            $tokenValue = trim($tokenValue);
+            if (isset($matches[1])) {
+                $tokenValue = $matches[1];
+                $tokenValue = trim($tokenValue);
+            } else {
+                $tokenValue = '';
+            }
 
             $ret = new JSONPathToken(JSONPathToken::T_INDEX, $tokenValue);
         } elseif (preg_match('/^' . static::MATCH_INDEX_IN_DOUBLE_QUOTES . '$/xu', $tokenValue, $matches)) {
-            $tokenValue = $matches[1];
-            $tokenValue = trim($tokenValue);
+            if (isset($matches[1])) {
+                $tokenValue = $matches[1];
+                $tokenValue = trim($tokenValue);
+            } else {
+                $tokenValue = '';
+            }
 
             $ret = new JSONPathToken(JSONPathToken::T_INDEX, $tokenValue);
         }

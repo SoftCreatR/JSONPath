@@ -43,6 +43,7 @@ class QueryTest extends TestCase
         string $consensus,
         bool $skip = false
     ): void {
+        $results = null;
         $query = ucwords(str_replace('_', ' ', $id));
         $url = sprintf('https://cburgmer.github.io/json-path-comparison/results/%s', $id);
 
@@ -66,11 +67,23 @@ class QueryTest extends TestCase
 
             self::assertEquals($consensus, $results);
         } catch (ExpectationFailedException $e) {
-            $e = $e->getComparisonFailure();
+            try {
+                // In some cases, the consensus is just disordered, while
+                // the actual result is correct. Let's perform a canonicalized
+                // assert in these cases. There might be still some false positives
+                // (e.g. multidimensional comparisons), but that's okay, I guess. Maybe,
+                // we can also find a way around that in the future.
+                $results = json_decode($results, true);
+                $consensus = json_decode($consensus, true);
 
-            fwrite(STDERR, "==========================\n");
-            fwrite(STDERR, "Query: {$query}\n\n{$e->toString()}\nMore information: $url\n");
-            fwrite(STDERR, "==========================\n\n");
+                self::assertEqualsCanonicalizing($consensus, $results);
+            } catch (ExpectationFailedException $f) {
+                $e = $e->getComparisonFailure();
+
+                fwrite(STDERR, "==========================\n");
+                fwrite(STDERR, "Query: {$query}\n\n{$e->toString()}\nMore information: $url\n");
+                fwrite(STDERR, "==========================\n\n");
+            }
         } catch (JSONPathException $e) {
             fwrite(STDERR, "==========================\n");
             fwrite(STDERR, "Query: {$query}\n\n{$e->getMessage()}\n");
