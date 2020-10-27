@@ -139,6 +139,14 @@ The original JsonPath implementations is available at [http://code.google.com/p/
 
 Changelog
 ---------
+# 0.7.2
+ - Fixed query/selector "Array Slice With Start Large Negative Number And Open End On Short Array" (#7)
+ - Fixed query/selector "Union With Keys" (#22)
+ - Fixed query/selector "Dot Notation After Union With Keys" (#15)
+ - Fixed query/selector "Union With Keys After Array Slice" (#23)
+ - Fixed query/selector "Union With Keys After Bracket Notation" (#24)
+ - Fixed query/selector "Union With Keys On Object Without Key" (#25)
+
 ### 0.7.1
  - Fixed issues with empty tokens (`['']` and `[""]`)
  - Fixed TypeError in AccessHelper::keyExists 
