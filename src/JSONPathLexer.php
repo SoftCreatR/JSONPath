@@ -213,6 +213,16 @@ class JSONPathLexer
             if (isset($matches[1])) {
                 $tokenValue = $matches[1];
                 $tokenValue = trim($tokenValue);
+
+                $possibleArray = false;
+                if ($matches[0][0] === '"') {
+                    $possibleArray = explode('","', $tokenValue);
+                } elseif ($matches[0][0] === "'") {
+                    $possibleArray = explode("','", $tokenValue);
+                }
+                if ($possibleArray !== false && count($possibleArray) > 1) {
+                    $tokenValue = $possibleArray;
+                }
             } else {
                 $tokenValue = '';
             }
