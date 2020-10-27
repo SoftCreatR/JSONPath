@@ -678,6 +678,23 @@ class JSONPathTest extends TestCase
         self::assertEquals(["/core/img/filetypes/image.png"], $result->getData());
     }
 
+    public function testUnionWithKeys(): void
+    {
+        $result = (new JSONPath(
+            json_decode(
+                json_encode(
+                    [
+                        "key" => "value",
+                        "another" => "entry",
+                    ]
+                ),
+                false
+            )
+        ))->find("$['key','another']");
+
+        self::assertEquals(["value","entry"], $result->getData());
+    }
+
     /**
      * @throws Exception
      */
