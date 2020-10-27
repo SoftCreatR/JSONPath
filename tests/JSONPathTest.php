@@ -135,6 +135,11 @@ class JSONPathTest extends TestCase
             ->find('$[-1:]');
 
         self::assertEquals(['fifth'], $result->getData());
+
+        $result = (new JSONPath(['first', 'second', 'third']))
+            ->find('$[-4:]');
+
+        self::assertEquals(['first','second','third'], $result->getData());
     }
 
     /**
