@@ -32,6 +32,9 @@ class SliceFilter extends AbstractFilter
 
         if ($start < 0) {
             $start = $length + $start;
+            if ($start < 0) {
+                $start = 0;
+            }
         }
 
         if ($end === null) {
