@@ -86,6 +86,8 @@ print_r((new JSONPath($data))->find('$.people.*.name'), true);
 // $result[3] === 'Maximilian'
 ```
 
+More examples can be found in the [Wiki](https://github.com/SoftCreatR/JSONPath/wiki/Queries)
+
 ### Magic method access
 
 The options flag `JSONPath::ALLOW_MAGIC` will instruct JSONPath when retrieving a value to first check if an object
