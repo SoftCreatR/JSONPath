@@ -79,8 +79,7 @@ $data = ['people' => [
     ['name' => 'Maximilian'],
 ]];
 
-print_r((new JSONPath($data))
-    ->find('$.people.*.name'), true);
+print_r((new JSONPath($data))->find('$.people.*.name'), true);
 // $result[0] === 'Sascha'
 // $result[1] === 'Bianca'
 // $result[2] === 'Alexander'
