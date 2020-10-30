@@ -1,14 +1,14 @@
 <?php
+
 /**
  * JSONPath implementation for PHP.
  *
- * @copyright Copyright (c) 2018 Flow Communications
- * @license   MIT <https://github.com/SoftCreatR/JSONPath/blob/main/LICENSE>
+ * @license https://github.com/SoftCreatR/JSONPath/blob/main/LICENSE  MIT License
  */
+
 declare(strict_types=1);
 
 namespace Flow\JSONPath;
-
 
 use function class_exists;
 use function in_array;
@@ -26,17 +26,17 @@ class JSONPathToken
     public const T_SLICE = 'slice';
     public const T_INDEXES = 'indexes';
 
+    /**
+     * @var string
+     */
     public $type;
+
     public $value;
 
     /**
-     * JSONPathToken constructor.
-     *
-     * @param $type
-     * @param $value
      * @throws JSONPathException
      */
-    public function __construct($type, $value)
+    public function __construct(string $type, $value)
     {
         $this->validateType($type);
 
@@ -45,19 +45,15 @@ class JSONPathToken
     }
 
     /**
-     * @param $type
      * @throws JSONPathException
      */
-    public function validateType($type): void
+    public function validateType(string $type): void
     {
         if (!in_array($type, static::getTypes(), true)) {
             throw new JSONPathException('Invalid token: ' . $type);
         }
     }
 
-    /**
-     * @return string[]
-     */
     public static function getTypes(): array
     {
         return [
@@ -71,11 +67,9 @@ class JSONPathToken
     }
 
     /**
-     * @param $options
-     * @return mixed
      * @throws JSONPathException
      */
-    public function buildFilter($options)
+    public function buildFilter(bool $options)
     {
         $filterClass = 'Flow\\JSONPath\\Filters\\' . ucfirst($this->type) . 'Filter';
 

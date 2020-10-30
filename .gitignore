@@ -3,3 +3,5 @@
 vendor
 .php_cs.cache
 composer.lock
+composer.phar
+.phpcs-cache

@@ -1,21 +1,23 @@
 <?php
+
 /**
  * JSONPath implementation for PHP.
  *
- * @copyright Copyright (c) 2018 Flow Communications
- * @license   MIT <https://github.com/SoftCreatR/JSONPath/blob/main/LICENSE>
+ * @license https://github.com/SoftCreatR/JSONPath/blob/main/LICENSE  MIT License
  */
+
 declare(strict_types=1);
 
 namespace Flow\JSONPath\Filters;
 
-use Flow\JSONPath\AccessHelper;
-use Flow\JSONPath\JSONPathException;
+use Flow\JSONPath\{AccessHelper, JSONPathException};
+use ArrayAccess;
 
 class RecursiveFilter extends AbstractFilter
 {
     /**
      * @inheritDoc
+     *
      * @throws JSONPathException
      */
     public function filter($collection): array
@@ -28,11 +30,11 @@ class RecursiveFilter extends AbstractFilter
     }
 
     /**
-     * @param $result
-     * @param $data
+     * @param array|ArrayAccess $data
+     *
      * @throws JSONPathException
      */
-    private function recurse(&$result, $data): void
+    private function recurse(array &$result, $data): void
     {
         $result[] = $data;
 

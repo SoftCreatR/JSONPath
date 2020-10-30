@@ -1,27 +1,27 @@
 <?php
+
 /**
  * JSONPath implementation for PHP.
  *
- * @copyright Copyright (c) 2018 Flow Communications
- * @license   MIT <https://github.com/SoftCreatR/JSONPath/blob/main/LICENSE>
+ * @license https://github.com/SoftCreatR/JSONPath/blob/main/LICENSE  MIT License
  */
+
 declare(strict_types=1);
 
 namespace Flow\JSONPath\Test;
 
+use Flow\JSONPath\{JSONPathException, JSONPathLexer, JSONPathToken};
 use PHPUnit\Framework\TestCase;
-use Flow\JSONPath\JSONPathException;
-use Flow\JSONPath\JSONPathLexer;
-use Flow\JSONPath\JSONPathToken;
 
 class JSONPathLexerTest extends TestCase
 {
     /**
      * @throws JSONPathException
      */
-    public function test_Index_Wildcard(): void
+    public function testIndexWildcard(): void
     {
-        $tokens = (new JSONPathLexer('.*'))->parseExpression();
+        $tokens = (new JSONPathLexer('.*'))
+            ->parseExpression();
 
         self::assertEquals(JSONPathToken::T_INDEX, $tokens[0]->type);
         self::assertEquals("*", $tokens[0]->value);
@@ -30,9 +30,10 @@ class JSONPathLexerTest extends TestCase
     /**
      * @throws JSONPathException
      */
-    public function test_Index_Simple(): void
+    public function testIndexSimple(): void
     {
-        $tokens = (new JSONPathLexer('.foo'))->parseExpression();
+        $tokens = (new JSONPathLexer('.foo'))
+            ->parseExpression();
 
         self::assertEquals(JSONPathToken::T_INDEX, $tokens[0]->type);
         self::assertEquals("foo", $tokens[0]->value);
@@ -41,9 +42,10 @@ class JSONPathLexerTest extends TestCase
     /**
      * @throws JSONPathException
      */
-    public function test_Index_Recursive(): void
+    public function testIndexRecursive(): void
     {
-        $tokens = (new JSONPathLexer('..teams.*'))->parseExpression();
+        $tokens = (new JSONPathLexer('..teams.*'))
+            ->parseExpression();
 
         self::assertCount(3, $tokens);
         self::assertEquals(JSONPathToken::T_RECURSIVE, $tokens[0]->type);
@@ -57,9 +59,10 @@ class JSONPathLexerTest extends TestCase
     /**
      * @throws JSONPathException
      */
-    public function test_Index_Complex(): void
+    public function testIndexComplex(): void
     {
-        $tokens = (new JSONPathLexer('["\'b.^*_"]'))->parseExpression();
+        $tokens = (new JSONPathLexer('["\'b.^*_"]'))
+            ->parseExpression();
 
         self::assertEquals(JSONPathToken::T_INDEX, $tokens[0]->type);
         self::assertEquals("'b.^*_", $tokens[0]->value);
@@ -68,20 +71,22 @@ class JSONPathLexerTest extends TestCase
     /**
      * @throws JSONPathException
      */
-    public function test_Index_BadlyFormed(): void
+    public function testIndexBadlyFormed(): void
     {
         $this->expectException(JSONPathException::class);
         $this->expectExceptionMessage('Unable to parse token hello* in expression: .hello*');
 
-        (new JSONPathLexer('.hello*'))->parseExpression();
+        (new JSONPathLexer('.hello*'))
+            ->parseExpression();
     }
 
     /**
      * @throws JSONPathException
      */
-    public function test_Index_Integer(): void
+    public function testIndexInteger(): void
     {
-        $tokens = (new JSONPathLexer('[0]'))->parseExpression();
+        $tokens = (new JSONPathLexer('[0]'))
+            ->parseExpression();
 
         self::assertEquals(JSONPathToken::T_INDEX, $tokens[0]->type);
         self::assertEquals("0", $tokens[0]->value);
@@ -90,9 +95,10 @@ class JSONPathLexerTest extends TestCase
     /**
      * @throws JSONPathException
      */
-    public function test_Index_IntegerAfterDotNotation(): void
+    public function testIndexIntegerAfterDotNotation(): void
     {
-        $tokens = (new JSONPathLexer('.books[0]'))->parseExpression();
+        $tokens = (new JSONPathLexer('.books[0]'))
+            ->parseExpression();
 
         self::assertEquals(JSONPathToken::T_INDEX, $tokens[0]->type);
         self::assertEquals(JSONPathToken::T_INDEX, $tokens[1]->type);
@@ -103,9 +109,10 @@ class JSONPathLexerTest extends TestCase
     /**
      * @throws JSONPathException
      */
-    public function test_Index_Word(): void
+    public function testIndexWord(): void
     {
-        $tokens = (new JSONPathLexer('["foo$-/\'"]'))->parseExpression();
+        $tokens = (new JSONPathLexer('["foo$-/\'"]'))
+            ->parseExpression();
 
         self::assertEquals(JSONPathToken::T_INDEX, $tokens[0]->type);
         self::assertEquals("foo$-/'", $tokens[0]->value);
@@ -114,9 +121,10 @@ class JSONPathLexerTest extends TestCase
     /**
      * @throws JSONPathException
      */
-    public function test_Index_WordWithWhitespace(): void
+    public function testIndexWordWithWhitespace(): void
     {
-        $tokens = (new JSONPathLexer('[   "foo$-/\'"     ]'))->parseExpression();
+        $tokens = (new JSONPathLexer('[   "foo$-/\'"     ]'))
+            ->parseExpression();
 
         self::assertEquals(JSONPathToken::T_INDEX, $tokens[0]->type);
         self::assertEquals("foo$-/'", $tokens[0]->value);
@@ -125,9 +133,10 @@ class JSONPathLexerTest extends TestCase
     /**
      * @throws JSONPathException
      */
-    public function test_Slice_Simple(): void
+    public function testSliceSimple(): void
     {
-        $tokens = (new JSONPathLexer('[0:1:2]'))->parseExpression();
+        $tokens = (new JSONPathLexer('[0:1:2]'))
+            ->parseExpression();
 
         self::assertEquals(JSONPathToken::T_SLICE, $tokens[0]->type);
         self::assertEquals(['start' => 0, 'end' => 1, 'step' => 2], $tokens[0]->value);
@@ -136,9 +145,10 @@ class JSONPathLexerTest extends TestCase
     /**
      * @throws JSONPathException
      */
-    public function test_Index_NegativeIndex(): void
+    public function testIndexNegativeIndex(): void
     {
-        $tokens = (new JSONPathLexer('[-1]'))->parseExpression();
+        $tokens = (new JSONPathLexer('[-1]'))
+            ->parseExpression();
 
         self::assertEquals(JSONPathToken::T_SLICE, $tokens[0]->type);
         self::assertEquals(['start' => -1, 'end' => null, 'step' => null], $tokens[0]->value);
@@ -147,9 +157,10 @@ class JSONPathLexerTest extends TestCase
     /**
      * @throws JSONPathException
      */
-    public function test_Slice_AllNull(): void
+    public function testSliceAllNull(): void
     {
-        $tokens = (new JSONPathLexer('[:]'))->parseExpression();
+        $tokens = (new JSONPathLexer('[:]'))
+            ->parseExpression();
 
         self::assertEquals(JSONPathToken::T_SLICE, $tokens[0]->type);
         self::assertEquals(['start' => null, 'end' => null, 'step' => null], $tokens[0]->value);
@@ -158,9 +169,10 @@ class JSONPathLexerTest extends TestCase
     /**
      * @throws JSONPathException
      */
-    public function test_QueryResult_Simple(): void
+    public function testQueryResultSimple(): void
     {
-        $tokens = (new JSONPathLexer('[(@.foo + 2)]'))->parseExpression();
+        $tokens = (new JSONPathLexer('[(@.foo + 2)]'))
+            ->parseExpression();
 
         self::assertEquals(JSONPathToken::T_QUERY_RESULT, $tokens[0]->type);
         self::assertEquals('@.foo + 2', $tokens[0]->value);
@@ -169,9 +181,10 @@ class JSONPathLexerTest extends TestCase
     /**
      * @throws JSONPathException
      */
-    public function test_QueryMatch_Simple(): void
+    public function testQueryMatchSimple(): void
     {
-        $tokens = (new JSONPathLexer('[?(@.foo < \'bar\')]'))->parseExpression();
+        $tokens = (new JSONPathLexer('[?(@.foo < \'bar\')]'))
+            ->parseExpression();
 
         self::assertEquals(JSONPathToken::T_QUERY_MATCH, $tokens[0]->type);
         self::assertEquals('@.foo < \'bar\'', $tokens[0]->value);
@@ -180,9 +193,10 @@ class JSONPathLexerTest extends TestCase
     /**
      * @throws JSONPathException
      */
-    public function test_QueryMatch_NotEqualTO(): void
+    public function testQueryMatchNotEqualTO(): void
     {
-        $tokens = (new JSONPathLexer('[?(@.foo != \'bar\')]'))->parseExpression();
+        $tokens = (new JSONPathLexer('[?(@.foo != \'bar\')]'))
+            ->parseExpression();
 
         self::assertEquals(JSONPathToken::T_QUERY_MATCH, $tokens[0]->type);
         self::assertEquals('@.foo != \'bar\'', $tokens[0]->value);
@@ -191,21 +205,22 @@ class JSONPathLexerTest extends TestCase
     /**
      * @throws JSONPathException
      */
-    public function test_QueryMatch_Brackets(): void
+    public function testQueryMatchBrackets(): void
     {
-        $tokens = (new JSONPathLexer("[?(@['@language']='en')]"))->parseExpression();
+        $tokens = (new JSONPathLexer("[?(@['@language']='en')]"))
+            ->parseExpression();
 
         self::assertEquals(JSONPathToken::T_QUERY_MATCH, $tokens[0]->type);
         self::assertEquals("@['@language']='en'", $tokens[0]->value);
-
     }
 
     /**
      * @throws JSONPathException
      */
-    public function test_Recursive_Simple(): void
+    public function testRecursiveSimple(): void
     {
-        $tokens = (new JSONPathLexer('..foo'))->parseExpression();
+        $tokens = (new JSONPathLexer('..foo'))
+            ->parseExpression();
 
         self::assertEquals(JSONPathToken::T_RECURSIVE, $tokens[0]->type);
         self::assertEquals(JSONPathToken::T_INDEX, $tokens[1]->type);
@@ -216,9 +231,10 @@ class JSONPathLexerTest extends TestCase
     /**
      * @throws JSONPathException
      */
-    public function test_Recursive_Wildcard(): void
+    public function testRecursiveWildcard(): void
     {
-        $tokens = (new JSONPathLexer('..*'))->parseExpression();
+        $tokens = (new JSONPathLexer('..*'))
+            ->parseExpression();
 
         self::assertEquals(JSONPathToken::T_RECURSIVE, $tokens[0]->type);
         self::assertEquals(JSONPathToken::T_INDEX, $tokens[1]->type);
@@ -229,20 +245,22 @@ class JSONPathLexerTest extends TestCase
     /**
      * @throws JSONPathException
      */
-    public function test_Recursive_BadlyFormed(): void
+    public function testRecursiveBadlyFormed(): void
     {
         $this->expectException(JSONPathException::class);
         $this->expectExceptionMessage('Unable to parse token ba^r in expression: ..ba^r');
 
-        (new JSONPathLexer('..ba^r'))->parseExpression();
+        (new JSONPathLexer('..ba^r'))
+            ->parseExpression();
     }
 
     /**
      * @throws JSONPathException
      */
-    public function test_Indexes_Simple(): void
+    public function testIndexesSimple(): void
     {
-        $tokens = (new JSONPathLexer('[1,2,3]'))->parseExpression();
+        $tokens = (new JSONPathLexer('[1,2,3]'))
+            ->parseExpression();
 
         self::assertEquals(JSONPathToken::T_INDEXES, $tokens[0]->type);
         self::assertEquals([1, 2, 3], $tokens[0]->value);
@@ -251,9 +269,10 @@ class JSONPathLexerTest extends TestCase
     /**
      * @throws JSONPathException
      */
-    public function test_Indexes_Whitespace(): void
+    public function testIndexesWhitespace(): void
     {
-        $tokens = (new JSONPathLexer('[ 1,2 , 3]'))->parseExpression();
+        $tokens = (new JSONPathLexer('[ 1,2 , 3]'))
+            ->parseExpression();
 
         self::assertEquals(JSONPathToken::T_INDEXES, $tokens[0]->type);
         self::assertEquals([1, 2, 3], $tokens[0]->value);

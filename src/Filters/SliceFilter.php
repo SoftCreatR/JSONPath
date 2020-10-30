@@ -1,15 +1,17 @@
 <?php
+
 /**
  * JSONPath implementation for PHP.
  *
- * @copyright Copyright (c) 2018 Flow Communications
- * @license   MIT <https://github.com/SoftCreatR/JSONPath/blob/main/LICENSE>
+ * @license https://github.com/SoftCreatR/JSONPath/blob/main/LICENSE  MIT License
  */
+
 declare(strict_types=1);
 
 namespace Flow\JSONPath\Filters;
 
 use Flow\JSONPath\AccessHelper;
+
 use function count;
 
 class SliceFilter extends AbstractFilter
@@ -19,7 +21,6 @@ class SliceFilter extends AbstractFilter
      */
     public function filter($collection): array
     {
-        $result = [];
         $length = count($collection);
         $start = $this->token->value['start'];
         $end = $this->token->value['end'];
@@ -31,6 +32,9 @@ class SliceFilter extends AbstractFilter
 
         if ($start < 0) {
             $start = $length + $start;
+            if ($start < 0) {
+                $start = 0;
+            }
         }
 
         if ($end === null) {
@@ -41,6 +45,8 @@ class SliceFilter extends AbstractFilter
         if ($end < 0) {
             $end = $length + $end;
         }
+
+        $result = [];
 
         for ($i = $start; $i < $end; $i += $step) {
             $index = $i;

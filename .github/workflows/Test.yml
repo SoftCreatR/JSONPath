@@ -4,12 +4,16 @@ name: Test
 on:
   push:
     paths:
-      - '*.php'
+      - '**.php'
       - 'composer.json'
+    branches:
+      - 'main'
   pull_request:
     paths:
-      - '*.php'
+      - '**.php'
       - 'composer.json'
+    branches:
+      - 'main'
   workflow_dispatch:
 
 jobs:
@@ -17,8 +21,9 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        php: [ '7.2', '7.3', '7.4' ]
-    name: PHP ${{ matrix.php-versions }} Test
+        php: [ '7.1', '7.2', '7.3', '7.4', '8.0' ]
+    continue-on-error: ${{ matrix.php == '8.0' }}
+    name: PHP ${{ matrix.php }} Test
 
     steps:
       - name: Git checkout
@@ -29,8 +34,7 @@ jobs:
         with:
           php-version: ${{ matrix.php }}
           extensions: json
-          coverage: none
-          tools: phpunit
+          coverage: pcov
         env:
           COMPOSER_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -38,7 +42,19 @@ jobs:
         run: echo "::add-matcher::${{ runner.tool_cache }}/phpunit.json"
 
       - name: Install dependencies
-        run: composer install --prefer-dist --no-interaction --no-suggest
+        run: composer update --prefer-dist --no-interaction
+
+      - name: Run phpcs
+        run: composer cs-check -- -v
+
+      - name: Setup PCOV
+        if: matrix.php == '7.1'
+        run: |
+          composer require pcov/clobber
+          vendor/bin/pcov clobber
 
       - name: Execute tests
-        run: vendor/bin/phpunit --verbose
+        run: composer test -- -v --coverage-clover=coverage.xml
+
+      - name: Run codecov
+        uses: codecov/codecov-action@v1

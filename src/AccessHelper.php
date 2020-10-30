@@ -1,15 +1,17 @@
 <?php
+
 /**
  * JSONPath implementation for PHP.
  *
- * @copyright Copyright (c) 2018 Flow Communications
- * @license   MIT <https://github.com/SoftCreatR/JSONPath/blob/main/LICENSE>
+ * @license https://github.com/SoftCreatR/JSONPath/blob/main/LICENSE  MIT License
  */
+
 declare(strict_types=1);
 
 namespace Flow\JSONPath;
 
 use ArrayAccess;
+
 use function abs;
 use function array_key_exists;
 use function array_keys;
@@ -25,8 +27,7 @@ use function property_exists;
 class AccessHelper
 {
     /**
-     * @param $collection
-     * @return array
+     * @param array|ArrayAccess $collection
      */
     public static function collectionKeys($collection): array
     {
@@ -38,8 +39,7 @@ class AccessHelper
     }
 
     /**
-     * @param $collection
-     * @return bool
+     * @param array|ArrayAccess $collection
      */
     public static function isCollectionType($collection): bool
     {
@@ -47,19 +47,16 @@ class AccessHelper
     }
 
     /**
-     * @param $collection
-     * @param $key
-     * @param false $magicIsAllowed
-     * @return bool
+     * @param array|ArrayAccess $collection
      */
-    public static function keyExists($collection, $key, $magicIsAllowed = false): bool
+    public static function keyExists($collection, $key, bool $magicIsAllowed = false): bool
     {
         if ($magicIsAllowed && is_object($collection) && method_exists($collection, '__get')) {
             return true;
         }
 
         if (is_int($key) && $key < 0) {
-            $key = abs((int)$key);
+            $key = abs($key);
         }
 
         if (is_array($collection) || $collection instanceof ArrayAccess) {
@@ -67,78 +64,83 @@ class AccessHelper
         }
 
         if (is_object($collection)) {
-            return property_exists($collection, $key);
+            return property_exists($collection, (string)$key);
         }
 
         return false;
     }
 
     /**
-     * @param $collection
-     * @param $key
-     * @param false $magicIsAllowed
-     * @return mixed
+     * @todo Optimize conditions
+     *
+     * @param array|ArrayAccess $collection
+     * @noinspection NotOptimalIfConditionsInspection
      */
-    public static function getValue($collection, $key, $magicIsAllowed = false)
+    public static function getValue($collection, $key, bool $magicIsAllowed = false)
     {
-        if ($magicIsAllowed && is_object($collection) && !$collection instanceof ArrayAccess && method_exists($collection, '__get')) {
-            return $collection->__get($key);
+        $return = null;
+
+        if (
+            $magicIsAllowed &&
+            is_object($collection) &&
+            !$collection instanceof ArrayAccess && method_exists($collection, '__get')
+        ) {
+            $return = $collection->__get($key);
+        } elseif (is_object($collection) && !$collection instanceof ArrayAccess) {
+            $return = $collection->$key;
+        } elseif (is_array($collection)) {
+            if (is_int($key) && $key < 0) {
+                $return = array_slice($collection, $key, 1, false)[0];
+            } else {
+                $return = $collection[$key];
+            }
+        } elseif (is_int($key)) {
+            $return = self::getValueByIndex($collection, $key);
+        } else {
+            $return = $collection[$key];
         }
 
-        if (is_object($collection) && !$collection instanceof ArrayAccess) {
-            return $collection->$key;
-        }
+        return $return;
+    }
 
-        if (is_array($collection)) {
-            if (is_int($key)) {
-                return array_slice($collection, $key, 1, false)[0];
+    /**
+     * Find item in php collection by index
+     * Written this way to handle instances ArrayAccess or Traversable objects
+     *
+     * @param array|ArrayAccess $collection
+     *
+     * @return mixed|null
+     */
+    private static function getValueByIndex($collection, $key)
+    {
+        $i = 0;
+
+        foreach ($collection as $val) {
+            if ($i === $key) {
+                return $val;
             }
 
-            return $collection[$key];
+            ++$i;
         }
 
-        if (is_object($collection) && !$collection instanceof ArrayAccess) {
-            return $collection->$key;
-        }
-
-        /*
-         * Find item in php collection by index
-         * Written this way to handle instances ArrayAccess or Traversable objects
-         */
-        if (is_int($key)) {
+        if ($key < 0) {
+            $total = $i;
             $i = 0;
 
             foreach ($collection as $val) {
-                if ($i === $key) {
+                if ($i - $total === $key) {
                     return $val;
                 }
 
                 ++$i;
             }
-
-            if ($key < 0) {
-                $total = $i;
-                $i = 0;
-
-                foreach ($collection as $val) {
-                    if ($i - $total === $key) {
-                        return $val;
-                    }
-
-                    ++$i;
-                }
-            }
         }
 
-        // Finally, try anything
-        return $collection[$key];
+        return null;
     }
 
     /**
-     * @param $collection
-     * @param $key
-     * @param $value
-     * @return mixed
+     * @param array|ArrayAccess $collection
      */
     public static function setValue(&$collection, $key, $value)
     {
@@ -150,8 +152,7 @@ class AccessHelper
     }
 
     /**
-     * @param $collection
-     * @param $key
+     * @param array|ArrayAccess $collection
      */
     public static function unsetValue(&$collection, $key): void
     {
@@ -163,8 +164,8 @@ class AccessHelper
     }
 
     /**
-     * @param $collection
-     * @return array
+     * @param array|ArrayAccess $collection
+     *
      * @throws JSONPathException
      */
     public static function arrayValues($collection): array
