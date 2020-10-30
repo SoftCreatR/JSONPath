@@ -154,3 +154,29 @@ A list of changes can be found in the [CHANGELOG.md](CHANGELOG.md) file.
 
 ## Contributors ✨
 
+<table>
+<tr>
+    <td align="center">
+        <a href=https://github.com/SoftCreatR>
+            <img src=https://avatars0.githubusercontent.com/u/81188?v=4 width="100;" alt=Sascha Greuel/>
+            <br />
+            <sub style="font-size:14px"><b>Sascha Greuel</b></sub>
+        </a>
+    </td>
+    <td align="center">
+        <a href=https://github.com/SG5>
+            <img src=https://avatars0.githubusercontent.com/u/3931761?v=4 width="100;" alt=Sergey/>
+            <br />
+            <sub style="font-size:14px"><b>Sergey</b></sub>
+        </a>
+    </td>
+    <td align="center">
+        <a href=https://github.com/oleg-andreyev>
+            <img src=https://avatars1.githubusercontent.com/u/1244112?v=4 width="100;" alt=Oleg Andreyev/>
+            <br />
+            <sub style="font-size:14px"><b>Oleg Andreyev</b></sub>
+        </a>
+    </td>
+</tr>
+</table>
+
