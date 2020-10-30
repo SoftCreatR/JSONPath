@@ -133,15 +133,7 @@ So here are the types of query expressions that are supported:
 
 [FlowCommunications/JSONPath](https://github.com/FlowCommunications/JSONPath) is the predecessor of this library by Stephen Frank
 
-[Galbar/JsonPath-PHP](https://github.com/Galbar/JsonPath-PHP) is a PHP implementation that does a few things this project doesn't and is a strong alternative
-
-[JMESPath](https://github.com/jmespath) does similiar things, is full of features and has a PHP implementation
-
-The [Hash](http://book.cakephp.org/2.0/en/core-utility-libraries/hash.html) utility from CakePHP does some similar things 
-
-The original JsonPath implementations is available at [http://code.google.com/p/jsonpath]() and re-hosted for composer here [Peekmo/JsonPath](https://github.com/Peekmo/JsonPath).
-
-[ObjectPath](http://objectpath.org) ([https://github.com/adriank/ObjectPath]()) appears to be a Python/JS implementation with a new name and extra features.
+Other / Similar implementations can be found in the [Wiki](https://github.com/SoftCreatR/JSONPath/wiki/Other-Implementations).
 
 ## Changelog
 
