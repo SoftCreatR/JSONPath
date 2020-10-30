@@ -28,7 +28,6 @@ class AccessHelper
 {
     /**
      * @param array|ArrayAccess $collection
-     * @return array
      */
     public static function collectionKeys($collection): array
     {
@@ -41,7 +40,6 @@ class AccessHelper
 
     /**
      * @param array|ArrayAccess $collection
-     * @return bool
      */
     public static function isCollectionType($collection): bool
     {
@@ -50,9 +48,6 @@ class AccessHelper
 
     /**
      * @param array|ArrayAccess $collection
-     * @param mixed $key
-     * @param bool $magicIsAllowed
-     * @return bool
      */
     public static function keyExists($collection, $key, bool $magicIsAllowed = false): bool
     {
@@ -77,10 +72,8 @@ class AccessHelper
 
     /**
      * @todo Optimize conditions
+     *
      * @param array|ArrayAccess $collection
-     * @param mixed $key
-     * @param bool $magicIsAllowed
-     * @return mixed
      * @noinspection NotOptimalIfConditionsInspection
      */
     public static function getValue($collection, $key, bool $magicIsAllowed = false)
@@ -115,7 +108,7 @@ class AccessHelper
      * Written this way to handle instances ArrayAccess or Traversable objects
      *
      * @param array|ArrayAccess $collection
-     * @param mixed $key
+     *
      * @return mixed|null
      */
     private static function getValueByIndex($collection, $key)
@@ -148,9 +141,6 @@ class AccessHelper
 
     /**
      * @param array|ArrayAccess $collection
-     * @param mixed $key
-     * @param mixed $value
-     * @return mixed
      */
     public static function setValue(&$collection, $key, $value)
     {
@@ -163,7 +153,6 @@ class AccessHelper
 
     /**
      * @param array|ArrayAccess $collection
-     * @param mixed $key
      */
     public static function unsetValue(&$collection, $key): void
     {
@@ -176,7 +165,7 @@ class AccessHelper
 
     /**
      * @param array|ArrayAccess $collection
-     * @return array
+     *
      * @throws JSONPathException
      */
     public static function arrayValues($collection): array

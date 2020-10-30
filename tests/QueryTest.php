@@ -30,11 +30,6 @@ class QueryTest extends TestCase
      *
      * @see https://cburgmer.github.io/json-path-comparison
      * @dataProvider queryDataProvider
-     * @param string $id
-     * @param string $selector
-     * @param string $data
-     * @param string $consensus
-     * @param bool $skip
      */
     public function testQueries(
         string $id,

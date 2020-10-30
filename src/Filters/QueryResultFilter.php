@@ -19,6 +19,7 @@ class QueryResultFilter extends AbstractFilter
 {
     /**
      * @inheritDoc
+     *
      * @throws JSONPathException
      */
     public function filter($collection): array

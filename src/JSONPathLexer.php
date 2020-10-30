@@ -162,8 +162,6 @@ class JSONPathLexer
     }
 
     /**
-     * @param string $value
-     * @return JSONPathToken
      * @throws JSONPathException
      */
     protected function createToken(string $value): JSONPathToken

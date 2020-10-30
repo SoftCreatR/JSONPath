@@ -1,5 +1,4 @@
-JSONPath for PHP 7.1+
-=============
+# JSONPath for PHP 7.1+
 
 [![Build Status](https://img.shields.io/github/workflow/status/SoftCreatR/JSONPath/Test/main?label=Build%20Status)](https://github.com/SoftCreatR/JSONPath/actions?query=workflow%3ATest)
 [![Latest Release](https://img.shields.io/packagist/v/SoftCreatR/JSONPath?color=blue&label=Latest%20Release)](https://packagist.org/packages/softcreatr/jsonpath)
@@ -18,13 +17,13 @@ This project aims to be a clean and simple implementation with the following goa
  - There is no `eval()` in use
  - Any combination of objects/arrays/ArrayAccess-objects can be used as the data input which is great if you're de-serializing JSON in to objects or if you want to process your own data structures.
 
-Installation
----
+## Installation
 
 **PHP 7.1+**
 ```bash
 composer require softcreatr/jsonpath
 ```
+
 **PHP < 7.1**
 
 Support for PHP < 7.1 has been dropped. However, legacy branches exist for PHP 5.6 and 7.0 and can be composer-installed as follows:
@@ -32,10 +31,9 @@ Support for PHP < 7.1 has been dropped. However, legacy branches exist for PHP 5
 * PHP 7.0: `"softcreatr/jsonpath": "dev-php-70"`
 * PHP 5.6: `"softcreatr/jsonpath": "dev-php-56"`
 
-🔻 Please note, that these legacy branches (based on JSONPath 0.6.2) are protected. There are no intentions to make any updates here. Please consider upgrading to PHP 7.2 or newer.
+🔻 Please note, that these legacy branches (based on JSONPath 0.6.2) are protected. There are no intentions to make any updates here. Please consider upgrading to PHP 7.1 or newer.
 
-JSONPath Examples
----
+## JSONPath Examples
 
 JSONPath                  | Result
 --------------------------|-------------------------------------
@@ -69,15 +67,24 @@ Symbol                | Description
 `?()`                 | Filters a result set by a script expression
 `()`                  | Uses the result of a script expression as the index
 
-PHP Usage
----
+## PHP Usage
 
 ```php
-$data = ['people' => [['name' => 'Joe'], ['name' => 'Jane'], ['name' => 'John']]];
-$result = (new JSONPath($data))->find('$.people.*.name'); // returns new JSONPath
-// $result[0] === 'Joe'
-// $result[1] === 'Jane'
-// $result[2] === 'John'
+use Flow\JSONPath\JSONPath;
+
+$data = ['people' => [
+    ['name' => 'Sascha'],
+    ['name' => 'Bianca'],
+    ['name' => 'Alexander'],
+    ['name' => 'Maximilian'],
+]];
+
+print_r((new JSONPath($data))
+    ->find('$.people.*.name'), true);
+// $result[0] === 'Sascha'
+// $result[1] === 'Bianca'
+// $result[2] === 'Alexander'
+// $result[3] === 'Maximilian'
 ```
 
 ### Magic method access
@@ -92,13 +99,15 @@ not very predictable as:
 -   any errors thrown or unpredictable behaviour caused by fetching via `__get()` is your own problem to deal with
 
 ```php
+use Flow\JSONPath\JSONPath;
+
+$myObject = json_decode('{"name":"Sascha Greuel","birthdate":"1987-12-16","city":"Gladbeck","country":"Germany"}', false);
 $jsonPath = new JSONPath($myObject, JSONPath::ALLOW_MAGIC);
 ```
 
 For more examples, check the JSONPathTest.php tests file.
 
-Script expressions
--------
+## Script expressions
 
 Script expressions are not supported as the original author intended because:
 
@@ -117,13 +126,11 @@ So here are the types of query expressions that are supported:
 	[?(@.title in ["A string", "Another string"])]
 	[?(@.title nin ["A string", "Another string"])]
 	
-Known issues
-------
+## Known issues
 
 - This project has not implemented multiple string indexes e.g. `$[name,year]` or `$["name","year"]`. I have no ETA on that feature, and it would require some re-writing of the parser that uses a very basic regex implementation.
 
-Similar projects
-----------------
+## Similar projects
 
 [FlowCommunications/JSONPath](https://github.com/FlowCommunications/JSONPath) is the predecessor of this library by Stephen Frank
 
@@ -137,72 +144,13 @@ The original JsonPath implementations is available at [http://code.google.com/p/
 
 [ObjectPath](http://objectpath.org) ([https://github.com/adriank/ObjectPath]()) appears to be a Python/JS implementation with a new name and extra features.
 
-Changelog
----------
-### 0.7.2
- - Fixed query/selector "Array Slice With Start Large Negative Number And Open End On Short Array" (#7)
- - Fixed query/selector "Union With Keys" (#22)
- - Fixed query/selector "Dot Notation After Union With Keys" (#15)
- - Fixed query/selector "Union With Keys After Array Slice" (#23)
- - Fixed query/selector "Union With Keys After Bracket Notation" (#24)
- - Fixed query/selector "Union With Keys On Object Without Key" (#25)
+## Changelog
 
-### 0.7.1
- - Fixed issues with empty tokens (`['']` and `[""]`)
- - Fixed TypeError in AccessHelper::keyExists 
- - Improved QueryTest
+A list of changes can be found in the [CHANGELOG.md](CHANGELOG.md) file. 
 
-### 0.7.0
-🔻 Breaking changes ahead:
-
- - Made JSONPath::__construct final
- - Added missing type hints
- - Partially reduced complexity
- - Performed some code optimizations
- - Updated composer.json for proper PHPUnit/PHP usage
- - Added support for regular expression operator (`=~`)
- - Added QueryTest to perform tests against all queries from https://cburgmer.github.io/json-path-comparison/
- - Switched Code Style from PSR-2 to PSR-12
-
-### 0.6.4
- - Removed unnecessary type casting, that caused problems under certain circumstances
- - Added support for `nin` operator
- - Added support for greater than or equal operator (`>=`)
- - Added support for less or equal operator (`<=`)
-
-### 0.6.3
- - Added support for `in` operator
- - Fixed evaluation on indexed object
-
-### 0.6.x
- - Dropped support for PHP < 7.1
- - Switched from (broken) PSR-0 to PSR-4
- - Updated PHPUnit to 8.5 / 9.4
- - Updated tests
- - Added missing PHPDoc blocks
- - Added return type hints
- - Moved from Travis to GitHub actions
- - Set `strict_types=1`
-
-### 0.5.0
- - Fixed the slice notation (e.g. [0:2:5] etc.). **Breaks code relying on the broken implementation**
-
-### 0.3.0
- - Added JSONPathToken class as value object
- - Lexer clean up and refactor
- - Updated the lexing and filtering of the recursive token ("..") to allow for a combination of recursion
-   and filters, e.g. $..[?(@.type == 'suburb')].name
-
-### 0.2.1 - 0.2.5
- - Various bug fixes and clean up
-
-### 0.2.0
- - Added a heap of array access features for more creative iterating and chaining possibilities
-
-### 0.1.x
- - Init
-
-License
----------
+## License
 
 [MIT](LICENSE)
+
+## Contributors ✨
+

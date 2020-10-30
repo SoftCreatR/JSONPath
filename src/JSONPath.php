@@ -47,7 +47,6 @@ class JSONPath implements ArrayAccess, Iterator, JsonSerializable, Countable
 
     /**
      * @param array|ArrayAccess $data
-     * @param bool $options
      */
     final public function __construct($data = [], bool $options = false)
     {
@@ -58,9 +57,9 @@ class JSONPath implements ArrayAccess, Iterator, JsonSerializable, Countable
     /**
      * Evaluate an expression
      *
-     * @param string $expression
-     * @return static
      * @throws JSONPathException
+     *
+     * @return static
      */
     public function find(string $expression): self
     {
@@ -155,8 +154,6 @@ class JSONPath implements ArrayAccess, Iterator, JsonSerializable, Countable
     }
 
     /**
-     * @param string $expression
-     * @return array
      * @throws JSONPathException
      */
     public function parseTokens(string $expression): array
@@ -194,7 +191,6 @@ class JSONPath implements ArrayAccess, Iterator, JsonSerializable, Countable
     }
 
     /**
-     * @param mixed $key
      * @return mixed|null
      * @noinspection MagicMethodsValidityInspection
      */

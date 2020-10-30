@@ -26,7 +26,6 @@ abstract class AbstractFilter
     protected $magicIsAllowed = false;
 
     /**
-     * @param JSONPathToken $token
      * @param int|bool $options
      */
     public function __construct(JSONPathToken $token, $options = false)
@@ -37,7 +36,6 @@ abstract class AbstractFilter
 
     /**
      * @param array|ArrayAccess $collection
-     * @return array
      */
     abstract public function filter($collection): array;
 }

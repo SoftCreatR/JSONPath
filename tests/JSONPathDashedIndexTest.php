@@ -36,9 +36,7 @@ class JSONPathDashedIndexTest extends TestCase
 
     /**
      * @dataProvider indexDataProvider
-     * @param string $path
-     * @param array $data
-     * @param array $expected
+     *
      * @throws JSONPathException
      */
     public function testSlice(string $path, array $data, array $expected): void

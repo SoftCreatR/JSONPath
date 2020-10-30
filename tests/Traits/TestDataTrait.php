@@ -18,8 +18,8 @@ trait TestDataTrait
     /**
      * Returns decoded JSON from a given file either as array or object.
      *
-     * @param string $type
      * @param bool|int $asArray
+     *
      * @return array|ArrayAccess|null
      */
     protected function getData(string $type, $asArray = true)

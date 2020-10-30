@@ -78,9 +78,7 @@ class JSONPathSliceAccessTest extends TestCase
 
     /**
      * @dataProvider sliceDataProvider
-     * @param string $path
-     * @param array $data
-     * @param array $expected
+     *
      * @throws JSONPathException
      */
     public function testSlice(string $path, array $data, array $expected): void

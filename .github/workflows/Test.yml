@@ -23,7 +23,7 @@ jobs:
       matrix:
         php: [ '7.1', '7.2', '7.3', '7.4', '8.0' ]
     continue-on-error: ${{ matrix.php == '8.0' }}
-    name: PHP ${{ matrix.php-versions }} Test
+    name: PHP ${{ matrix.php }} Test
 
     steps:
       - name: Git checkout

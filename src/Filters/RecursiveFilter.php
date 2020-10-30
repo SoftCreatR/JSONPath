@@ -17,6 +17,7 @@ class RecursiveFilter extends AbstractFilter
 {
     /**
      * @inheritDoc
+     *
      * @throws JSONPathException
      */
     public function filter($collection): array
@@ -29,8 +30,8 @@ class RecursiveFilter extends AbstractFilter
     }
 
     /**
-     * @param array $result
      * @param array|ArrayAccess $data
+     *
      * @throws JSONPathException
      */
     private function recurse(array &$result, $data): void

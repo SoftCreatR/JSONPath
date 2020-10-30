@@ -12,13 +12,15 @@ namespace Flow\JSONPath\Test;
 
 class JSONPathTestClass
 {
+    /**
+     * @var string[]
+     */
     protected $attributes = [
         'foo' => 'bar',
     ];
 
     /**
      * @param $key
-     * @return string|null
      * @noinspection MagicMethodsValidityInspection
      */
     public function __get($key): ?string

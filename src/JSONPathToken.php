@@ -31,14 +31,9 @@ class JSONPathToken
      */
     public $type;
 
-    /**
-     * @var mixed
-     */
     public $value;
 
     /**
-     * @param string $type
-     * @param mixed $value
      * @throws JSONPathException
      */
     public function __construct(string $type, $value)
@@ -50,7 +45,6 @@ class JSONPathToken
     }
 
     /**
-     * @param string $type
      * @throws JSONPathException
      */
     public function validateType(string $type): void
@@ -73,8 +67,6 @@ class JSONPathToken
     }
 
     /**
-     * @param bool $options
-     * @return mixed
      * @throws JSONPathException
      */
     public function buildFilter(bool $options)
