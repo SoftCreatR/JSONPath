@@ -19,19 +19,17 @@ This project aims to be a clean and simple implementation with the following goa
 
 ## Installation
 
-**PHP 7.1+**
+**PHP >= 7.1+**
 ```bash
 composer require softcreatr/jsonpath
 ```
 
 **PHP < 7.1**
 
-Support for PHP < 7.1 has been dropped. However, legacy branches exist for PHP 5.6 and 7.0 and can be composer-installed as follows:
+1. Add to the `require`-section of your composer.json: `"softcreatr/jsonpath": "dev-oldphp"`
+2. Execute `composer install`
 
-* PHP 7.0: `"softcreatr/jsonpath": "dev-php-70"`
-* PHP 5.6: `"softcreatr/jsonpath": "dev-php-56"`
-
-🔻 Please note, that these legacy branches (based on JSONPath 0.6.2) are protected. There are no intentions to make any updates here. Please consider upgrading to PHP 7.1 or newer.
+🔻 Please note, that this legacy branch (based on JSONPath 0.7.2) is protected. There are no intentions to make any updates here. Please consider upgrading to PHP 7.1 or newer.
 
 ## JSONPath Examples
 
@@ -69,6 +67,8 @@ Symbol                | Description
 
 ## PHP Usage
 
+#### Using arrays
+
 ```php
 use Flow\JSONPath\JSONPath;
 
@@ -79,11 +79,37 @@ $data = ['people' => [
     ['name' => 'Maximilian'],
 ]];
 
-print_r((new JSONPath($data))->find('$.people.*.name'), true);
-// $result[0] === 'Sascha'
-// $result[1] === 'Bianca'
-// $result[2] === 'Alexander'
-// $result[3] === 'Maximilian'
+print_r((new JSONPath($data))->find('$.people.*.name')->getData());
+
+/*
+Array
+(
+    [0] => Sascha
+    [1] => Bianca
+    [2] => Alexander
+    [3] => Maximilian
+)
+*/
+```
+
+#### Using objects
+
+```php
+use Flow\JSONPath\JSONPath;
+
+$data = json_decode('{"name":"Sascha Greuel","birthdate":"1987-12-16","city":"Gladbeck","country":"Germany"}', false);
+
+print_r((new JSONPath($data))->find('$')->getData()[0]);
+
+/*
+stdClass Object
+(
+    [name] => Sascha Greuel
+    [birthdate] => 1987-12-16
+    [city] => Gladbeck
+    [country] => Germany
+)
+*/
 ```
 
 More examples can be found in the [Wiki](https://github.com/SoftCreatR/JSONPath/wiki/Queries)
@@ -102,7 +128,7 @@ not very predictable as:
 ```php
 use Flow\JSONPath\JSONPath;
 
-$myObject = json_decode('{"name":"Sascha Greuel","birthdate":"1987-12-16","city":"Gladbeck","country":"Germany"}', false);
+$myObject = (new Foo())->get('bar');
 $jsonPath = new JSONPath($myObject, JSONPath::ALLOW_MAGIC);
 ```
 
