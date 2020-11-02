@@ -19,17 +19,9 @@ This project aims to be a clean and simple implementation with the following goa
 
 ## Installation
 
-**PHP >= 7.1+**
 ```bash
-composer require softcreatr/jsonpath
+composer require softcreatr/jsonpath:"^0.5 || ^0.7"
 ```
-
-**PHP < 7.1**
-
-1. Add to the `require`-section of your composer.json: `"softcreatr/jsonpath": "dev-oldphp"`
-2. Execute `composer install`
-
-🔻 Please note, that this legacy branch (based on JSONPath 0.7.2) is protected. There are no intentions to make any updates here. Please consider upgrading to PHP 7.1 or newer.
 
 ## JSONPath Examples
 
