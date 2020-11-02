@@ -6,19 +6,19 @@
  * @license https://github.com/SoftCreatR/JSONPath/blob/main/LICENSE  MIT License
  */
 
-declare(strict_types=1);
-
 namespace Flow\JSONPath\Test;
 
-use Flow\JSONPath\{JSONPathException, JSONPathLexer, JSONPathToken};
-use PHPUnit\Framework\TestCase;
+use Flow\JSONPath\JSONPathException;
+use Flow\JSONPath\JSONPathLexer;
+use Flow\JSONPath\JSONPathToken;
+use PHPUnit\Framework\Exception as PHPUnit_Framework_Exception;
 
 class JSONPathLexerTest extends TestCase
 {
     /**
      * @throws JSONPathException
      */
-    public function testIndexWildcard(): void
+    public function testIndexWildcard()
     {
         $tokens = (new JSONPathLexer('.*'))
             ->parseExpression();
@@ -30,7 +30,7 @@ class JSONPathLexerTest extends TestCase
     /**
      * @throws JSONPathException
      */
-    public function testIndexSimple(): void
+    public function testIndexSimple()
     {
         $tokens = (new JSONPathLexer('.foo'))
             ->parseExpression();
@@ -42,7 +42,7 @@ class JSONPathLexerTest extends TestCase
     /**
      * @throws JSONPathException
      */
-    public function testIndexRecursive(): void
+    public function testIndexRecursive()
     {
         $tokens = (new JSONPathLexer('..teams.*'))
             ->parseExpression();
@@ -59,7 +59,7 @@ class JSONPathLexerTest extends TestCase
     /**
      * @throws JSONPathException
      */
-    public function testIndexComplex(): void
+    public function testIndexComplex()
     {
         $tokens = (new JSONPathLexer('["\'b.^*_"]'))
             ->parseExpression();
@@ -70,10 +70,11 @@ class JSONPathLexerTest extends TestCase
 
     /**
      * @throws JSONPathException
+     * @throws PHPUnit_Framework_Exception
      */
-    public function testIndexBadlyFormed(): void
+    public function testIndexBadlyFormed()
     {
-        $this->expectException(JSONPathException::class);
+        $this->expectException('Flow\JSONPath\JSONPathException');
         $this->expectExceptionMessage('Unable to parse token hello* in expression: .hello*');
 
         (new JSONPathLexer('.hello*'))
@@ -83,7 +84,7 @@ class JSONPathLexerTest extends TestCase
     /**
      * @throws JSONPathException
      */
-    public function testIndexInteger(): void
+    public function testIndexInteger()
     {
         $tokens = (new JSONPathLexer('[0]'))
             ->parseExpression();
@@ -95,7 +96,7 @@ class JSONPathLexerTest extends TestCase
     /**
      * @throws JSONPathException
      */
-    public function testIndexIntegerAfterDotNotation(): void
+    public function testIndexIntegerAfterDotNotation()
     {
         $tokens = (new JSONPathLexer('.books[0]'))
             ->parseExpression();
@@ -109,7 +110,7 @@ class JSONPathLexerTest extends TestCase
     /**
      * @throws JSONPathException
      */
-    public function testIndexWord(): void
+    public function testIndexWord()
     {
         $tokens = (new JSONPathLexer('["foo$-/\'"]'))
             ->parseExpression();
@@ -121,7 +122,7 @@ class JSONPathLexerTest extends TestCase
     /**
      * @throws JSONPathException
      */
-    public function testIndexWordWithWhitespace(): void
+    public function testIndexWordWithWhitespace()
     {
         $tokens = (new JSONPathLexer('[   "foo$-/\'"     ]'))
             ->parseExpression();
@@ -133,7 +134,7 @@ class JSONPathLexerTest extends TestCase
     /**
      * @throws JSONPathException
      */
-    public function testSliceSimple(): void
+    public function testSliceSimple()
     {
         $tokens = (new JSONPathLexer('[0:1:2]'))
             ->parseExpression();
@@ -145,7 +146,7 @@ class JSONPathLexerTest extends TestCase
     /**
      * @throws JSONPathException
      */
-    public function testIndexNegativeIndex(): void
+    public function testIndexNegativeIndex()
     {
         $tokens = (new JSONPathLexer('[-1]'))
             ->parseExpression();
@@ -157,7 +158,7 @@ class JSONPathLexerTest extends TestCase
     /**
      * @throws JSONPathException
      */
-    public function testSliceAllNull(): void
+    public function testSliceAllNull()
     {
         $tokens = (new JSONPathLexer('[:]'))
             ->parseExpression();
@@ -169,7 +170,7 @@ class JSONPathLexerTest extends TestCase
     /**
      * @throws JSONPathException
      */
-    public function testQueryResultSimple(): void
+    public function testQueryResultSimple()
     {
         $tokens = (new JSONPathLexer('[(@.foo + 2)]'))
             ->parseExpression();
@@ -181,7 +182,7 @@ class JSONPathLexerTest extends TestCase
     /**
      * @throws JSONPathException
      */
-    public function testQueryMatchSimple(): void
+    public function testQueryMatchSimple()
     {
         $tokens = (new JSONPathLexer('[?(@.foo < \'bar\')]'))
             ->parseExpression();
@@ -193,7 +194,7 @@ class JSONPathLexerTest extends TestCase
     /**
      * @throws JSONPathException
      */
-    public function testQueryMatchNotEqualTO(): void
+    public function testQueryMatchNotEqualTO()
     {
         $tokens = (new JSONPathLexer('[?(@.foo != \'bar\')]'))
             ->parseExpression();
@@ -205,7 +206,7 @@ class JSONPathLexerTest extends TestCase
     /**
      * @throws JSONPathException
      */
-    public function testQueryMatchBrackets(): void
+    public function testQueryMatchBrackets()
     {
         $tokens = (new JSONPathLexer("[?(@['@language']='en')]"))
             ->parseExpression();
@@ -217,7 +218,7 @@ class JSONPathLexerTest extends TestCase
     /**
      * @throws JSONPathException
      */
-    public function testRecursiveSimple(): void
+    public function testRecursiveSimple()
     {
         $tokens = (new JSONPathLexer('..foo'))
             ->parseExpression();
@@ -231,7 +232,7 @@ class JSONPathLexerTest extends TestCase
     /**
      * @throws JSONPathException
      */
-    public function testRecursiveWildcard(): void
+    public function testRecursiveWildcard()
     {
         $tokens = (new JSONPathLexer('..*'))
             ->parseExpression();
@@ -244,10 +245,11 @@ class JSONPathLexerTest extends TestCase
 
     /**
      * @throws JSONPathException
+     * @throws PHPUnit_Framework_Exception
      */
-    public function testRecursiveBadlyFormed(): void
+    public function testRecursiveBadlyFormed()
     {
-        $this->expectException(JSONPathException::class);
+        $this->expectException('Flow\JSONPath\JSONPathException');
         $this->expectExceptionMessage('Unable to parse token ba^r in expression: ..ba^r');
 
         (new JSONPathLexer('..ba^r'))
@@ -257,7 +259,7 @@ class JSONPathLexerTest extends TestCase
     /**
      * @throws JSONPathException
      */
-    public function testIndexesSimple(): void
+    public function testIndexesSimple()
     {
         $tokens = (new JSONPathLexer('[1,2,3]'))
             ->parseExpression();
@@ -269,7 +271,7 @@ class JSONPathLexerTest extends TestCase
     /**
      * @throws JSONPathException
      */
-    public function testIndexesWhitespace(): void
+    public function testIndexesWhitespace()
     {
         $tokens = (new JSONPathLexer('[ 1,2 , 3]'))
             ->parseExpression();

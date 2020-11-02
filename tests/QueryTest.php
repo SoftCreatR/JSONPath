@@ -6,18 +6,11 @@
  * @license https://github.com/SoftCreatR/JSONPath/blob/main/LICENSE  MIT License
  */
 
-declare(strict_types=1);
-
 namespace Flow\JSONPath\Test;
 
-use Flow\JSONPath\{JSONPath, JSONPathException};
-use PHPUnit\Framework\{ExpectationFailedException, TestCase};
-
-use function fwrite;
-use function json_decode;
-use function json_encode;
-
-use const STDERR;
+use Flow\JSONPath\JSONPath;
+use Flow\JSONPath\JSONPathException;
+use PHPUnit\Framework\ExpectationFailedException;
 
 class QueryTest extends TestCase
 {
@@ -30,14 +23,20 @@ class QueryTest extends TestCase
      *
      * @see https://cburgmer.github.io/json-path-comparison
      * @dataProvider queryDataProvider
+     *
+     * @param string $id
+     * @param string $selector
+     * @param string $data
+     * @param string $consensus
+     * @param false|bool $skip
      */
     public function testQueries(
-        string $id,
-        string $selector,
-        string $data,
-        string $consensus,
-        bool $skip = false
-    ): void {
+        $id,
+        $selector,
+        $data,
+        $consensus,
+        $skip = false
+    ) {
         $results = null;
         $query = ucwords(str_replace('_', ' ', $id));
         $url = sprintf('https://cburgmer.github.io/json-path-comparison/results/%s', $id);
@@ -68,10 +67,10 @@ class QueryTest extends TestCase
                 // assert in these cases. There might be still some false positives
                 // (e.g. multidimensional comparisons), but that's okay, I guess. Maybe,
                 // we can also find a way around that in the future.
-                $results = json_decode($results, true);
-                $consensus = json_decode($consensus, true);
-
-                self::assertEqualsCanonicalizing($consensus, $results);
+                self::assertEqualsCanonicalizing(
+                    json_decode($consensus, true),
+                    json_decode($results, true)
+                );
             } catch (ExpectationFailedException $f) {
                 $e = $e->getComparisonFailure();
 
@@ -106,7 +105,7 @@ class QueryTest extends TestCase
      *
      * @return string[]
      */
-    public function queryDataProvider(): array
+    public function queryDataProvider()
     {
         return [
             [ // data set #0

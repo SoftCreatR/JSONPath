@@ -7,13 +7,13 @@ on:
       - '**.php'
       - 'composer.json'
     branches:
-      - 'main'
+      - 'oldphp'
   pull_request:
     paths:
       - '**.php'
       - 'composer.json'
     branches:
-      - 'main'
+      - 'oldphp'
   workflow_dispatch:
 
 jobs:
@@ -21,8 +21,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        php: [ '7.1', '7.2', '7.3', '7.4', '8.0' ]
-    continue-on-error: ${{ matrix.php == '8.0' }}
+        php: [ '5.4', '5.5', '5.6', '7.0' ]
     name: PHP ${{ matrix.php }} Test
 
     steps:
@@ -34,7 +33,7 @@ jobs:
         with:
           php-version: ${{ matrix.php }}
           extensions: json
-          coverage: pcov
+          coverage: xdebug
         env:
           COMPOSER_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -47,14 +46,5 @@ jobs:
       - name: Run phpcs
         run: composer cs-check -- -v
 
-      - name: Setup PCOV
-        if: matrix.php == '7.1'
-        run: |
-          composer require pcov/clobber
-          vendor/bin/pcov clobber
-
       - name: Execute tests
         run: composer test -- -v --coverage-clover=coverage.xml
-
-      - name: Run codecov
-        uses: codecov/codecov-action@v1

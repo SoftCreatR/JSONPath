@@ -6,12 +6,11 @@
  * @license https://github.com/SoftCreatR/JSONPath/blob/main/LICENSE  MIT License
  */
 
-declare(strict_types=1);
-
 namespace Flow\JSONPath\Filters;
 
 use ArrayAccess;
-use Flow\JSONPath\{JSONPath, JSONPathToken};
+use Flow\JSONPath\JSONPath;
+use Flow\JSONPath\JSONPathToken;
 
 abstract class AbstractFilter
 {
@@ -26,6 +25,7 @@ abstract class AbstractFilter
     protected $magicIsAllowed = false;
 
     /**
+     * @param JSONPathToken $token
      * @param int|bool $options
      */
     public function __construct(JSONPathToken $token, $options = false)
@@ -37,5 +37,5 @@ abstract class AbstractFilter
     /**
      * @param array|ArrayAccess $collection
      */
-    abstract public function filter($collection): array;
+    abstract public function filter($collection);
 }

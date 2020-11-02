@@ -6,17 +6,11 @@
  * @license https://github.com/SoftCreatR/JSONPath/blob/main/LICENSE  MIT License
  */
 
-declare(strict_types=1);
-
 namespace Flow\JSONPath\Test;
 
 use Exception;
 use Flow\JSONPath\JSONPath;
 use Flow\JSONPath\Test\Traits\TestDataTrait;
-use PHPUnit\Framework\TestCase;
-
-use function is_array;
-use function random_int;
 
 class JSONPathArrayAccessTest extends TestCase
 {
@@ -25,7 +19,7 @@ class JSONPathArrayAccessTest extends TestCase
     /**
      * @throws Exception
      */
-    public function testChaining(): void
+    public function testChaining()
     {
         $jsonPath = (new JSONPath($this->getData('conferences')));
 
@@ -53,7 +47,7 @@ class JSONPathArrayAccessTest extends TestCase
     /**
      * @throws Exception
      */
-    public function testIterating(): void
+    public function testIterating()
     {
         $data = $this->getData('conferences');
 
@@ -77,9 +71,9 @@ class JSONPathArrayAccessTest extends TestCase
     /**
      * @throws Exception
      */
-    public function testDifferentStylesOfAccess(): void
+    public function testDifferentStylesOfAccess()
     {
-        $data = (new JSONPath($this->getData('conferences', random_int(0, 1))));
+        $data = (new JSONPath($this->getData('conferences', mt_rand(0, 1))));
 
         self::assertArrayHasKey('conferences', $data);
 

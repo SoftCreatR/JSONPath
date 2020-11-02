@@ -6,30 +6,18 @@
  * @license https://github.com/SoftCreatR/JSONPath/blob/main/LICENSE  MIT License
  */
 
-declare(strict_types=1);
-
 namespace Flow\JSONPath;
 
 use ArrayAccess;
-
-use function abs;
-use function array_key_exists;
-use function array_keys;
-use function array_slice;
-use function array_values;
-use function get_object_vars;
-use function is_array;
-use function is_int;
-use function is_object;
-use function method_exists;
-use function property_exists;
 
 class AccessHelper
 {
     /**
      * @param array|ArrayAccess $collection
+     *
+     * @return array
      */
-    public static function collectionKeys($collection): array
+    public static function collectionKeys($collection)
     {
         if (is_object($collection)) {
             return array_keys(get_object_vars($collection));
@@ -40,16 +28,22 @@ class AccessHelper
 
     /**
      * @param array|ArrayAccess $collection
+     *
+     * @return bool
      */
-    public static function isCollectionType($collection): bool
+    public static function isCollectionType($collection)
     {
         return is_array($collection) || is_object($collection);
     }
 
     /**
      * @param array|ArrayAccess $collection
+     * @param mixed $key
+     * @param bool $magicIsAllowed
+     *
+     * @return bool
      */
-    public static function keyExists($collection, $key, bool $magicIsAllowed = false): bool
+    public static function keyExists($collection, $key, $magicIsAllowed = false)
     {
         if ($magicIsAllowed && is_object($collection) && method_exists($collection, '__get')) {
             return true;
@@ -71,12 +65,16 @@ class AccessHelper
     }
 
     /**
-     * @todo Optimize conditions
-     *
      * @param array|ArrayAccess $collection
+     * @param mixed $key
+     * @param bool $magicIsAllowed
+     *
+     * @return mixed|null
      * @noinspection NotOptimalIfConditionsInspection
+     *
+     * @todo Optimize conditions
      */
-    public static function getValue($collection, $key, bool $magicIsAllowed = false)
+    public static function getValue($collection, $key, $magicIsAllowed = false)
     {
         $return = null;
 
@@ -108,6 +106,7 @@ class AccessHelper
      * Written this way to handle instances ArrayAccess or Traversable objects
      *
      * @param array|ArrayAccess $collection
+     * @param mixed $key
      *
      * @return mixed|null
      */
@@ -141,6 +140,10 @@ class AccessHelper
 
     /**
      * @param array|ArrayAccess $collection
+     * @param mixed $key
+     * @param mixed $value
+     *
+     * @return mixed
      */
     public static function setValue(&$collection, $key, $value)
     {
@@ -153,8 +156,9 @@ class AccessHelper
 
     /**
      * @param array|ArrayAccess $collection
+     * @param mixed $key
      */
-    public static function unsetValue(&$collection, $key): void
+    public static function unsetValue(&$collection, $key)
     {
         if (is_object($collection) && !$collection instanceof ArrayAccess) {
             unset($collection->$key);
@@ -167,8 +171,10 @@ class AccessHelper
      * @param array|ArrayAccess $collection
      *
      * @throws JSONPathException
+     *
+     * @return array|ArrayAccess
      */
-    public static function arrayValues($collection): array
+    public static function arrayValues($collection)
     {
         if (is_array($collection)) {
             return array_values($collection);

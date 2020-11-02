@@ -1,10 +1,4 @@
-# JSONPath for PHP 7.1+
-
-[![Build Status](https://img.shields.io/github/workflow/status/SoftCreatR/JSONPath/Test/main?label=Build%20Status)](https://github.com/SoftCreatR/JSONPath/actions?query=workflow%3ATest)
-[![Latest Release](https://img.shields.io/packagist/v/SoftCreatR/JSONPath?color=blue&label=Latest%20Release)](https://packagist.org/packages/softcreatr/jsonpath)
-[![MIT licensed](https://img.shields.io/badge/license-MIT-blue.svg)](./LICENSE)
-[![Codecov branch](https://img.shields.io/codecov/c/github/SoftCreatR/JSONPath)](https://codecov.io/gh/SoftCreatR/JSONPath)
-[![Code Climate maintainability](https://img.shields.io/codeclimate/maintainability-percentage/SoftCreatR/JSONPath)](https://codeclimate.com/github/SoftCreatR/JSONPath)
+# JSONPath for PHP 5.4 - 7.0 [![MIT licensed](https://img.shields.io/badge/license-MIT-blue.svg)](./LICENSE)
 
 This is a [JSONPath](http://goessner.net/articles/JsonPath/) implementation for PHP based on Stefan Goessner's JSONPath script.
 
@@ -16,22 +10,20 @@ This project aims to be a clean and simple implementation with the following goa
  - Expressions are parsed into tokens using code inspired by the Doctrine Lexer. The tokens are cached internally to avoid re-parsing the expressions.
  - There is no `eval()` in use
  - Any combination of objects/arrays/ArrayAccess-objects can be used as the data input which is great if you're de-serializing JSON in to objects or if you want to process your own data structures.
+ 
+🔻 **Please note, that this branch (based on JSONPath 0.7.2) is protected. There are no intentions to make any updates here. Please consider upgrading to PHP 7.1 or newer.**
 
 ## Installation
 
-**PHP 7.1+**
+**PHP >= 7.1+**
 ```bash
 composer require softcreatr/jsonpath
 ```
 
 **PHP < 7.1**
 
-Support for PHP < 7.1 has been dropped. However, legacy branches exist for PHP 5.6 and 7.0 and can be composer-installed as follows:
-
-* PHP 7.0: `"softcreatr/jsonpath": "dev-php-70"`
-* PHP 5.6: `"softcreatr/jsonpath": "dev-php-56"`
-
-🔻 Please note, that these legacy branches (based on JSONPath 0.6.2) are protected. There are no intentions to make any updates here. Please consider upgrading to PHP 7.1 or newer.
+1. Add to the `require`-section of your composer.json: `"softcreatr/jsonpath": "dev-oldphp"`
+2. Execute `composer install`
 
 ## JSONPath Examples
 
@@ -137,39 +129,6 @@ So here are the types of query expressions that are supported:
 
 Other / Similar implementations can be found in the [Wiki](https://github.com/SoftCreatR/JSONPath/wiki/Other-Implementations).
 
-## Changelog
-
-A list of changes can be found in the [CHANGELOG.md](CHANGELOG.md) file. 
-
 ## License
 
 [MIT](LICENSE)
-
-## Contributors ✨
-
-<table>
-<tr>
-    <td align="center">
-        <a href=https://github.com/SoftCreatR>
-            <img src=https://avatars0.githubusercontent.com/u/81188?v=4 width="100;" alt=Sascha Greuel/>
-            <br />
-            <sub style="font-size:14px"><b>Sascha Greuel</b></sub>
-        </a>
-    </td>
-    <td align="center">
-        <a href=https://github.com/SG5>
-            <img src=https://avatars0.githubusercontent.com/u/3931761?v=4 width="100;" alt=Sergey/>
-            <br />
-            <sub style="font-size:14px"><b>Sergey</b></sub>
-        </a>
-    </td>
-    <td align="center">
-        <a href=https://github.com/oleg-andreyev>
-            <img src=https://avatars1.githubusercontent.com/u/1244112?v=4 width="100;" alt=Oleg Andreyev/>
-            <br />
-            <sub style="font-size:14px"><b>Oleg Andreyev</b></sub>
-        </a>
-    </td>
-</tr>
-</table>
-

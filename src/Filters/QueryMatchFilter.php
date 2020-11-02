@@ -6,26 +6,14 @@
  * @license https://github.com/SoftCreatR/JSONPath/blob/main/LICENSE  MIT License
  */
 
-declare(strict_types=1);
-
 namespace Flow\JSONPath\Filters;
 
 use Flow\JSONPath\AccessHelper;
 use RuntimeException;
 
-use function explode;
-use function in_array;
-use function is_array;
-use function is_string;
-use function preg_match;
-use function preg_replace;
-use function strpos;
-use function strtolower;
-use function substr;
-
 class QueryMatchFilter extends AbstractFilter
 {
-    protected const MATCH_QUERY_OPERATORS = '
+    const MATCH_QUERY_OPERATORS = '
       @(\.(?<key>[^\s<>!=]+)|\[["\']?(?<keySquare>.*?)["\']?\])
       (\s*(?<operator>==|=~|=|<>|!==|!=|>=|<=|>|<|in|!in|nin)\s*(?<comparisonValue>.+))?
     ';
@@ -33,7 +21,7 @@ class QueryMatchFilter extends AbstractFilter
     /**
      * @inheritDoc
      */
-    public function filter($collection): array
+    public function filter($collection)
     {
         preg_match('/^' . static::MATCH_QUERY_OPERATORS . '$/x', $this->token->value, $matches);
 
@@ -47,8 +35,8 @@ class QueryMatchFilter extends AbstractFilter
             throw new RuntimeException('Malformed filter query: key was not set');
         }
 
-        $operator = $matches['operator'] ?? null;
-        $comparisonValue = $matches['comparisonValue'] ?? null;
+        $operator = isset($matches['operator']) ? $matches['operator'] : null;
+        $comparisonValue   = isset($matches['comparisonValue']) ? $matches['comparisonValue'] : null;
 
         if (is_string($comparisonValue)) {
             if (strpos($comparisonValue, "[") === 0 && substr($comparisonValue, -1) === "]") {

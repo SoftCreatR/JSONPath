@@ -6,19 +6,17 @@
  * @license https://github.com/SoftCreatR/JSONPath/blob/main/LICENSE  MIT License
  */
 
-declare(strict_types=1);
-
 namespace Flow\JSONPath\Test;
 
-use Flow\JSONPath\{JSONPath, JSONPathException};
-use PHPUnit\Framework\TestCase;
+use Flow\JSONPath\JSONPath;
+use Flow\JSONPath\JSONPathException;
 
 class JSONPathDashedIndexTest extends TestCase
 {
     /**
      * @return array[]
      */
-    public function indexDataProvider(): array
+    public function indexDataProvider()
     {
         return [
             [
@@ -37,9 +35,13 @@ class JSONPathDashedIndexTest extends TestCase
     /**
      * @dataProvider indexDataProvider
      *
+     * @param string $path
+     * @param array $data
+     * @param array $expected
+     *
      * @throws JSONPathException
      */
-    public function testSlice(string $path, array $data, array $expected): void
+    public function testSlice($path, array $data, array $expected)
     {
         $results = (new JSONPath($data))
             ->find($path);
