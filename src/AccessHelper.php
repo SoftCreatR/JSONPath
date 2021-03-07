@@ -59,8 +59,12 @@ class AccessHelper
             $key = abs($key);
         }
 
-        if (is_array($collection) || $collection instanceof ArrayAccess) {
+        if (is_array($collection)) {
             return array_key_exists($key, $collection);
+        }
+        
+        if ($collection instanceof ArrayAccess) {
+            return $collection->offsetExists($key);
         }
 
         if (is_object($collection)) {
@@ -88,6 +92,8 @@ class AccessHelper
             $return = $collection->__get($key);
         } elseif (is_object($collection) && !$collection instanceof ArrayAccess) {
             $return = $collection->$key;
+        } elseif ($collection instanceof ArrayAccess) {
+            $return = $collection->offsetGet($key);
         } elseif (is_array($collection)) {
             if (is_int($key) && $key < 0) {
                 $return = array_slice($collection, $key, 1, false)[0];
@@ -147,6 +153,10 @@ class AccessHelper
         if (is_object($collection) && !$collection instanceof ArrayAccess) {
             return $collection->$key = $value;
         }
+        
+        if ($collection instanceof ArrayAccess) {
+            return $collection->offsetSet($key, $value);
+        }
 
         return $collection[$key] = $value;
     }
@@ -158,7 +168,13 @@ class AccessHelper
     {
         if (is_object($collection) && !$collection instanceof ArrayAccess) {
             unset($collection->$key);
-        } else {
+        }
+        
+        if ($collection instanceof ArrayAccess) {
+            $collection->offsetUnset($key);
+        }
+        
+        if (is_array($collection)) {
             unset($collection[$key]);
         }
     }
