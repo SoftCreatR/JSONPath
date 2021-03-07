@@ -62,7 +62,7 @@ class AccessHelper
         if (is_array($collection)) {
             return array_key_exists($key, $collection);
         }
-        
+
         if ($collection instanceof ArrayAccess) {
             return $collection->offsetExists($key);
         }
@@ -153,7 +153,7 @@ class AccessHelper
         if (is_object($collection) && !$collection instanceof ArrayAccess) {
             return $collection->$key = $value;
         }
-        
+
         if ($collection instanceof ArrayAccess) {
             return $collection->offsetSet($key, $value);
         }
@@ -169,11 +169,11 @@ class AccessHelper
         if (is_object($collection) && !$collection instanceof ArrayAccess) {
             unset($collection->$key);
         }
-        
+
         if ($collection instanceof ArrayAccess) {
             $collection->offsetUnset($key);
         }
-        
+
         if (is_array($collection)) {
             unset($collection[$key]);
         }
