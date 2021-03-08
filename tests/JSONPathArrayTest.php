@@ -10,15 +10,15 @@ declare(strict_types=1);
 
 namespace Flow\JSONPath\Test;
 
-use ArrayObject;
 use Exception;
 use Flow\JSONPath\JSONPath;
 use Flow\JSONPath\Test\Traits\TestDataTrait;
 use PHPUnit\Framework\TestCase;
 
 use function is_array;
+use function random_int;
 
-class JSONPathArrayAccessTest extends TestCase
+class JSONPathArrayTest extends TestCase
 {
     use TestDataTrait;
 
@@ -27,8 +27,7 @@ class JSONPathArrayAccessTest extends TestCase
      */
     public function testChaining(): void
     {
-        $container = new ArrayObject($this->getData('conferences'));
-        $jsonPath = new JSONPath($container);
+        $jsonPath = (new JSONPath($this->getData('conferences')));
 
         $teams = $jsonPath
             ->find('.conferences.*')
@@ -56,9 +55,9 @@ class JSONPathArrayAccessTest extends TestCase
      */
     public function testIterating(): void
     {
-        $container = new ArrayObject($this->getData('conferences'));
+        $data = $this->getData('conferences');
 
-        $conferences = (new JSONPath($container))
+        $conferences = (new JSONPath($data))
             ->find('.conferences.*');
 
         $names = [];
@@ -76,14 +75,11 @@ class JSONPathArrayAccessTest extends TestCase
     }
 
     /**
-     * @param bool $asArray
-     * @testWith [false]
-     *           [true]
+     * @throws Exception
      */
-    public function testDifferentStylesOfAccess(bool $asArray): void
+    public function testDifferentStylesOfAccess(): void
     {
-        $container = new ArrayObject($this->getData('conferences', $asArray));
-        $data = new JSONPath($container);
+        $data = (new JSONPath($this->getData('conferences', random_int(0, 1))));
 
         self::assertArrayHasKey('conferences', $data);
 
@@ -94,14 +90,5 @@ class JSONPathArrayAccessTest extends TestCase
         } else {
             self::assertEquals('Western Conference', $conferences[0]->name);
         }
-    }
-
-    public function testUpdate(): void
-    {
-        $container = new ArrayObject($this->getData('conferences'));
-        $data = new JSONPath($container);
-
-        $data->offsetSet('name', 'Major League Football');
-        self::assertEquals('Major League Football', $data->name);
     }
 }

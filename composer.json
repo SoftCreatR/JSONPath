@@ -1,7 +1,7 @@
 {
   "name": "softcreatr/jsonpath",
   "description": "JSONPath implementation for parsing, searching and flattening arrays",
-  "version": "0.7.2",
+  "version": "0.7.3",
   "license": "MIT",
   "authors": [
     {
@@ -54,6 +54,7 @@
   },
   "support": {
     "email": "hello@1-2.dev",
+    "forum": "https://github.com/SoftCreatR/JSONPath/discussions",
     "issues": "https://github.com/SoftCreatR/JSONPath/issues",
     "source": "https://github.com/SoftCreatR/JSONPath"
   }
