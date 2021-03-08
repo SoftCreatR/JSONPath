@@ -1,5 +1,8 @@
 # Changelog
 
+### 0.7.3
+ - Fixed PHP 7.4+ compatibility issues
+
 ### 0.7.2
  - Fixed query/selector "Array Slice With Start Large Negative Number And Open End On Short Array" (#7)
  - Fixed query/selector "Union With Keys" (#22)
