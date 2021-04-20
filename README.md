@@ -189,6 +189,13 @@ A list of changes can be found in the [CHANGELOG.md](CHANGELOG.md) file.
         </a>
     </td>
     <td align="center" style="word-wrap: break-word; width: 150.0; height: 150.0">
+        <a href=https://github.com/drealecs>
+            <img src=https://avatars.githubusercontent.com/u/209984?v=4 width="100;"  alt=Alexandru Pătrănescu/>
+            <br />
+            <sub style="font-size:14px"><b>Alexandru Pătrănescu</b></sub>
+        </a>
+    </td>
+    <td align="center" style="word-wrap: break-word; width: 150.0; height: 150.0">
         <a href=https://github.com/oleg-andreyev>
             <img src=https://avatars.githubusercontent.com/u/1244112?v=4 width="100;"  alt=Oleg Andreyev/>
             <br />
