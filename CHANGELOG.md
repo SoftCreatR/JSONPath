@@ -1,5 +1,8 @@
 # Changelog
 
+### 0.7.4
+ - Removed PHPUnit from conflicting packages
+
 ### 0.7.3
  - Fixed PHP 7.4+ compatibility issues
 
