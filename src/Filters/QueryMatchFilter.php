@@ -56,7 +56,7 @@ class QueryMatchFilter extends AbstractFilter
                 $comparisonValue = preg_replace('/^[\'"]/', '', $comparisonValue);
                 $comparisonValue = preg_replace('/[\'"]$/', '', $comparisonValue);
                 $comparisonValue = preg_replace('/[\'"],[ ]*[\'"]/', ',', $comparisonValue);
-                $comparisonValue = explode(",", $comparisonValue);
+                $comparisonValue = array_map('trim', explode(",", $comparisonValue));
             } else {
                 $comparisonValue = preg_replace('/^[\'"]/', '', $comparisonValue);
                 $comparisonValue = preg_replace('/[\'"]$/', '', $comparisonValue);
@@ -113,14 +113,14 @@ class QueryMatchFilter extends AbstractFilter
                     $return[] = $value;
                 }
 
-                if ($operator === 'in' && is_array($comparisonValue) && in_array($value1, $comparisonValue, true)) {
+                if ($operator === 'in' && is_array($comparisonValue) && in_array($value1, $comparisonValue)) {
                     $return[] = $value;
                 }
 
                 if (
                     ($operator === 'nin' || $operator === '!in') &&
                     is_array($comparisonValue) &&
-                    !in_array($value1, $comparisonValue, true)
+                    !in_array($value1, $comparisonValue)
                 ) {
                     $return[] = $value;
                 }
