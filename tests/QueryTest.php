@@ -1234,7 +1234,7 @@ class QueryTest extends TestCase
                 'filter_expression_with_in_array_of_values',
                 '$[?(@.d in [2, 3])]',
                 '[{"d":1},{"d":2},{"d":1},{"d":3},{"d":4}]',
-                ''
+                '[{"d":2},{"d":3}]'
             ],
             [ // data set #181 - unknown consensus
                 'filter_expression_with_in_current_object',
