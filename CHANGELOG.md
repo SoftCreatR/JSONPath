@@ -1,5 +1,10 @@
 # Changelog
 
+### 0.7.5
+ - Added support for $.length
+ - Added trim to explode to support both 1,2,3 and 1, 2, 3 inputs
+ - Dropped in_array strict equality check to be in line with the other standard equality checks such as (== and !=)
+
 ### 0.7.4
  - Removed PHPUnit from conflicting packages
 
