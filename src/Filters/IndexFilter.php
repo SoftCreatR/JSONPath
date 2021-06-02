@@ -41,6 +41,12 @@ class IndexFilter extends AbstractFilter
             return AccessHelper::arrayValues($collection);
         }
 
+        if ($this->token->value === 'length') {
+            return [
+                count($collection),
+            ];
+        }
+
         return [];
     }
 }

@@ -808,7 +808,7 @@ class QueryTest extends TestCase
                 'dot_notation_with_key_named_length_on_array',
                 '$.length',
                 '[4,5,6]',
-                '[]'
+                '[3]'
             ],
             [ // data set #114
                 'dot_notation_with_key_named_null',
@@ -1454,7 +1454,7 @@ class QueryTest extends TestCase
                 'script_expression',
                 '$[(@.length-1)]',
                 '["first","second","third","forth","fifth"]',
-                ''
+                'fifth'
             ],
             [ // data set #214
                 'union',
