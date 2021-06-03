@@ -39,6 +39,7 @@ JSONPath                  | Result
 `$..books[1:6:3]`         | every third book starting from 1 till 6
 `$..books[?(@.isbn)]`     | filter all books with isbn number
 `$..books[?(@.price<10)]` | filter all books cheaper than 10
+`$..books.length`         | the amount of books
 `$..*`                    | all elements in the data (recursively extracted)
 
 
@@ -62,7 +63,8 @@ Symbol                | Description
 #### Using arrays
 
 ```php
-use Flow\JSONPath\JSONPath;
+<?php
+require_once __DIR__ . '/vendor/autoload.php';
 
 $data = ['people' => [
     ['name' => 'Sascha'],
@@ -71,7 +73,7 @@ $data = ['people' => [
     ['name' => 'Maximilian'],
 ]];
 
-print_r((new JSONPath($data))->find('$.people.*.name')->getData());
+print_r((new \Flow\JSONPath\JSONPath($data))->find('$.people.*.name')->getData());
 
 /*
 Array
@@ -87,11 +89,12 @@ Array
 #### Using objects
 
 ```php
-use Flow\JSONPath\JSONPath;
+<?php
+require_once __DIR__ . '/vendor/autoload.php';
 
 $data = json_decode('{"name":"Sascha Greuel","birthdate":"1987-12-16","city":"Gladbeck","country":"Germany"}', false);
 
-print_r((new JSONPath($data))->find('$')->getData()[0]);
+print_r((new \Flow\JSONPath\JSONPath($data))->find('$')->getData()[0]);
 
 /*
 stdClass Object
@@ -204,4 +207,3 @@ A list of changes can be found in the [CHANGELOG.md](CHANGELOG.md) file.
     </td>
 </tr>
 </table>
-
