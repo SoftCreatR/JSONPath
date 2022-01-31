@@ -16,9 +16,6 @@ use function count;
 
 class SliceFilter extends AbstractFilter
 {
-    /**
-     * @inheritDoc
-     */
     public function filter($collection): array
     {
         $length = count($collection);

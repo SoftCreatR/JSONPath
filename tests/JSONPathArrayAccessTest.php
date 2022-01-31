@@ -14,6 +14,7 @@ use ArrayObject;
 use Exception;
 use Flow\JSONPath\JSONPath;
 use Flow\JSONPath\Test\Traits\TestDataTrait;
+use JsonException;
 use PHPUnit\Framework\TestCase;
 
 use function is_array;
@@ -76,7 +77,8 @@ class JSONPathArrayAccessTest extends TestCase
     }
 
     /**
-     * @param bool $asArray
+     * @throws JsonException
+     *
      * @testWith [false]
      *           [true]
      */
@@ -96,6 +98,9 @@ class JSONPathArrayAccessTest extends TestCase
         }
     }
 
+    /**
+     * @throws JsonException
+     */
     public function testUpdate(): void
     {
         $container = new ArrayObject($this->getData('conferences'));

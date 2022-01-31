@@ -14,9 +14,6 @@ use Flow\JSONPath\AccessHelper;
 
 class IndexesFilter extends AbstractFilter
 {
-    /**
-     * @inheritDoc
-     */
     public function filter($collection): array
     {
         $return = [];

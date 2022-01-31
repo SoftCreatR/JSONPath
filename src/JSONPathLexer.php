@@ -23,7 +23,7 @@ class JSONPathLexer
      * Match within bracket groups
      * Matches are whitespace insensitive
      */
-    public const MATCH_INDEX = '(?!\-)[\-\w]+ | \*'; // Eg. foo or 40f35757-2563-4790-b0b1-caa904be455f
+    public const MATCH_INDEX = '(?!-)[\-\w]+ | \*'; // Eg. foo or 40f35757-2563-4790-b0b1-caa904be455f
     public const MATCH_INDEXES = '\s* -?\d+ [-?\d,\s]+'; // Eg. 0,1,2
     public const MATCH_SLICE = '[-\d:]+ | :'; // Eg. [0:2:1]
     public const MATCH_QUERY_RESULT = '\s* \( .+? \) \s*'; // Eg. ?(@.length - 1)
@@ -33,17 +33,13 @@ class JSONPathLexer
 
     /**
      * The expression being lexed.
-     *
-     * @var string
      */
-    protected $expression = '';
+    protected string $expression = '';
 
     /**
      * The length of the expression.
-     *
-     * @var int
      */
-    protected $expressionLength = 0;
+    protected int $expressionLength = 0;
 
     public function __construct(string $expression)
     {
@@ -232,6 +228,6 @@ class JSONPathLexer
             return $ret;
         }
 
-        throw new JSONPathException("Unable to parse token {$tokenValue} in expression: $this->expression");
+        throw new JSONPathException("Unable to parse token $tokenValue in expression: $this->expression");
     }
 }

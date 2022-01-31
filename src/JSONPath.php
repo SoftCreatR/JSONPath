@@ -24,31 +24,17 @@ use function key;
 use function next;
 use function reset;
 
-use const E_USER_DEPRECATED;
-
 class JSONPath implements ArrayAccess, Iterator, JsonSerializable, Countable
 {
     public const ALLOW_MAGIC = true;
 
-    /**
-     * @var array
-     */
-    protected static $tokenCache = [];
+    protected static array $tokenCache = [];
 
-    /**
-     * @var array
-     */
-    protected $data = [];
+    protected mixed $data = [];
 
-    /**
-     * @var bool
-     */
-    protected $options = false;
+    protected bool $options = false;
 
-    /**
-     * @param array|ArrayAccess $data
-     */
-    final public function __construct($data = [], bool $options = false)
+    final public function __construct(mixed $data = [], bool $options = false)
     {
         $this->data = $data;
         $this->options = $options;
@@ -87,10 +73,7 @@ class JSONPath implements ArrayAccess, Iterator, JsonSerializable, Countable
         return new static($collectionData, $this->options);
     }
 
-    /**
-     * @return mixed|null
-     */
-    public function first()
+    public function first(): mixed
     {
         $keys = AccessHelper::collectionKeys($this->data);
 
@@ -105,10 +88,8 @@ class JSONPath implements ArrayAccess, Iterator, JsonSerializable, Countable
 
     /**
      * Evaluate an expression and return the last result
-     *
-     * @return mixed|null
      */
-    public function last()
+    public function last(): mixed
     {
         $keys = AccessHelper::collectionKeys($this->data);
 
@@ -123,10 +104,8 @@ class JSONPath implements ArrayAccess, Iterator, JsonSerializable, Countable
 
     /**
      * Evaluate an expression and return the first key
-     *
-     * @return mixed|null
      */
-    public function firstKey()
+    public function firstKey(): mixed
     {
         $keys = AccessHelper::collectionKeys($this->data);
 
@@ -139,10 +118,8 @@ class JSONPath implements ArrayAccess, Iterator, JsonSerializable, Countable
 
     /**
      * Evaluate an expression and return the last key
-     *
-     * @return mixed|null
      */
-    public function lastKey()
+    public function lastKey(): mixed
     {
         $keys = AccessHelper::collectionKeys($this->data);
 
@@ -178,19 +155,6 @@ class JSONPath implements ArrayAccess, Iterator, JsonSerializable, Countable
     }
 
     /**
-     * @deprecated Please use getData() instead
-     */
-    public function data(): array
-    {
-        trigger_error(
-            'Calling JSONPath::data() is deprecated, please use JSONPath::getData() instead.',
-            E_USER_DEPRECATED
-        );
-
-        return $this->getData();
-    }
-
-    /**
      * @return mixed|null
      * @noinspection MagicMethodsValidityInspection
      */
@@ -210,7 +174,7 @@ class JSONPath implements ArrayAccess, Iterator, JsonSerializable, Countable
     /**
      * @inheritDoc
      */
-    public function offsetGet($offset)
+    public function offsetGet($offset): mixed
     {
         $value = AccessHelper::getValue($this->data, $offset);
 
@@ -250,7 +214,7 @@ class JSONPath implements ArrayAccess, Iterator, JsonSerializable, Countable
     /**
      * @inheritDoc
      */
-    public function current()
+    public function current(): mixed
     {
         $value = current($this->data);
 
@@ -268,7 +232,7 @@ class JSONPath implements ArrayAccess, Iterator, JsonSerializable, Countable
     /**
      * @inheritDoc
      */
-    public function key()
+    public function key(): mixed
     {
         return key($this->data);
     }

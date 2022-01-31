@@ -26,12 +26,9 @@ class JSONPathToken
     public const T_SLICE = 'slice';
     public const T_INDEXES = 'indexes';
 
-    /**
-     * @var string
-     */
-    public $type;
+    public string $type;
 
-    public $value;
+    public mixed $value;
 
     /**
      * @throws JSONPathException
@@ -74,7 +71,7 @@ class JSONPathToken
         $filterClass = 'Flow\\JSONPath\\Filters\\' . ucfirst($this->type) . 'Filter';
 
         if (!class_exists($filterClass)) {
-            throw new JSONPathException("No filter class exists for token [{$this->type}]");
+            throw new JSONPathException("No filter class exists for token [$this->type]");
         }
 
         return new $filterClass($this, $options);
