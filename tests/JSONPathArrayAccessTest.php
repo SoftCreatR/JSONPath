@@ -17,8 +17,6 @@ use Flow\JSONPath\Test\Traits\TestDataTrait;
 use JsonException;
 use PHPUnit\Framework\TestCase;
 
-use function is_array;
-
 class JSONPathArrayAccessTest extends TestCase
 {
     use TestDataTrait;
@@ -91,7 +89,7 @@ class JSONPathArrayAccessTest extends TestCase
 
         $conferences = $data->__get('conferences')->getData();
 
-        if (is_array($conferences[0])) {
+        if (\is_array($conferences[0])) {
             self::assertEquals('Western Conference', $conferences[0]['name']);
         } else {
             self::assertEquals('Western Conference', $conferences[0]->name);
@@ -100,6 +98,7 @@ class JSONPathArrayAccessTest extends TestCase
 
     /**
      * @throws JsonException
+     * @noinspection PhpUndefinedFieldInspection
      */
     public function testUpdate(): void
     {

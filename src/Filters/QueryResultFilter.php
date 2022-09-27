@@ -6,14 +6,10 @@
  * @license https://github.com/SoftCreatR/JSONPath/blob/main/LICENSE  MIT License
  */
 
-declare(strict_types=1);
-
 namespace Flow\JSONPath\Filters;
 
-use Flow\JSONPath\{AccessHelper, JSONPathException};
-
-use function count;
-use function preg_match;
+use Flow\JSONPath\AccessHelper;
+use Flow\JSONPath\JSONPathException;
 
 class QueryResultFilter extends AbstractFilter
 {
@@ -22,14 +18,14 @@ class QueryResultFilter extends AbstractFilter
      */
     public function filter($collection): array
     {
-        preg_match('/@\.(?<key>\w+)\s*(?<operator>[-+*\/])\s*(?<numeric>\d+)/', $this->token->value, $matches);
+        \preg_match('/@\.(?<key>\w+)\s*(?<operator>[-+*\/])\s*(?<numeric>\d+)/', $this->token->value, $matches);
 
         $matchKey = $matches['key'];
 
         if (AccessHelper::keyExists($collection, $matchKey, $this->magicIsAllowed)) {
             $value = AccessHelper::getValue($collection, $matchKey, $this->magicIsAllowed);
         } elseif ($matches['key'] === 'length') {
-            $value = count($collection);
+            $value = \count($collection);
         } else {
             return [];
         }

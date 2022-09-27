@@ -10,7 +10,9 @@ declare(strict_types=1);
 
 namespace Flow\JSONPath\Test;
 
-use Flow\JSONPath\{JSONPathException, JSONPathLexer, JSONPathToken};
+use Flow\JSONPath\JSONPathException;
+use Flow\JSONPath\JSONPathLexer;
+use Flow\JSONPath\JSONPathToken;
 use PHPUnit\Framework\TestCase;
 
 class JSONPathLexerTest extends TestCase

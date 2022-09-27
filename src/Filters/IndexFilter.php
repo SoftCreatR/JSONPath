@@ -6,11 +6,10 @@
  * @license https://github.com/SoftCreatR/JSONPath/blob/main/LICENSE  MIT License
  */
 
-declare(strict_types=1);
-
 namespace Flow\JSONPath\Filters;
 
-use Flow\JSONPath\{AccessHelper, JSONPathException};
+use Flow\JSONPath\AccessHelper;
+use Flow\JSONPath\JSONPathException;
 
 class IndexFilter extends AbstractFilter
 {
@@ -19,13 +18,14 @@ class IndexFilter extends AbstractFilter
      */
     public function filter($collection): array
     {
-        if (is_array($this->token->value)) {
+        if (\is_array($this->token->value)) {
             $result = [];
             foreach ($this->token->value as $value) {
                 if (AccessHelper::keyExists($collection, $value, $this->magicIsAllowed)) {
                     $result[] = AccessHelper::getValue($collection, $value, $this->magicIsAllowed);
                 }
             }
+
             return $result;
         }
 
@@ -41,7 +41,7 @@ class IndexFilter extends AbstractFilter
 
         if ($this->token->value === 'length') {
             return [
-                count($collection),
+                \count($collection),
             ];
         }
 

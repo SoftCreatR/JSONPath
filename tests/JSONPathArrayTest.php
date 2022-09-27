@@ -15,9 +15,6 @@ use Flow\JSONPath\JSONPath;
 use Flow\JSONPath\Test\Traits\TestDataTrait;
 use PHPUnit\Framework\TestCase;
 
-use function is_array;
-use function random_int;
-
 class JSONPathArrayTest extends TestCase
 {
     use TestDataTrait;
@@ -79,13 +76,13 @@ class JSONPathArrayTest extends TestCase
      */
     public function testDifferentStylesOfAccess(): void
     {
-        $data = (new JSONPath($this->getData('conferences', random_int(0, 1))));
+        $data = (new JSONPath($this->getData('conferences', \random_int(0, 1))));
 
         self::assertArrayHasKey('conferences', $data);
 
         $conferences = $data->__get('conferences')->getData();
 
-        if (is_array($conferences[0])) {
+        if (\is_array($conferences[0])) {
             self::assertEquals('Western Conference', $conferences[0]['name']);
         } else {
             self::assertEquals('Western Conference', $conferences[0]->name);

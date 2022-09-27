@@ -6,12 +6,11 @@
  * @license https://github.com/SoftCreatR/JSONPath/blob/main/LICENSE  MIT License
  */
 
-declare(strict_types=1);
-
 namespace Flow\JSONPath\Filters;
 
 use ArrayAccess;
-use Flow\JSONPath\{JSONPath, JSONPathToken};
+use Flow\JSONPath\JSONPath;
+use Flow\JSONPath\JSONPathToken;
 
 abstract class AbstractFilter
 {

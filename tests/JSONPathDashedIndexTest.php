@@ -10,7 +10,8 @@ declare(strict_types=1);
 
 namespace Flow\JSONPath\Test;
 
-use Flow\JSONPath\{JSONPath, JSONPathException};
+use Flow\JSONPath\JSONPath;
+use Flow\JSONPath\JSONPathException;
 use PHPUnit\Framework\TestCase;
 
 class JSONPathDashedIndexTest extends TestCase

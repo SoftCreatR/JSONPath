@@ -6,12 +6,13 @@
  * @license https://github.com/SoftCreatR/JSONPath/blob/main/LICENSE  MIT License
  */
 
-declare(strict_types=1);
-
 namespace Flow\JSONPath\Test\Traits;
 
 use JsonException;
 use RuntimeException;
+
+use const JSON_ERROR_NONE;
+use const JSON_THROW_ON_ERROR;
 
 trait TestDataTrait
 {
@@ -22,16 +23,16 @@ trait TestDataTrait
      */
     protected function getData(string $type, bool|int $asArray = true): mixed
     {
-        $filePath = sprintf('%s/data/%s.json', dirname(__DIR__), $type);
+        $filePath = \sprintf('%s/data/%s.json', \dirname(__DIR__), $type);
 
-        if (!file_exists($filePath)) {
-            throw new RuntimeException("File $filePath does not exist.");
+        if (!\file_exists($filePath)) {
+            throw new RuntimeException("File {$filePath} does not exist.");
         }
 
-        $json = json_decode(file_get_contents($filePath), (bool)$asArray, 512, JSON_THROW_ON_ERROR);
+        $json = \json_decode(\file_get_contents($filePath), (bool)$asArray, 512, JSON_THROW_ON_ERROR);
 
-        if (json_last_error() !== JSON_ERROR_NONE) {
-            throw new RuntimeException("File $filePath does not contain valid JSON.");
+        if (\json_last_error() !== JSON_ERROR_NONE) {
+            throw new RuntimeException("File {$filePath} does not contain valid JSON.");
         }
 
         return $json;

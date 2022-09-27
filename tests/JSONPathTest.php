@@ -10,14 +10,11 @@ declare(strict_types=1);
 
 namespace Flow\JSONPath\Test;
 
-use JsonException;
-use Flow\JSONPath\{JSONPath, JSONPathException};
+use Flow\JSONPath\JSONPath;
+use Flow\JSONPath\JSONPathException;
 use Flow\JSONPath\Test\Traits\TestDataTrait;
+use JsonException;
 use PHPUnit\Framework\TestCase;
-
-use function is_object;
-use function json_decode;
-use function json_encode;
 
 use const JSON_THROW_ON_ERROR;
 
@@ -488,13 +485,13 @@ class JSONPathTest extends TestCase
         $result = (new JSONPath($this->getData('example')))
             ->find('$.store.*');
 
-        if (is_object($result[0][0])) {
+        if (\is_object($result[0][0])) {
             self::assertEquals('Sayings of the Century', $result[0][0]->title);
         } else {
             self::assertEquals('Sayings of the Century', $result[0][0]['title']);
         }
 
-        if (is_object($result[1])) {
+        if (\is_object($result[1])) {
             self::assertEquals('red', $result[1]->color);
         } else {
             self::assertEquals('red', $result[1]['color']);
@@ -580,8 +577,8 @@ class JSONPathTest extends TestCase
     {
         $result = (new JSONPath($this->getData('with-dots')))
             ->find(".data.tokens[?(@.Employee.FirstName)]");
-        $result = json_decode(
-            json_encode($result, JSON_THROW_ON_ERROR),
+        $result = \json_decode(
+            \json_encode($result, JSON_THROW_ON_ERROR),
             true,
             512,
             JSON_THROW_ON_ERROR
@@ -600,8 +597,8 @@ class JSONPathTest extends TestCase
     {
         $result = (new JSONPath($this->getData('example')))
             ->find('$..*');
-        $result = json_decode(
-            json_encode($result, JSON_THROW_ON_ERROR),
+        $result = \json_decode(
+            \json_encode($result, JSON_THROW_ON_ERROR),
             true,
             512,
             JSON_THROW_ON_ERROR

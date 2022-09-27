@@ -6,23 +6,10 @@
  * @license https://github.com/SoftCreatR/JSONPath/blob/main/LICENSE  MIT License
  */
 
-declare(strict_types=1);
-
 namespace Flow\JSONPath\Filters;
 
 use Flow\JSONPath\AccessHelper;
 use RuntimeException;
-
-use function explode;
-use function in_array;
-use function is_array;
-use function is_string;
-use function preg_match;
-use function preg_replace;
-use function str_ends_with;
-use function str_starts_with;
-use function strtolower;
-use function substr;
 
 class QueryMatchFilter extends AbstractFilter
 {
@@ -33,7 +20,7 @@ class QueryMatchFilter extends AbstractFilter
 
     public function filter($collection): array
     {
-        preg_match('/^' . static::MATCH_QUERY_OPERATORS . '$/x', $this->token->value, $matches);
+        \preg_match('/^' . static::MATCH_QUERY_OPERATORS . '$/x', $this->token->value, $matches);
 
         if (!isset($matches[1])) {
             throw new RuntimeException('Malformed filter query');
@@ -48,22 +35,22 @@ class QueryMatchFilter extends AbstractFilter
         $operator = $matches['operator'] ?? null;
         $comparisonValue = $matches['comparisonValue'] ?? null;
 
-        if (is_string($comparisonValue)) {
-            if (str_starts_with($comparisonValue, "[") && str_ends_with($comparisonValue, "]")) {
-                $comparisonValue = substr($comparisonValue, 1, -1);
-                $comparisonValue = preg_replace('/^[\'"]/', '', $comparisonValue);
-                $comparisonValue = preg_replace('/[\'"]$/', '', $comparisonValue);
-                $comparisonValue = preg_replace('/[\'"],[ ]*[\'"]/', ',', $comparisonValue);
-                $comparisonValue = array_map('trim', explode(",", $comparisonValue));
+        if (\is_string($comparisonValue)) {
+            if (\str_starts_with($comparisonValue, "[") && \str_ends_with($comparisonValue, "]")) {
+                $comparisonValue = \substr($comparisonValue, 1, -1);
+                $comparisonValue = \preg_replace('/^[\'"]/', '', $comparisonValue);
+                $comparisonValue = \preg_replace('/[\'"]$/', '', $comparisonValue);
+                $comparisonValue = \preg_replace('/[\'"], *[\'"]/', ',', $comparisonValue);
+                $comparisonValue = \array_map('trim', \explode(",", $comparisonValue));
             } else {
-                $comparisonValue = preg_replace('/^[\'"]/', '', $comparisonValue);
-                $comparisonValue = preg_replace('/[\'"]$/', '', $comparisonValue);
+                $comparisonValue = \preg_replace('/^[\'"]/', '', $comparisonValue);
+                $comparisonValue = \preg_replace('/[\'"]$/', '', $comparisonValue);
 
-                if (strtolower($comparisonValue) === 'false') {
+                if (\strtolower($comparisonValue) === 'false') {
                     $comparisonValue = false;
-                } elseif (strtolower($comparisonValue) === 'true') {
+                } elseif (\strtolower($comparisonValue) === 'true') {
                     $comparisonValue = true;
-                } elseif (strtolower($comparisonValue) === 'null') {
+                } elseif (\strtolower($comparisonValue) === 'null') {
                     $comparisonValue = null;
                 }
             }
@@ -91,7 +78,7 @@ class QueryMatchFilter extends AbstractFilter
                     $return[] = $value;
                 }
 
-                if ($operator === '=~' && @preg_match($comparisonValue, $value1)) {
+                if ($operator === '=~' && @\preg_match($comparisonValue, $value1)) {
                     $return[] = $value;
                 }
 
@@ -111,14 +98,14 @@ class QueryMatchFilter extends AbstractFilter
                     $return[] = $value;
                 }
 
-                if ($operator === 'in' && is_array($comparisonValue) && in_array($value1, $comparisonValue, false)) {
+                if ($operator === 'in' && \is_array($comparisonValue) && \in_array($value1, $comparisonValue, false)) {
                     $return[] = $value;
                 }
 
                 if (
-                    ($operator === 'nin' || $operator === '!in') &&
-                    is_array($comparisonValue) &&
-                    !in_array($value1, $comparisonValue, false)
+                    ($operator === 'nin' || $operator === '!in')
+                    && \is_array($comparisonValue)
+                    && !\in_array($value1, $comparisonValue, false)
                 ) {
                     $return[] = $value;
                 }
