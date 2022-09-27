@@ -21,15 +21,16 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        php: [ '8.0', '8.1' ]
+        php: [ '8.0', '8.1', '8.2' ]
+    continue-on-error: ${{ matrix.php == '8.2' }}
     name: PHP ${{ matrix.php }} Test
 
     steps:
       - name: Git checkout
-        uses: actions/checkout@v2.4.0
+        uses: actions/checkout@v2.4.2
 
       - name: Setup PHP
-        uses: shivammathur/setup-php@2.16.0
+        uses: shivammathur/setup-php@2.21.2
         with:
           php-version: ${{ matrix.php }}
           extensions: json
@@ -50,4 +51,4 @@ jobs:
         run: composer test -- -v --coverage-clover=coverage.xml
 
       - name: Run codecov
-        uses: codecov/codecov-action@v1
+        uses: codecov/codecov-action@v3.1.1
