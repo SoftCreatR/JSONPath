@@ -209,7 +209,9 @@ class JSONPath implements ArrayAccess, Iterator, JsonSerializable, Countable
 
     /**
      * @inheritDoc
+     * @return mixed
      */
+    #[\ReturnTypeWillChange]
     public function offsetGet($offset)
     {
         $value = AccessHelper::getValue($this->data, $offset);
@@ -249,7 +251,9 @@ class JSONPath implements ArrayAccess, Iterator, JsonSerializable, Countable
 
     /**
      * @inheritDoc
+     * @return mixed
      */
+    #[\ReturnTypeWillChange]
     public function current()
     {
         $value = current($this->data);
@@ -267,7 +271,9 @@ class JSONPath implements ArrayAccess, Iterator, JsonSerializable, Countable
 
     /**
      * @inheritDoc
+     * @return int|string|null
      */
+    #[\ReturnTypeWillChange]
     public function key()
     {
         return key($this->data);
