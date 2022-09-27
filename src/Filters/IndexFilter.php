@@ -15,8 +15,6 @@ use Flow\JSONPath\{AccessHelper, JSONPathException};
 class IndexFilter extends AbstractFilter
 {
     /**
-     * @inheritDoc
-     *
      * @throws JSONPathException
      */
     public function filter($collection): array

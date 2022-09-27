@@ -19,7 +19,8 @@ use function is_array;
 use function is_string;
 use function preg_match;
 use function preg_replace;
-use function strpos;
+use function str_ends_with;
+use function str_starts_with;
 use function strtolower;
 use function substr;
 
@@ -30,9 +31,6 @@ class QueryMatchFilter extends AbstractFilter
       (\s*(?<operator>==|=~|=|<>|!==|!=|>=|<=|>|<|in|!in|nin)\s*(?<comparisonValue>.+))?
     ';
 
-    /**
-     * @inheritDoc
-     */
     public function filter($collection): array
     {
         preg_match('/^' . static::MATCH_QUERY_OPERATORS . '$/x', $this->token->value, $matches);
@@ -51,7 +49,7 @@ class QueryMatchFilter extends AbstractFilter
         $comparisonValue = $matches['comparisonValue'] ?? null;
 
         if (is_string($comparisonValue)) {
-            if (strpos($comparisonValue, "[") === 0 && substr($comparisonValue, -1) === "]") {
+            if (str_starts_with($comparisonValue, "[") && str_ends_with($comparisonValue, "]")) {
                 $comparisonValue = substr($comparisonValue, 1, -1);
                 $comparisonValue = preg_replace('/^[\'"]/', '', $comparisonValue);
                 $comparisonValue = preg_replace('/[\'"]$/', '', $comparisonValue);
@@ -113,14 +111,14 @@ class QueryMatchFilter extends AbstractFilter
                     $return[] = $value;
                 }
 
-                if ($operator === 'in' && is_array($comparisonValue) && in_array($value1, $comparisonValue)) {
+                if ($operator === 'in' && is_array($comparisonValue) && in_array($value1, $comparisonValue, false)) {
                     $return[] = $value;
                 }
 
                 if (
                     ($operator === 'nin' || $operator === '!in') &&
                     is_array($comparisonValue) &&
-                    !in_array($value1, $comparisonValue)
+                    !in_array($value1, $comparisonValue, false)
                 ) {
                     $return[] = $value;
                 }

@@ -31,6 +31,8 @@ class QueryTest extends TestCase
      *
      * @see https://cburgmer.github.io/json-path-comparison
      * @dataProvider queryDataProvider
+     *
+     * @noinspection JsonEncodingApiUsageInspection
      */
     public function testQueries(
         string $id,
@@ -73,18 +75,18 @@ class QueryTest extends TestCase
                     json_decode($consensus, true),
                     json_decode($results, true)
                 );
-            } catch (ExpectationFailedException $f) {
+            } catch (ExpectationFailedException) {
                 $e = $e->getComparisonFailure();
 
                 fwrite(STDERR, "==========================\n");
-                fwrite(STDERR, "Query: {$query}\n\n{$e->toString()}\nMore information: $url\n");
+                fwrite(STDERR, "Query: $query\n\n{$e->toString()}\nMore information: $url\n");
                 fwrite(STDERR, "==========================\n\n");
             }
         } catch (JSONPathException $e) {
             fwrite(STDERR, "==========================\n");
-            fwrite(STDERR, "Query: {$query}\n\n{$e->getMessage()}\n");
+            fwrite(STDERR, "Query: $query\n\n{$e->getMessage()}\n");
             fwrite(STDERR, "==========================\n\n");
-        } catch (RuntimeException $e) {
+        } catch (RuntimeException) {
             // ignore
         }
     }

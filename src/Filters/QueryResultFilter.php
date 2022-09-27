@@ -18,8 +18,6 @@ use function preg_match;
 class QueryResultFilter extends AbstractFilter
 {
     /**
-     * @inheritDoc
-     *
      * @throws JSONPathException
      */
     public function filter($collection): array
@@ -36,22 +34,13 @@ class QueryResultFilter extends AbstractFilter
             return [];
         }
 
-        switch ($matches['operator']) {
-            case '+':
-                $resultKey = $value + $matches['numeric'];
-                break;
-            case '*':
-                $resultKey = $value * $matches['numeric'];
-                break;
-            case '-':
-                $resultKey = $value - $matches['numeric'];
-                break;
-            case '/':
-                $resultKey = $value / $matches['numeric'];
-                break;
-            default:
-                throw new JSONPathException('Unsupported operator in expression');
-        }
+        $resultKey = match ($matches['operator']) {
+            '+' => $value + $matches['numeric'],
+            '*' => $value * $matches['numeric'],
+            '-' => $value - $matches['numeric'],
+            '/' => $value / $matches['numeric'],
+            default => throw new JSONPathException('Unsupported operator in expression'),
+        };
 
         $result = [];
 

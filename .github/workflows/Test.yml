@@ -21,7 +21,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        php: [ '7.1', '7.2', '7.3', '7.4' ]
+        php: [ '8.0', '8.1' ]
     name: PHP ${{ matrix.php }} Test
 
     steps:
@@ -45,12 +45,6 @@ jobs:
 
       - name: Run phpcs
         run: composer cs-check -- -v
-
-      - name: Setup PCOV
-        if: matrix.php == '7.1'
-        run: |
-          composer require pcov/clobber
-          vendor/bin/pcov clobber
 
       - name: Execute tests
         run: composer test -- -v --coverage-clover=coverage.xml

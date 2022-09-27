@@ -26,10 +26,7 @@ use function property_exists;
 
 class AccessHelper
 {
-    /**
-     * @param array|ArrayAccess $collection
-     */
-    public static function collectionKeys($collection): array
+    public static function collectionKeys(mixed $collection): array
     {
         if (is_object($collection)) {
             return array_keys(get_object_vars($collection));
@@ -38,18 +35,12 @@ class AccessHelper
         return array_keys($collection);
     }
 
-    /**
-     * @param array|ArrayAccess $collection
-     */
-    public static function isCollectionType($collection): bool
+    public static function isCollectionType(mixed $collection): bool
     {
         return is_array($collection) || is_object($collection);
     }
 
-    /**
-     * @param array|ArrayAccess $collection
-     */
-    public static function keyExists($collection, $key, bool $magicIsAllowed = false): bool
+    public static function keyExists(mixed $collection, $key, bool $magicIsAllowed = false): bool
     {
         if ($magicIsAllowed && is_object($collection) && method_exists($collection, '__get')) {
             return true;
@@ -76,14 +67,9 @@ class AccessHelper
 
     /**
      * @todo Optimize conditions
-     *
-     * @param array|ArrayAccess $collection
-     * @noinspection NotOptimalIfConditionsInspection
      */
-    public static function getValue($collection, $key, bool $magicIsAllowed = false)
+    public static function getValue(mixed $collection, $key, bool $magicIsAllowed = false)
     {
-        $return = null;
-
         if (
             $magicIsAllowed &&
             is_object($collection) &&
@@ -112,12 +98,8 @@ class AccessHelper
     /**
      * Find item in php collection by index
      * Written this way to handle instances ArrayAccess or Traversable objects
-     *
-     * @param array|ArrayAccess $collection
-     *
-     * @return mixed|null
      */
-    private static function getValueByIndex($collection, $key)
+    private static function getValueByIndex(mixed $collection, $key): mixed
     {
         $i = 0;
 
@@ -145,26 +127,21 @@ class AccessHelper
         return null;
     }
 
-    /**
-     * @param array|ArrayAccess $collection
-     */
-    public static function setValue(&$collection, $key, $value)
+    public static function setValue(mixed &$collection, $key, $value)
     {
         if (is_object($collection) && !$collection instanceof ArrayAccess) {
             return $collection->$key = $value;
         }
 
         if ($collection instanceof ArrayAccess) {
+            /** @noinspection PhpVoidFunctionResultUsedInspection */
             return $collection->offsetSet($key, $value);
         }
 
         return $collection[$key] = $value;
     }
 
-    /**
-     * @param array|ArrayAccess $collection
-     */
-    public static function unsetValue(&$collection, $key): void
+    public static function unsetValue(mixed &$collection, $key): void
     {
         if (is_object($collection) && !$collection instanceof ArrayAccess) {
             unset($collection->$key);
@@ -180,11 +157,9 @@ class AccessHelper
     }
 
     /**
-     * @param array|ArrayAccess $collection
-     *
      * @throws JSONPathException
      */
-    public static function arrayValues($collection): array
+    public static function arrayValues(array|ArrayAccess $collection): array
     {
         if (is_array($collection)) {
             return array_values($collection);

@@ -16,8 +16,6 @@ use ArrayAccess;
 class RecursiveFilter extends AbstractFilter
 {
     /**
-     * @inheritDoc
-     *
      * @throws JSONPathException
      */
     public function filter($collection): array
@@ -30,18 +28,14 @@ class RecursiveFilter extends AbstractFilter
     }
 
     /**
-     * @param array|ArrayAccess $data
-     *
      * @throws JSONPathException
      */
-    private function recurse(array &$result, $data): void
+    private function recurse(array &$result, array|ArrayAccess $data): void
     {
         $result[] = $data;
 
         if (AccessHelper::isCollectionType($data)) {
-            foreach (AccessHelper::arrayValues($data) as $key => $value) {
-                $results[] = $value;
-
+            foreach (AccessHelper::arrayValues($data) as $value) {
                 if (AccessHelper::isCollectionType($value)) {
                     $this->recurse($result, $value);
                 }
