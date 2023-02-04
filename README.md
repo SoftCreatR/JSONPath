@@ -1,4 +1,6 @@
-# JSONPath for PHP 5.4 - 7.0 [![MIT licensed](https://img.shields.io/badge/license-MIT-blue.svg)](./LICENSE)
+# JSONPath for PHP 5.4 - 7.0
+
+[![Build](https://img.shields.io/github/actions/workflow/status/SoftCreatR/JSONPath/.github/workflows/Test.yml?branch=oldphp)](https://github.com/SoftCreatR/JSONPath/blob/oldphp/.github/workflows/Test.yml) [![MIT licensed](https://img.shields.io/badge/license-MIT-blue.svg)](./LICENSE)
 
 This is a [JSONPath](http://goessner.net/articles/JsonPath/) implementation for PHP based on Stefan Goessner's JSONPath script.
 
