@@ -27,10 +27,10 @@ jobs:
 
     steps:
       - name: Git checkout
-        uses: actions/checkout@v2.4.2
+        uses: actions/checkout@v3
 
       - name: Setup PHP
-        uses: shivammathur/setup-php@2.21.2
+        uses: shivammathur/setup-php@v2
         with:
           php-version: ${{ matrix.php }}
           extensions: json
@@ -51,4 +51,4 @@ jobs:
         run: composer test -- -v --coverage-clover=coverage.xml
 
       - name: Run codecov
-        uses: codecov/codecov-action@v3.1.1
+        uses: codecov/codecov-action@v3
