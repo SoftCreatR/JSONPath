@@ -7,7 +7,7 @@ on:
       - '**.php'
       - 'composer.json'
     branches:
-      - 'main'
+      - 'PHP7'
   pull_request:
     paths:
       - '**.php'
