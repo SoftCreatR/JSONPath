@@ -145,7 +145,7 @@ class AccessHelper
     /**
      * @throws JSONPathException
      */
-    public static function arrayValues(array|ArrayAccess $collection): array|ArrayAccess
+    public static function arrayValues(array|object $collection): array|ArrayAccess
     {
         if (\is_array($collection)) {
             return \array_values($collection);
