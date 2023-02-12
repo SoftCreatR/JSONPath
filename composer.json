@@ -1,8 +1,8 @@
 {
   "name": "softcreatr/jsonpath",
   "description": "JSONPath implementation for parsing, searching and flattening arrays",
-  "version": "0.8.1",
   "license": "MIT",
+  "version": "0.8.2",
   "authors": [
     {
       "name": "Stephen Frank",
@@ -17,22 +17,24 @@
       "role": "Developer"
     }
   ],
+  "support": {
+    "email": "hello@1-2.dev",
+    "issues": "https://github.com/SoftCreatR/JSONPath/issues",
+    "forum": "https://github.com/SoftCreatR/JSONPath/discussions",
+    "source": "https://github.com/SoftCreatR/JSONPath"
+  },
   "require": {
     "php": ">=8.0",
     "ext-json": "*"
   },
+  "require-dev": {
+    "phpunit/phpunit": "^9.6",
+    "roave/security-advisories": "dev-latest"
+  },
   "replace": {
     "flow/jsonpath": "*"
   },
-  "require-dev": {
-    "phpunit/phpunit": "^9.5",
-    "roave/security-advisories": "dev-latest",
-    "squizlabs/php_codesniffer": "^3.7"
-  },
-  "config": {
-    "optimize-autoloader": true,
-    "preferred-install": "dist"
-  },
+  "minimum-stability": "stable",
   "autoload": {
     "psr-4": {
       "Flow\\JSONPath\\": "src/"
@@ -43,16 +45,11 @@
       "Flow\\JSONPath\\Test\\": "tests/"
     }
   },
-  "minimum-stability": "stable",
-  "scripts": {
-    "cs-check": "phpcs",
-    "cs-fix": "phpcbf",
-    "test": "phpunit"
+  "config": {
+    "optimize-autoloader": true,
+    "preferred-install": "dist"
   },
-  "support": {
-    "email": "hello@1-2.dev",
-    "forum": "https://github.com/SoftCreatR/JSONPath/discussions",
-    "issues": "https://github.com/SoftCreatR/JSONPath/issues",
-    "source": "https://github.com/SoftCreatR/JSONPath"
+  "scripts": {
+    "test": "phpunit"
   }
 }

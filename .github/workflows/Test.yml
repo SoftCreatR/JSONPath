@@ -1,4 +1,3 @@
----
 name: Test
 
 on:
@@ -12,8 +11,6 @@ on:
     paths:
       - '**.php'
       - 'composer.json'
-    branches:
-      - 'main'
   workflow_dispatch:
 
 jobs:
@@ -21,7 +18,10 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        php: [ '8.0', '8.1', '8.2' ]
+        php:
+        - '8.0'
+        - '8.1'
+        - '8.2'
     continue-on-error: ${{ matrix.php == '8.2' }}
     name: PHP ${{ matrix.php }} Test
 
@@ -34,9 +34,16 @@ jobs:
         with:
           php-version: ${{ matrix.php }}
           extensions: json
+          tools: phpcs
           coverage: pcov
         env:
           COMPOSER_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup problem matchers for PHP syntax check
+        run: echo "::add-matcher::.github/php-syntax.json"
+
+      - run: |
+          ! find . -type f -name '*.php' -exec php -l '{}' \; 2>&1 |grep -v '^No syntax errors detected'
 
       - name: Setup problem matchers for PHPUnit
         run: echo "::add-matcher::${{ runner.tool_cache }}/phpunit.json"
@@ -45,7 +52,7 @@ jobs:
         run: composer update --prefer-dist --no-interaction
 
       - name: Run phpcs
-        run: composer cs-check -- -v
+        run: phpcs -- -v
 
       - name: Execute tests
         run: composer test -- -v --coverage-clover=coverage.xml

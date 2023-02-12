@@ -1,5 +1,8 @@
 # Changelog
 
+### 0.8.2
+- AccessHelper & RecursiveFilter now return a plain `object`, rather than an `ArrayAccess` object
+
 ### 0.8.1
 - Removed strict_types
 - Applied some PSR-12 related changes

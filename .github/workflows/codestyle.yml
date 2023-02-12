@@ -1,0 +1,30 @@
+name: Code Style
+
+on:
+  push:
+    paths:
+    - '**.php'
+  pull_request:
+    paths:
+    - '**.php'
+
+jobs:
+  php:
+    name: PHP
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Setup PHP with tools
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: '8.1'
+        extensions: json
+        tools: cs2pr, phpcs, php-cs-fixer
+
+    - name: phpcs
+      run: phpcs -n -q --report=checkstyle | cs2pr
+
+    - name: php-cs-fixer
+      run: php-cs-fixer fix --dry-run --diff

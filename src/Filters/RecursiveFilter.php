@@ -8,7 +8,6 @@
 
 namespace Flow\JSONPath\Filters;
 
-use ArrayAccess;
 use Flow\JSONPath\AccessHelper;
 use Flow\JSONPath\JSONPathException;
 

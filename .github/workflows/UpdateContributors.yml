@@ -1,4 +1,3 @@
----
 name: Update Contributors
 
 on: [ push, workflow_dispatch]
@@ -9,10 +8,10 @@ jobs:
 
     steps:
       - name: Git checkout
-        uses: actions/checkout@v2.4.2
+        uses: actions/checkout@v3
 
       - name: Update Contributors
-        uses: BobAnkh/add-contributors@v0.2.2
+        uses: BobAnkh/add-contributors@master
         with:
           REPO_NAME: 'SoftCreatR/JSONPath'
           CONTRIBUTOR: '## Contributors ✨'
