@@ -138,7 +138,7 @@ class JSONPath implements ArrayAccess, Iterator, JsonSerializable, Countable
         return $tokens;
     }
 
-    public function getData(): array
+    public function getData(): mixed
     {
         return $this->data;
     }
