@@ -1,5 +1,8 @@
 # Changelog
 
+### 0.8.3
+- Change `getData()` so that it can be mixed instead of array
+
 ### 0.8.2
 - AccessHelper & RecursiveFilter now return a plain `object`, rather than an `ArrayAccess` object
 
