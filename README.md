@@ -20,7 +20,7 @@ This project aims to be a clean and simple implementation with the following goa
 ## Installation
 
 ```bash
-composer require softcreatr/jsonpath:"^0.5 || ^0.7 || ^0.8"
+composer require softcreatr/jsonpath:"^0.7"
 ```
 
 ## JSONPath Examples
