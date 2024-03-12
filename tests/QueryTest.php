@@ -12,6 +12,7 @@ namespace Flow\JSONPath\Test;
 
 use Flow\JSONPath\JSONPath;
 use Flow\JSONPath\JSONPathException;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\ExpectationFailedException;
 use PHPUnit\Framework\TestCase;
 use RuntimeException;
@@ -28,10 +29,10 @@ class QueryTest extends TestCase
      * a message will be printed to STDERR, so we know, what's going on.
      *
      * @see https://cburgmer.github.io/json-path-comparison
-     * @dataProvider queryDataProvider
      *
      * @noinspection JsonEncodingApiUsageInspection
      */
+    #[DataProvider('queryDataProvider')]
     public function testQueries(
         string $id,
         string $selector,
@@ -109,7 +110,7 @@ class QueryTest extends TestCase
      *
      * @return string[]
      */
-    public function queryDataProvider(): array
+    public static function queryDataProvider(): array
     {
         return [
             [ // data set #0

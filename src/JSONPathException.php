@@ -12,4 +12,5 @@ use Exception;
 
 class JSONPathException extends Exception
 {
+    // does nothing
 }

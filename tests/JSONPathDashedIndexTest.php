@@ -12,6 +12,7 @@ namespace Flow\JSONPath\Test;
 
 use Flow\JSONPath\JSONPath;
 use Flow\JSONPath\JSONPathException;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 
 class JSONPathDashedIndexTest extends TestCase
@@ -19,7 +20,7 @@ class JSONPathDashedIndexTest extends TestCase
     /**
      * @return array[]
      */
-    public function indexDataProvider(): array
+    public static function indexDataProvider(): array
     {
         return [
             [
@@ -36,10 +37,9 @@ class JSONPathDashedIndexTest extends TestCase
     }
 
     /**
-     * @dataProvider indexDataProvider
-     *
      * @throws JSONPathException
      */
+    #[DataProvider('indexDataProvider')]
     public function testSlice(string $path, array $data, array $expected): void
     {
         $results = (new JSONPath($data))

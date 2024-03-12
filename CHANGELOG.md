@@ -1,5 +1,13 @@
 # Changelog
 
+### 0.9.0
+🔻 Breaking changes ahead:
+
+- Dropped support for PHP < 8.1
+
+### 0.8.3
+- Change `getData()` so that it can be mixed instead of array
+
 ### 0.8.2
 - AccessHelper & RecursiveFilter now return a plain `object`, rather than an `ArrayAccess` object
 

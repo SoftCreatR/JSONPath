@@ -19,15 +19,16 @@ jobs:
     strategy:
       matrix:
         php:
-        - '8.0'
         - '8.1'
         - '8.2'
-    continue-on-error: ${{ matrix.php == '8.2' }}
+        - '8.3'
+        - '8.4'
+    continue-on-error: ${{ matrix.php == '8.4' }}
     name: PHP ${{ matrix.php }} Test
 
     steps:
       - name: Git checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
@@ -55,7 +56,7 @@ jobs:
         run: phpcs -- -v
 
       - name: Execute tests
-        run: composer test -- -v --coverage-clover=coverage.xml
+        run: composer test -- --coverage-clover=coverage.xml
 
       - name: Run codecov
-        uses: codecov/codecov-action@v3
+        uses: codecov/codecov-action@v4

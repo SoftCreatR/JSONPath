@@ -12,11 +12,12 @@ namespace Flow\JSONPath\Test;
 
 use Flow\JSONPath\JSONPath;
 use Flow\JSONPath\JSONPathException;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 
 class JSONPathSliceAccessTest extends TestCase
 {
-    public function sliceDataProvider(): array
+    public static function sliceDataProvider(): array
     {
         return [
             [
@@ -78,10 +79,9 @@ class JSONPathSliceAccessTest extends TestCase
     }
 
     /**
-     * @dataProvider sliceDataProvider
-     *
      * @throws JSONPathException
      */
+    #[DataProvider('sliceDataProvider')]
     public function testSlice(string $path, array $data, array $expected): void
     {
         $result = (new JSONPath($data))
