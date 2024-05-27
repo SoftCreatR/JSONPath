@@ -64,7 +64,7 @@ class QueryMatchFilter extends AbstractFilter
             if (AccessHelper::keyExists($value, $key, $this->magicIsAllowed)) {
                 $value1 = AccessHelper::getValue($value, $key, $this->magicIsAllowed);
             } elseif (str_contains($key, '.')) {
-                $value1 = (new JSONPath($value))->find($key)->getData()[0];
+                $value1 = (new JSONPath($value))->find($key)->getData()[0] ?? '';
             }
             if ($value1) {
                 if ($operator === null && $value1) {
