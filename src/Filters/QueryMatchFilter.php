@@ -9,6 +9,7 @@
 namespace Flow\JSONPath\Filters;
 
 use Flow\JSONPath\AccessHelper;
+use Flow\JSONPath\JSONPath;
 use RuntimeException;
 
 class QueryMatchFilter extends AbstractFilter
@@ -20,7 +21,7 @@ class QueryMatchFilter extends AbstractFilter
 
     public function filter($collection): array
     {
-        \preg_match('/^' . static::MATCH_QUERY_OPERATORS . '$/x', $this->token->value, $matches);
+        \preg_match('/^'.static::MATCH_QUERY_OPERATORS.'$/x', $this->token->value, $matches);
 
         if (!isset($matches[1])) {
             throw new RuntimeException('Malformed filter query');
@@ -59,9 +60,13 @@ class QueryMatchFilter extends AbstractFilter
         $return = [];
 
         foreach ($collection as $value) {
+            $value1 = null;
             if (AccessHelper::keyExists($value, $key, $this->magicIsAllowed)) {
                 $value1 = AccessHelper::getValue($value, $key, $this->magicIsAllowed);
-
+            } elseif (str_contains($key, '.')) {
+                $value1 = (new JSONPath($value))->find($key)->getData()[0];
+            }
+            if ($value1) {
                 if ($operator === null && $value1) {
                     $return[] = $value;
                 }
