@@ -17,10 +17,16 @@ use PHPUnit\Framework\ExpectationFailedException;
 use PHPUnit\Framework\TestCase;
 use RuntimeException;
 
-use const STDERR;
-
 class QueryTest extends TestCase
 {
+    public static array $baselineFailedQueries;
+
+    public static function setUpBeforeClass(): void
+    {
+        parent::setUpBeforeClass();
+        self::$baselineFailedQueries = \array_map('trim', \file(__DIR__ . '/data/baselineFailedQueries.txt'));
+    }
+
     /**
      * This method aims to test the current implementation against
      * all queries listed on https://cburgmer.github.io/json-path-comparison/
@@ -70,21 +76,24 @@ class QueryTest extends TestCase
                 // assert in these cases. There might be still some false positives
                 // (e.g. multidimensional comparisons), but that's okay, I guess. Maybe,
                 // we can also find a way around that in the future.
+                $message = "==========================\n";
+                $message .= "Query: {$query}\n\nMore information: {$url}\n";
+                $message .= "==========================\n\n";
                 self::assertEqualsCanonicalizing(
                     \json_decode($consensus, true),
-                    \json_decode($results, true)
+                    \json_decode($results, true),
+                    $message
                 );
             } catch (ExpectationFailedException) {
-                $e = $e->getComparisonFailure();
-
-                \fwrite(STDERR, "==========================\n");
-                \fwrite(STDERR, "Query: {$query}\n\n{$e->toString()}\nMore information: {$url}\n");
-                \fwrite(STDERR, "==========================\n\n");
+                if (!\in_array($id, self::$baselineFailedQueries, true)) {
+                    throw new ExpectationFailedException(
+                        $e->getMessage() . "\nQuery: {$query}\n\nMore information: {$url}",
+                        $e->getComparisonFailure()
+                    );
+                }
             }
         } catch (JSONPathException $e) {
-            \fwrite(STDERR, "==========================\n");
-            \fwrite(STDERR, "Query: {$query}\n\n{$e->getMessage()}\n");
-            \fwrite(STDERR, "==========================\n\n");
+            // ignore
         } catch (RuntimeException) {
             // ignore
         }
