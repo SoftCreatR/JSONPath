@@ -2,7 +2,7 @@
   "name": "softcreatr/jsonpath",
   "description": "JSONPath implementation for parsing, searching and flattening arrays",
   "license": "MIT",
-  "version": "0.9.0",
+  "version": "0.9.1",
   "authors": [
     {
       "name": "Stephen Frank",
@@ -29,7 +29,8 @@
   },
   "require-dev": {
     "phpunit/phpunit": "10 - 12",
-    "roave/security-advisories": "dev-latest"
+    "friendsofphp/php-cs-fixer": "^3.58",
+    "squizlabs/php_codesniffer": "^3.10"
   },
   "replace": {
     "flow/jsonpath": "*"
@@ -50,6 +51,8 @@
     "preferred-install": "dist"
   },
   "scripts": {
-    "test": "phpunit"
+    "test": "phpunit",
+    "cs": "phpcs",
+    "cs-fix": "php-cs-fixer fix --config=.php-cs-fixer.dist.php"
   }
 }
