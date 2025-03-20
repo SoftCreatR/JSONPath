@@ -1545,6 +1545,60 @@ class QueryTest extends TestCase
                 '["first","second","third","forth","fifth"]',
                 '["first","second","third","forth","fifth","second"]',
             ],
+            [
+                'rfc_semantics_of_null_object_value',
+                '$.a',
+                '{"a": null, "b": [null], "c": [{}], "null": 1}',
+                '[null]'
+            ],
+            [
+                'rfc_semantics_of_null_null_used_as_array',
+                '$.a[0]',
+                '{"a": null, "b": [null], "c": [{}], "null": 1}',
+                'XFAIL'
+            ],
+            [
+                'rfc_semantics_of_null_null_used_as_object',
+                '$.a.d',
+                '{"a": null, "b": [null], "c": [{}], "null": 1}',
+                'XFAIL'
+            ],
+            [
+                'rfc_semantics_of_null_array_value',
+                '$.b[0]',
+                '{"a": null, "b": [null], "c": [{}], "null": 1}',
+                '[null]'
+            ],
+            [
+                'rfc_semantics_of_null_array_value_2',
+                '$.b[*]',
+                '{"a": null, "b": [null], "c": [{}], "null": 1}',
+                '[null]'
+            ],
+            [
+                'rfc_semantics_of_null_existance',
+                '$.b[?@]',
+                '{"a": null, "b": [null], "c": [{}], "null": 1}',
+                '[null]'
+            ],
+            [
+                'rfc_semantics_of_null_comparison',
+                '$.b[?@==null]',
+                '{"a": null, "b": [null], "c": [{}], "null": 1}',
+                '[null]'
+            ],
+            [
+                'rfc_semantics_of_null_comparison_with_missing_value',
+                '$.c[?@.d==null]',
+                '{"a": null, "b": [null], "c": [{}], "null": 1}',
+                'XFAIL'
+            ],
+            [
+                'rfc_semantics_of_null_null_string',
+                '$.null',
+                '{"a": null, "b": [null], "c": [{}], "null": 1}',
+                '[1]'
+            ],
         ];
     }
 }
