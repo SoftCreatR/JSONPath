@@ -1,4 +1,4 @@
-<?php declare(strict_types=1);
+<?php
 
 /**
  * JSONPath implementation for PHP.
@@ -6,18 +6,19 @@
  * @license https://github.com/SoftCreatR/JSONPath/blob/main/LICENSE  MIT License
  */
 
+declare(strict_types=1);
+
 namespace Flow\JSONPath\Filters;
 
 use Flow\JSONPath\AccessHelper;
 use Flow\JSONPath\JSONPath;
 use Flow\JSONPath\JSONPathException;
 use RuntimeException;
-use function error_log;
-use function is_scalar;
-use function is_string;
 
 class QueryMatchFilter extends AbstractFilter
 {
+    protected const MATCH_QUERY_NEGATION_WRAPPED = '^(?<negate>!)\((?<logicalexpr>.+)\)$';
+    protected const MATCH_QUERY_NEGATION_UNWRAPPED = '^(?<negate>!)(?<logicalexpr>.+)$';
     protected const MATCH_QUERY_OPERATORS = '
       @(\.(?<key>[^\s<>!=]+)|\[["\']?(?<keySquare>.*?)["\']?\])
       (\s*(?<operator>==|=~|=|<>|!==|!=|>=|<=|>|<|in|!in|nin)\s*(?<comparisonValue>.+))?
@@ -28,7 +29,17 @@ class QueryMatchFilter extends AbstractFilter
      */
     public function filter($collection): array
     {
-        \preg_match('/^' . static::MATCH_QUERY_OPERATORS . '$/x', $this->token->value, $matches);
+        $filterExpression = $this->token->value;
+        $negateFilter = false;
+        if (
+            \preg_match('/' . static::MATCH_QUERY_NEGATION_WRAPPED . '/x', $filterExpression, $negationMatches)
+            || \preg_match('/' . static::MATCH_QUERY_NEGATION_UNWRAPPED . '/x', $filterExpression, $negationMatches)
+        ) {
+            $negateFilter = true;
+            $filterExpression = $negationMatches['logicalexpr'];
+        }
+
+        \preg_match('/^' . static::MATCH_QUERY_OPERATORS . '$/x', $filterExpression, $matches);
 
         if (!isset($matches[1])) {
             throw new RuntimeException('Malformed filter query');
@@ -87,6 +98,10 @@ class QueryMatchFilter extends AbstractFilter
                 };
             }
 
+            if ($negateFilter) {
+                $comparisonResult = !$comparisonResult;
+            }
+
             if ($comparisonResult) {
                 $return[] = $value;
             }
@@ -97,16 +112,16 @@ class QueryMatchFilter extends AbstractFilter
 
     protected function isNumber($value): bool
     {
-        return !is_string($value) && \is_numeric($value);
+        return !\is_string($value) && \is_numeric($value);
     }
 
     protected function compareEquals($a, $b): bool
     {
-        $type_a = gettype($a);
-        $type_b = gettype($b);
+        $type_a = \gettype($a);
+        $type_b = \gettype($b);
         if ($type_a === $type_b || ($this->isNumber($a) && $this->isNumber($b))) {
             //Primitives or Numbers
-            if ($a === null || is_scalar($a)) {
+            if ($a === null || \is_scalar($a)) {
                 return $a == $b;
             }
             //Object/Array
@@ -117,7 +132,7 @@ class QueryMatchFilter extends AbstractFilter
 
     protected function compareLessThan($a, $b): bool
     {
-        if ((is_string($a) && is_string($b)) || ($this->isNumber($a) && $this->isNumber($b))) {
+        if ((\is_string($a) && \is_string($b)) || ($this->isNumber($a) && $this->isNumber($b))) {
             //numerical and string comparison supported only
             return $a < $b;
         }
