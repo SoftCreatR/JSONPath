@@ -21,7 +21,8 @@ class QueryMatchFilter extends AbstractFilter
     protected const MATCH_QUERY_NEGATION_UNWRAPPED = '^(?<negate>!)(?<logicalexpr>.+)$';
     protected const MATCH_QUERY_OPERATORS = '
       @(\.(?<key>[^\s<>!=]+)|\[["\']?(?<keySquare>.*?)["\']?\])
-      (\s*(?<operator>==|=~|=|<>|!==|!=|>=|<=|>|<|in|!in|nin)\s*(?<comparisonValue>.+))?
+      (\s*(?<operator>==|=~|=|<>|!==|!=|>=|<=|>|<|in|!in|nin)\s*(?<comparisonValue>.+?(?=(&&|$))))?
+      (\s*(?<logicaland>&&)\s*)?
     ';
 
     /**
@@ -39,71 +40,88 @@ class QueryMatchFilter extends AbstractFilter
             $filterExpression = $negationMatches['logicalexpr'];
         }
 
-        \preg_match('/^' . static::MATCH_QUERY_OPERATORS . '$/x', $filterExpression, $matches);
+        $match = \preg_match_all(
+            '/' . static::MATCH_QUERY_OPERATORS . '/x',
+            $filterExpression,
+            $matches,
+            PREG_UNMATCHED_AS_NULL
+        );
 
-        if (!isset($matches[1])) {
+        if (
+            $match === false
+            || !isset($matches[1][0])
+            || isset($matches['logicaland'][array_key_last($matches['logicaland'])])
+        ) {
             throw new RuntimeException('Malformed filter query');
-        }
-
-        $key = $matches['key'] ?: $matches['keySquare'];
-
-        if ($key === '') {
-            throw new RuntimeException('Malformed filter query: key was not set');
-        }
-
-        $operator = $matches['operator'] ?? null;
-        $comparisonValue = $matches['comparisonValue'] ?? null;
-
-        if (\is_string($comparisonValue)) {
-            $comparisonValue = \preg_replace('/^[\']/', '"', $comparisonValue);
-            $comparisonValue = \preg_replace('/[\']$/', '"', $comparisonValue);
-            try {
-                $comparisonValue = \json_decode($comparisonValue, true, flags:JSON_THROW_ON_ERROR);
-            } catch (\JsonException $e) {
-                //Leave $comparisonValue as raw (regular express or non quote wrapped string
-            }
         }
 
         $return = [];
 
-        foreach ($collection as $value) {
-            $value1 = null;
+        for ($logicalAndNum = 0; $logicalAndNum < \count($matches[0]); $logicalAndNum++) {
+            $key = $matches['key'][$logicalAndNum] ?: $matches['keySquare'][$logicalAndNum];
 
-            $notNothing = AccessHelper::keyExists($value, $key, $this->magicIsAllowed);
-            if ($notNothing) {
-                $value1 = AccessHelper::getValue($value, $key, $this->magicIsAllowed);
-            } elseif (\str_contains($key, '.')) {
-                $foundValue = (new JSONPath($value))->find($key)->getData();
-                if ($foundValue) {
-                    $value1 = $foundValue[0];
-                    $notNothing = true;
+            if ($key === '') {
+                throw new RuntimeException('Malformed filter query: key was not set');
+            }
+
+            $operator = $matches['operator'][$logicalAndNum] ?? null;
+            $comparisonValue = $matches['comparisonValue'][$logicalAndNum] ?? null;
+
+            if (\is_string($comparisonValue)) {
+                $comparisonValue = \preg_replace('/^[\']/', '"', $comparisonValue);
+                $comparisonValue = \preg_replace('/[\']$/', '"', $comparisonValue);
+                try {
+                    $comparisonValue = \json_decode($comparisonValue, true, flags: JSON_THROW_ON_ERROR);
+                } catch (\JsonException $e) {
+                    //Leave $comparisonValue as raw (regular express or non quote wrapped string
                 }
             }
 
-            $comparisonResult = null;
-            if ($notNothing) {
-                $comparisonResult = match ($operator) {
-                    null => AccessHelper::keyExists($value, $key, $this->magicIsAllowed),
-                    "=", "==" => $this->compareEquals($value1, $comparisonValue),
-                    "!=", "!==", "<>" => !$this->compareEquals($value1, $comparisonValue),
-                    '=~' => @\preg_match($comparisonValue, $value1),
-                    '<' => $this->compareLessThan($value1, $comparisonValue),
-                    '<=' => $this->compareLessThan($value1, $comparisonValue)
-                        || $this->compareEquals($value1, $comparisonValue),
-                    '>' => $this->compareLessThan($comparisonValue, $value1), //rfc semantics
-                    '>=' => $this->compareLessThan($comparisonValue, $value1) //rfc semantics
-                        || $this->compareEquals($value1, $comparisonValue),
-                    "in" => \is_array($comparisonValue) && \in_array($value1, $comparisonValue, true),
-                    'nin', "!in" => \is_array($comparisonValue) && !\in_array($value1, $comparisonValue, true)
-                };
+            $filteredCollection = $collection;
+            if ($logicalAndNum > 0) {
+                $filteredCollection = $return;
+                $return = [];
             }
 
-            if ($negateFilter) {
-                $comparisonResult = !$comparisonResult;
-            }
+            foreach ($filteredCollection as $value) {
+                $value1 = null;
 
-            if ($comparisonResult) {
-                $return[] = $value;
+                $notNothing = AccessHelper::keyExists($value, $key, $this->magicIsAllowed);
+                if ($notNothing) {
+                    $value1 = AccessHelper::getValue($value, $key, $this->magicIsAllowed);
+                } elseif (\str_contains($key, '.')) {
+                    $foundValue = (new JSONPath($value))->find($key)->getData();
+                    if ($foundValue) {
+                        $value1 = $foundValue[0];
+                        $notNothing = true;
+                    }
+                }
+
+                $comparisonResult = null;
+                if ($notNothing) {
+                    $comparisonResult = match ($operator) {
+                        null => AccessHelper::keyExists($value, $key, $this->magicIsAllowed),
+                        "=", "==" => $this->compareEquals($value1, $comparisonValue),
+                        "!=", "!==", "<>" => !$this->compareEquals($value1, $comparisonValue),
+                        '=~' => @\preg_match($comparisonValue, $value1),
+                        '<' => $this->compareLessThan($value1, $comparisonValue),
+                        '<=' => $this->compareLessThan($value1, $comparisonValue)
+                            || $this->compareEquals($value1, $comparisonValue),
+                        '>' => $this->compareLessThan($comparisonValue, $value1), //rfc semantics
+                        '>=' => $this->compareLessThan($comparisonValue, $value1) //rfc semantics
+                            || $this->compareEquals($value1, $comparisonValue),
+                        "in" => \is_array($comparisonValue) && \in_array($value1, $comparisonValue, true),
+                        'nin', "!in" => \is_array($comparisonValue) && !\in_array($value1, $comparisonValue, true)
+                    };
+                }
+
+                if ($negateFilter) {
+                    $comparisonResult = !$comparisonResult;
+                }
+
+                if ($comparisonResult) {
+                    $return[] = $value;
+                }
             }
         }
 
