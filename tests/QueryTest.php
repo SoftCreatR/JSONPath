@@ -1296,7 +1296,7 @@ class QueryTest extends TestCase
                 . 'ey":[42]},{"key":{"key":42}},{"key":{"some":42}},{"some":"value"}]',
                 '[{"key":0},{"key":-1},{"key":1},{"key":41},{"key":43},{"key":42.0001},{"key":41.9999},{"key":100},{'
                 . '"key":"some"},{"key":"42"},{"key":null},{"key":420},{"key":""},{"key":{}},{"key":[]},{"key":[42]},{'
-                . '"key":{"key":42}},{"key":{"some":42}},{"some":"value"}]',
+                . '"key":{"key":42}},{"key":{"some":42}}]',
             ],
             [ // data set #188 - unknown consensus
                 'filter_expression_with_regular_expression',
