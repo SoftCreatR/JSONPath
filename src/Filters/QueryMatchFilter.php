@@ -62,27 +62,21 @@ class QueryMatchFilter extends AbstractFilter
                 $value1 = (new JSONPath($value))->find($key)->getData()[0] ?? '';
             }
 
-            if ($value1) {
-                if ($operator === null) {
-                    $return[] = $value;
-                }
+            $comparisonResult = match ($operator) {
+                null => AccessHelper::keyExists($value, $key, $this->magicIsAllowed),
+                "=","==" => $value1 === $comparisonValue,
+                "!=","!==","<>" => $value1 !== $comparisonValue,
+                '=~' => @\preg_match($comparisonValue, $value1),
+                '>' => $value1 > $comparisonValue,
+                '>=' => $value1 >= $comparisonValue,
+                '<' => $value1 < $comparisonValue,
+                '<=' => $value1 <= $comparisonValue,
+                "in" => \is_array($comparisonValue) && \in_array($value1, $comparisonValue, true),
+                'nin',"!in" =>  \is_array($comparisonValue) && !\in_array($value1, $comparisonValue, true)
+            };
 
-                $comparisonResult = match ($operator) {
-                    null => null,
-                    "=","==" => $value1 === $comparisonValue,
-                    "!=","!==","<>" => $value1 !== $comparisonValue,
-                    '=~' => @\preg_match($comparisonValue, $value1),
-                    '>' => $value1 > $comparisonValue,
-                    '>=' => $value1 >= $comparisonValue,
-                    '<' => $value1 < $comparisonValue,
-                    '<=' => $value1 <= $comparisonValue,
-                    "in" => \is_array($comparisonValue) && \in_array($value1, $comparisonValue, true),
-                    'nin',"!in" =>  \is_array($comparisonValue) && !\in_array($value1, $comparisonValue, true)
-                };
-
-                if ($comparisonResult) {
-                    $return[] = $value;
-                }
+            if ($comparisonResult) {
+                $return[] = $value;
             }
         }
 
