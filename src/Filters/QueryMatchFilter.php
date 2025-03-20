@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 /**
  * JSONPath implementation for PHP.
@@ -13,6 +13,8 @@ use Flow\JSONPath\JSONPath;
 use Flow\JSONPath\JSONPathException;
 use RuntimeException;
 use function error_log;
+use function is_scalar;
+use function is_string;
 
 class QueryMatchFilter extends AbstractFilter
 {
@@ -71,13 +73,15 @@ class QueryMatchFilter extends AbstractFilter
             if ($notNothing) {
                 $comparisonResult = match ($operator) {
                     null => AccessHelper::keyExists($value, $key, $this->magicIsAllowed),
-                    "=", "==" => $value1 === $comparisonValue,
-                    "!=", "!==", "<>" => $value1 !== $comparisonValue,
+                    "=", "==" => $this->compareEquals($value1, $comparisonValue),
+                    "!=", "!==", "<>" => !$this->compareEquals($value1, $comparisonValue),
                     '=~' => @\preg_match($comparisonValue, $value1),
-                    '>' => $value1 > $comparisonValue,
-                    '>=' => $value1 >= $comparisonValue,
-                    '<' => $value1 < $comparisonValue,
-                    '<=' => $value1 <= $comparisonValue,
+                    '<' => $this->compareLessThan($value1, $comparisonValue),
+                    '<=' => $this->compareLessThan($value1, $comparisonValue)
+                        || $this->compareEquals($value1, $comparisonValue),
+                    '>' => $this->compareLessThan($comparisonValue, $value1), //rfc semantics
+                    '>=' => $this->compareLessThan($comparisonValue, $value1) //rfc semantics
+                        || $this->compareEquals($value1, $comparisonValue),
                     "in" => \is_array($comparisonValue) && \in_array($value1, $comparisonValue, true),
                     'nin', "!in" => \is_array($comparisonValue) && !\in_array($value1, $comparisonValue, true)
                 };
@@ -89,5 +93,34 @@ class QueryMatchFilter extends AbstractFilter
         }
 
         return $return;
+    }
+
+    protected function isNumber($value): bool
+    {
+        return !is_string($value) && \is_numeric($value);
+    }
+
+    protected function compareEquals($a, $b): bool
+    {
+        $type_a = gettype($a);
+        $type_b = gettype($b);
+        if ($type_a === $type_b || ($this->isNumber($a) && $this->isNumber($b))) {
+            //Primitives or Numbers
+            if ($a === null || is_scalar($a)) {
+                return $a == $b;
+            }
+            //Object/Array
+            //@TODO array and object comparison
+        }
+        return false;
+    }
+
+    protected function compareLessThan($a, $b): bool
+    {
+        if ((is_string($a) && is_string($b)) || ($this->isNumber($a) && $this->isNumber($b))) {
+            //numerical and string comparison supported only
+            return $a < $b;
+        }
+        return false;
     }
 }
