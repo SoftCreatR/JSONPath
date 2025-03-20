@@ -20,7 +20,7 @@ class QueryMatchFilter extends AbstractFilter
     protected const MATCH_QUERY_NEGATION_WRAPPED = '^(?<negate>!)\((?<logicalexpr>.+)\)$';
     protected const MATCH_QUERY_NEGATION_UNWRAPPED = '^(?<negate>!)(?<logicalexpr>.+)$';
     protected const MATCH_QUERY_OPERATORS = '
-      @(\.(?<key>[^\s<>!=]+)|\[["\']?(?<keySquare>.*?)["\']?\])
+      (@\.(?<key>[^\s<>!=]+)|@\[["\']?(?<keySquare>.*?)["\']?\]|(?<node>@))
       (\s*(?<operator>==|=~|=|<>|!==|!=|>=|<=|>|<|in|!in|nin)\s*(?<comparisonValue>.+?(?=(&&|$))))?
       (\s*(?<logicaland>&&)\s*)?
     ';
@@ -60,9 +60,9 @@ class QueryMatchFilter extends AbstractFilter
         for ($logicalAndNum = 0; $logicalAndNum < \count($matches[0]); $logicalAndNum++) {
             $key = $matches['key'][$logicalAndNum] ?: $matches['keySquare'][$logicalAndNum];
 
-            if ($key === '') {
-                throw new RuntimeException('Malformed filter query: key was not set');
-            }
+          //  if ($key === '') {
+          //      throw new RuntimeException('Malformed filter query: key was not set');
+          //  }
 
             $operator = $matches['operator'][$logicalAndNum] ?? null;
             $comparisonValue = $matches['comparisonValue'][$logicalAndNum] ?? null;
@@ -87,14 +87,19 @@ class QueryMatchFilter extends AbstractFilter
                 $value1 = null;
 
                 $notNothing = AccessHelper::keyExists($value, $key, $this->magicIsAllowed);
-                if ($notNothing) {
-                    $value1 = AccessHelper::getValue($value, $key, $this->magicIsAllowed);
-                } elseif (\str_contains($key, '.')) {
-                    $foundValue = (new JSONPath($value))->find($key)->getData();
-                    if ($foundValue) {
-                        $value1 = $foundValue[0];
-                        $notNothing = true;
+                if ($key) {
+                    if ($notNothing) {
+                        $value1 = AccessHelper::getValue($value, $key, $this->magicIsAllowed);
+                    } elseif (\str_contains($key, '.')) {
+                        $foundValue = (new JSONPath($value))->find($key)->getData();
+                        if ($foundValue) {
+                            $value1 = $foundValue[0];
+                            $notNothing = true;
+                        }
                     }
+                } else {
+                    $value1 = $value;
+                    $notNothing = true;
                 }
 
                 $comparisonResult = null;
