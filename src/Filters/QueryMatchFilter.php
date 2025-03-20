@@ -56,24 +56,32 @@ class QueryMatchFilter extends AbstractFilter
         foreach ($collection as $value) {
             $value1 = null;
 
-            if (AccessHelper::keyExists($value, $key, $this->magicIsAllowed)) {
+            $notNothing = AccessHelper::keyExists($value, $key, $this->magicIsAllowed);
+            if ($notNothing) {
                 $value1 = AccessHelper::getValue($value, $key, $this->magicIsAllowed);
             } elseif (\str_contains($key, '.')) {
-                $value1 = (new JSONPath($value))->find($key)->getData()[0] ?? '';
+                $foundValue = (new JSONPath($value))->find($key)->getData();
+                if ($foundValue) {
+                    $value1 = $foundValue[0];
+                    $notNothing = true;
+                }
             }
 
-            $comparisonResult = match ($operator) {
-                null => AccessHelper::keyExists($value, $key, $this->magicIsAllowed),
-                "=","==" => $value1 === $comparisonValue,
-                "!=","!==","<>" => $value1 !== $comparisonValue,
-                '=~' => @\preg_match($comparisonValue, $value1),
-                '>' => $value1 > $comparisonValue,
-                '>=' => $value1 >= $comparisonValue,
-                '<' => $value1 < $comparisonValue,
-                '<=' => $value1 <= $comparisonValue,
-                "in" => \is_array($comparisonValue) && \in_array($value1, $comparisonValue, true),
-                'nin',"!in" =>  \is_array($comparisonValue) && !\in_array($value1, $comparisonValue, true)
-            };
+            $comparisonResult = null;
+            if ($notNothing) {
+                $comparisonResult = match ($operator) {
+                    null => AccessHelper::keyExists($value, $key, $this->magicIsAllowed),
+                    "=", "==" => $value1 === $comparisonValue,
+                    "!=", "!==", "<>" => $value1 !== $comparisonValue,
+                    '=~' => @\preg_match($comparisonValue, $value1),
+                    '>' => $value1 > $comparisonValue,
+                    '>=' => $value1 >= $comparisonValue,
+                    '<' => $value1 < $comparisonValue,
+                    '<=' => $value1 <= $comparisonValue,
+                    "in" => \is_array($comparisonValue) && \in_array($value1, $comparisonValue, true),
+                    'nin', "!in" => \is_array($comparisonValue) && !\in_array($value1, $comparisonValue, true)
+                };
+            }
 
             if ($comparisonResult) {
                 $return[] = $value;
