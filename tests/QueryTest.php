@@ -48,7 +48,11 @@ class QueryTest extends TestCase
     ): void {
         $results = null;
         $query = \ucwords(\str_replace('_', ' ', $id));
-        $url = \sprintf('https://cburgmer.github.io/json-path-comparison/results/%s', $id);
+        if (\str_starts_with($id, 'rfc_')) {
+            $url = 'https://www.rfc-editor.org/rfc/rfc9535';
+        } else {
+            $url = \sprintf('https://cburgmer.github.io/json-path-comparison/results/%s', $id);
+        }
 
         // Avoid "This test did not perform any assertions"
         // but do not use markTestSkipped, to prevent unnecessary
@@ -69,6 +73,10 @@ class QueryTest extends TestCase
             $results = \json_encode((new JSONPath(\json_decode($data, true)))->find($selector));
 
             self::assertEquals($consensus, $results);
+
+            if (\in_array($id, self::$baselineFailedQueries, true)) {
+                throw new \Exception("XFAIL test $id unexpectedly passed, update baselineFailedQueries.txt");
+            }
         } catch (ExpectationFailedException $e) {
             try {
                 // In some cases, the consensus is just disordered, while
@@ -92,10 +100,12 @@ class QueryTest extends TestCase
                     );
                 }
             }
-        } catch (JSONPathException $e) {
-            // ignore
-        } catch (RuntimeException) {
-            // ignore
+        } catch (JSONPathException|RuntimeException $e) {
+            if (!\in_array($id, self::$baselineFailedQueries, true)) {
+                throw new RuntimeException(
+                    $e->getMessage() . "\nQuery: {$query}\n\nMore information: {$url}",
+                );
+            }
         }
     }
 
@@ -1576,7 +1586,7 @@ class QueryTest extends TestCase
                 '[null]'
             ],
             [
-                'rfc_semantics_of_null_existance',
+                'rfc_semantics_of_null_existence',
                 '$.b[?@]',
                 '{"a": null, "b": [null], "c": [{}], "null": 1}',
                 '[null]'
