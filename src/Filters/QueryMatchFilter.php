@@ -12,6 +12,7 @@ use Flow\JSONPath\AccessHelper;
 use Flow\JSONPath\JSONPath;
 use Flow\JSONPath\JSONPathException;
 use RuntimeException;
+use function error_log;
 
 class QueryMatchFilter extends AbstractFilter
 {
@@ -41,23 +42,12 @@ class QueryMatchFilter extends AbstractFilter
         $comparisonValue = $matches['comparisonValue'] ?? null;
 
         if (\is_string($comparisonValue)) {
-            if (\str_starts_with($comparisonValue, "[") && \str_ends_with($comparisonValue, "]")) {
-                $comparisonValue = \substr($comparisonValue, 1, -1);
-                $comparisonValue = \preg_replace('/^[\'"]/', '', $comparisonValue);
-                $comparisonValue = \preg_replace('/[\'"]$/', '', $comparisonValue);
-                $comparisonValue = \preg_replace('/[\'"], *[\'"]/', ',', $comparisonValue);
-                $comparisonValue = \array_map('trim', \explode(",", $comparisonValue));
-            } else {
-                $comparisonValue = \preg_replace('/^[\'"]/', '', $comparisonValue);
-                $comparisonValue = \preg_replace('/[\'"]$/', '', $comparisonValue);
-
-                if (\strtolower($comparisonValue) === 'false') {
-                    $comparisonValue = false;
-                } elseif (\strtolower($comparisonValue) === 'true') {
-                    $comparisonValue = true;
-                } elseif (\strtolower($comparisonValue) === 'null') {
-                    $comparisonValue = null;
-                }
+            $comparisonValue = \preg_replace('/^[\']/', '"', $comparisonValue);
+            $comparisonValue = \preg_replace('/[\']$/', '"', $comparisonValue);
+            try {
+                $comparisonValue = \json_decode($comparisonValue, true, flags:JSON_THROW_ON_ERROR);
+            } catch (\JsonException $e) {
+                //Leave $comparisonValue as raw (regular express or non quote wrapped string
             }
         }
 
@@ -79,15 +69,15 @@ class QueryMatchFilter extends AbstractFilter
 
                 $comparisonResult = match ($operator) {
                     null => null,
-                    "=","==" => $value1 == $comparisonValue,
-                    "!=","!==","<>" => $value1 != $comparisonValue,
+                    "=","==" => $value1 === $comparisonValue,
+                    "!=","!==","<>" => $value1 !== $comparisonValue,
                     '=~' => @\preg_match($comparisonValue, $value1),
                     '>' => $value1 > $comparisonValue,
                     '>=' => $value1 >= $comparisonValue,
                     '<' => $value1 < $comparisonValue,
                     '<=' => $value1 <= $comparisonValue,
-                    "in" => \is_array($comparisonValue) && \in_array($value1, $comparisonValue, false),
-                    'nin',"!in" =>  \is_array($comparisonValue) && !\in_array($value1, $comparisonValue, false)
+                    "in" => \is_array($comparisonValue) && \in_array($value1, $comparisonValue, true),
+                    'nin',"!in" =>  \is_array($comparisonValue) && !\in_array($value1, $comparisonValue, true)
                 };
 
                 if ($comparisonResult) {
