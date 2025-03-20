@@ -60,10 +60,6 @@ class QueryMatchFilter extends AbstractFilter
         for ($logicalAndNum = 0; $logicalAndNum < \count($matches[0]); $logicalAndNum++) {
             $key = $matches['key'][$logicalAndNum] ?: $matches['keySquare'][$logicalAndNum];
 
-          //  if ($key === '') {
-          //      throw new RuntimeException('Malformed filter query: key was not set');
-          //  }
-
             $operator = $matches['operator'][$logicalAndNum] ?? null;
             $comparisonValue = $matches['comparisonValue'][$logicalAndNum] ?? null;
 
@@ -73,7 +69,7 @@ class QueryMatchFilter extends AbstractFilter
                 try {
                     $comparisonValue = \json_decode($comparisonValue, true, flags: JSON_THROW_ON_ERROR);
                 } catch (\JsonException $e) {
-                    //Leave $comparisonValue as raw (regular express or non quote wrapped string
+                    //Leave $comparisonValue as raw (eg. regular express or non quote wrapped string)
                 }
             }
 
