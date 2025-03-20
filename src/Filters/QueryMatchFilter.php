@@ -77,47 +77,20 @@ class QueryMatchFilter extends AbstractFilter
                     $return[] = $value;
                 }
 
-                /** @noinspection TypeUnsafeComparisonInspection */
-                // phpcs:ignore -- This is a loose comparison by design.
-                if (($operator === '=' || $operator === '==') && $value1 == $comparisonValue) {
-                    $return[] = $value;
-                }
+                $comparisonResult = match ($operator) {
+                    null => null,
+                    "=","==" => $value1 == $comparisonValue,
+                    "!=","!==","<>" => $value1 != $comparisonValue,
+                    '=~' => @\preg_match($comparisonValue, $value1),
+                    '>' => $value1 > $comparisonValue,
+                    '>=' => $value1 >= $comparisonValue,
+                    '<' => $value1 < $comparisonValue,
+                    '<=' => $value1 <= $comparisonValue,
+                    "in" => \is_array($comparisonValue) && \in_array($value1, $comparisonValue, false),
+                    'nin',"!in" =>  \is_array($comparisonValue) && !\in_array($value1, $comparisonValue, false)
+                };
 
-                /** @noinspection TypeUnsafeComparisonInspection */
-                // phpcs:ignore -- This is a loose comparison by design.
-                if (($operator === '!=' || $operator === '!==' || $operator === '<>') && $value1 != $comparisonValue) {
-                    $return[] = $value;
-                }
-
-                if ($operator === '=~' && @\preg_match($comparisonValue, $value1)) {
-                    $return[] = $value;
-                }
-
-                if ($operator === '>' && $value1 > $comparisonValue) {
-                    $return[] = $value;
-                }
-
-                if ($operator === '>=' && $value1 >= $comparisonValue) {
-                    $return[] = $value;
-                }
-
-                if ($operator === '<' && $value1 < $comparisonValue) {
-                    $return[] = $value;
-                }
-
-                if ($operator === '<=' && $value1 <= $comparisonValue) {
-                    $return[] = $value;
-                }
-
-                if ($operator === 'in' && \is_array($comparisonValue) && \in_array($value1, $comparisonValue, false)) {
-                    $return[] = $value;
-                }
-
-                if (
-                    ($operator === 'nin' || $operator === '!in')
-                    && \is_array($comparisonValue)
-                    && !\in_array($value1, $comparisonValue, false)
-                ) {
+                if ($comparisonResult) {
                     $return[] = $value;
                 }
             }
