@@ -105,7 +105,7 @@ class QueryMatchFilter extends AbstractFilter
                 $comparisonResult = null;
                 if ($notNothing) {
                     $comparisonResult = match ($operator) {
-                        null => AccessHelper::keyExists($value, $key, $this->magicIsAllowed),
+                        null => AccessHelper::keyExists($value, $key, $this->magicIsAllowed) || (!$key),
                         "=", "==" => $this->compareEquals($value1, $comparisonValue),
                         "!=", "!==", "<>" => !$this->compareEquals($value1, $comparisonValue),
                         '=~' => @\preg_match($comparisonValue, $value1),
