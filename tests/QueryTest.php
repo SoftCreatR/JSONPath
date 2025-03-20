@@ -1464,7 +1464,7 @@ class QueryTest extends TestCase
                 'script_expression',
                 '$[(@.length-1)]',
                 '["first","second","third","forth","fifth"]',
-                'fifth',
+                '["fifth"]',
             ],
             [ // data set #214
                 'union',
