@@ -13,12 +13,19 @@ namespace Flow\JSONPath\Filters;
 use Flow\JSONPath\AccessHelper;
 use Flow\JSONPath\JSONPath;
 use Flow\JSONPath\JSONPathException;
+use JsonException;
 use RuntimeException;
+
+use const JSON_THROW_ON_ERROR;
+use const PREG_OFFSET_CAPTURE;
+use const PREG_UNMATCHED_AS_NULL;
 
 class QueryMatchFilter extends AbstractFilter
 {
     protected const MATCH_QUERY_NEGATION_WRAPPED = '^(?<negate>!)\((?<logicalexpr>.+)\)$';
+
     protected const MATCH_QUERY_NEGATION_UNWRAPPED = '^(?<negate>!)(?<logicalexpr>.+)$';
+
     protected const MATCH_QUERY_OPERATORS = '
       (@\.(?<key>[^\s<>!=]+)|@\[["\']?(?<keySquare>.*?)["\']?\]|(?<node>@)|(%group(?<group>\d+)%))
       (\s*(?<operator>==|=~|=|<>|!==|!=|>=|<=|>|<|in|!in|nin)\s*(?<comparisonValue>.+?(?=(&&|$|\|\||%))))?
@@ -56,7 +63,7 @@ class QueryMatchFilter extends AbstractFilter
                 //sanity check that our group is a group and not something within a string or regular expression
                 if (\preg_match('/' . static::MATCH_QUERY_OPERATORS . '/x', $test)) {
                     $filterGroups[$i] = $test;
-                    $filterExpression = \str_replace($matchesGroup[0], "%group$i%", $filterExpression);
+                    $filterExpression = \str_replace($matchesGroup[0], "%group{$i}%", $filterExpression);
                 }
             }
         }
@@ -71,16 +78,18 @@ class QueryMatchFilter extends AbstractFilter
         if (
             $match === false
             || !isset($matches[1][0])
-            || isset($matches['logicalandor'][array_key_last($matches['logicalandor'])])
+            || isset($matches['logicalandor'][\array_key_last($matches['logicalandor'])])
         ) {
             throw new RuntimeException('Malformed filter query');
         }
 
         $return = [];
+        $matchCount = \count($matches[0]);
 
-        for ($expressionPart = 0; $expressionPart < \count($matches[0]); $expressionPart++) {
+        for ($expressionPart = 0; $expressionPart < $matchCount; $expressionPart++) {
             $filteredCollection = $collection;
             $logicalJoin = $expressionPart > 0 ? $matches['logicalandor'][$expressionPart - 1] : null;
+
             if ($logicalJoin === '&&') {
                 //Restrict the nodes we need to look at to those already meeting criteria
                 $filteredCollection = $return;
@@ -92,6 +101,7 @@ class QueryMatchFilter extends AbstractFilter
                 $filter = '$[?(' . $filterGroups[$matches['group'][$expressionPart]] . ')]';
                 $resolve = (new JSONPath($filteredCollection))->find($filter)->getData();
                 $return = $resolve;
+
                 continue;
             }
 
@@ -102,12 +112,13 @@ class QueryMatchFilter extends AbstractFilter
             $comparisonValue = $matches['comparisonValue'][$expressionPart] ?? null;
 
             if (\is_string($comparisonValue)) {
-                $comparisonValue = \preg_replace('/^[\']/', '"', $comparisonValue);
-                $comparisonValue = \preg_replace('/[\']$/', '"', $comparisonValue);
+                $comparisonValue = \preg_replace('/^\'/', '"', $comparisonValue);
+                $comparisonValue = \preg_replace('/\'$/', '"', $comparisonValue);
+
                 try {
-                    $comparisonValue = \json_decode($comparisonValue, true, flags: JSON_THROW_ON_ERROR);
-                } catch (\JsonException $e) {
-                    //Leave $comparisonValue as raw (eg. regular express or non quote wrapped string)
+                    $comparisonValue = \json_decode($comparisonValue, true, 512, JSON_THROW_ON_ERROR);
+                } catch (JsonException) {
+                    //Leave $comparisonValue as raw (e.g. regular express or non quote wrapped string)
                 }
             }
 
@@ -116,14 +127,16 @@ class QueryMatchFilter extends AbstractFilter
                     //Short-circuit, node already exists in output due to previous test
                     continue;
                 }
-                $selectedNode = null;
 
+                $selectedNode = null;
                 $notNothing = AccessHelper::keyExists($node, $key, $this->magicIsAllowed);
+
                 if ($key) {
                     if ($notNothing) {
                         $selectedNode = AccessHelper::getValue($node, $key, $this->magicIsAllowed);
                     } elseif (\str_contains($key, '.')) {
                         $foundValue = (new JSONPath($node))->find($key)->getData();
+
                         if ($foundValue) {
                             $selectedNode = $foundValue[0];
                             $notNothing = true;
@@ -136,6 +149,7 @@ class QueryMatchFilter extends AbstractFilter
                 }
 
                 $comparisonResult = null;
+
                 if ($notNothing) {
                     $comparisonResult = match ($operator) {
                         null => AccessHelper::keyExists($node, $key, $this->magicIsAllowed) || (!$key),
@@ -165,6 +179,7 @@ class QueryMatchFilter extends AbstractFilter
 
         //Keep out returned nodes in the same order they were defined in the original collection
         \ksort($return);
+
         return $return;
     }
 
@@ -177,14 +192,17 @@ class QueryMatchFilter extends AbstractFilter
     {
         $type_a = \gettype($a);
         $type_b = \gettype($b);
+
         if ($type_a === $type_b || ($this->isNumber($a) && $this->isNumber($b))) {
             //Primitives or Numbers
             if ($a === null || \is_scalar($a)) {
+                /** @noinspection TypeUnsafeComparisonInspection */
                 return $a == $b;
             }
             //Object/Array
             //@TODO array and object comparison
         }
+
         return false;
     }
 
@@ -194,6 +212,7 @@ class QueryMatchFilter extends AbstractFilter
             //numerical and string comparison supported only
             return $a < $b;
         }
+
         return false;
     }
 }
