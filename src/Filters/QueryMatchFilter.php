@@ -20,10 +20,12 @@ class QueryMatchFilter extends AbstractFilter
     protected const MATCH_QUERY_NEGATION_WRAPPED = '^(?<negate>!)\((?<logicalexpr>.+)\)$';
     protected const MATCH_QUERY_NEGATION_UNWRAPPED = '^(?<negate>!)(?<logicalexpr>.+)$';
     protected const MATCH_QUERY_OPERATORS = '
-      (@\.(?<key>[^\s<>!=]+)|@\[["\']?(?<keySquare>.*?)["\']?\]|(?<node>@))
-      (\s*(?<operator>==|=~|=|<>|!==|!=|>=|<=|>|<|in|!in|nin)\s*(?<comparisonValue>.+?(?=(&&|$))))?
-      (\s*(?<logicaland>&&)\s*)?
+      (@\.(?<key>[^\s<>!=]+)|@\[["\']?(?<keySquare>.*?)["\']?\]|(?<node>@)|(%group(?<group>\d+)%))
+      (\s*(?<operator>==|=~|=|<>|!==|!=|>=|<=|>|<|in|!in|nin)\s*(?<comparisonValue>.+?(?=(&&|$|\|\||%))))?
+      (\s*(?<logicalandor>&&|\|\|)\s*)?
     ';
+
+    protected const MATCH_GROUPED_EXPRESSION = '#\([^)(]*+(?:(?R)[^)(]*)*+\)#';
 
     /**
      * @throws JSONPathException
@@ -40,6 +42,25 @@ class QueryMatchFilter extends AbstractFilter
             $filterExpression = $negationMatches['logicalexpr'];
         }
 
+        $filterGroups = [];
+        if (
+            \preg_match_all(
+                static::MATCH_GROUPED_EXPRESSION,
+                $filterExpression,
+                $matches,
+                PREG_OFFSET_CAPTURE | PREG_UNMATCHED_AS_NULL
+            )
+        ) {
+            foreach ($matches[0] as $i => $matchesGroup) {
+                $test = \substr($matchesGroup[0], 1, -1);
+                //sanity check that our group is a group and not something within a string or regular expression
+                if (\preg_match('/' . static::MATCH_QUERY_OPERATORS . '/x', $test)) {
+                    $filterGroups[$i] = $test;
+                    $filterExpression = \str_replace($matchesGroup[0], "%group$i%", $filterExpression);
+                }
+            }
+        }
+
         $match = \preg_match_all(
             '/' . static::MATCH_QUERY_OPERATORS . '/x',
             $filterExpression,
@@ -50,18 +71,35 @@ class QueryMatchFilter extends AbstractFilter
         if (
             $match === false
             || !isset($matches[1][0])
-            || isset($matches['logicaland'][array_key_last($matches['logicaland'])])
+            || isset($matches['logicalandor'][array_key_last($matches['logicalandor'])])
         ) {
             throw new RuntimeException('Malformed filter query');
         }
 
         $return = [];
 
-        for ($logicalAndNum = 0; $logicalAndNum < \count($matches[0]); $logicalAndNum++) {
-            $key = $matches['key'][$logicalAndNum] ?: $matches['keySquare'][$logicalAndNum];
+        for ($expressionPart = 0; $expressionPart < \count($matches[0]); $expressionPart++) {
+            $filteredCollection = $collection;
+            $logicalJoin = $expressionPart > 0 ? $matches['logicalandor'][$expressionPart - 1] : null;
+            if ($logicalJoin === '&&') {
+                //Restrict the nodes we need to look at to those already meeting criteria
+                $filteredCollection = $return;
+                $return = [];
+            }
 
-            $operator = $matches['operator'][$logicalAndNum] ?? null;
-            $comparisonValue = $matches['comparisonValue'][$logicalAndNum] ?? null;
+            //Processing a group
+            if ($matches['group'][$expressionPart] !== null) {
+                $filter = '$[?(' . $filterGroups[$matches['group'][$expressionPart]] . ')]';
+                $resolve = (new JSONPath($filteredCollection))->find($filter)->getData();
+                $return = $resolve;
+                continue;
+            }
+
+            //Process a normal expression
+            $key = $matches['key'][$expressionPart] ?: $matches['keySquare'][$expressionPart];
+
+            $operator = $matches['operator'][$expressionPart] ?? null;
+            $comparisonValue = $matches['comparisonValue'][$expressionPart] ?? null;
 
             if (\is_string($comparisonValue)) {
                 $comparisonValue = \preg_replace('/^[\']/', '"', $comparisonValue);
@@ -73,46 +111,45 @@ class QueryMatchFilter extends AbstractFilter
                 }
             }
 
-            $filteredCollection = $collection;
-            if ($logicalAndNum > 0) {
-                $filteredCollection = $return;
-                $return = [];
-            }
+            foreach ($filteredCollection as $nodeIndex => $node) {
+                if ($logicalJoin === '||' && \array_key_exists($nodeIndex, $return)) {
+                    //Short-circuit, node already exists in output due to previous test
+                    continue;
+                }
+                $selectedNode = null;
 
-            foreach ($filteredCollection as $value) {
-                $value1 = null;
-
-                $notNothing = AccessHelper::keyExists($value, $key, $this->magicIsAllowed);
+                $notNothing = AccessHelper::keyExists($node, $key, $this->magicIsAllowed);
                 if ($key) {
                     if ($notNothing) {
-                        $value1 = AccessHelper::getValue($value, $key, $this->magicIsAllowed);
+                        $selectedNode = AccessHelper::getValue($node, $key, $this->magicIsAllowed);
                     } elseif (\str_contains($key, '.')) {
-                        $foundValue = (new JSONPath($value))->find($key)->getData();
+                        $foundValue = (new JSONPath($node))->find($key)->getData();
                         if ($foundValue) {
-                            $value1 = $foundValue[0];
+                            $selectedNode = $foundValue[0];
                             $notNothing = true;
                         }
                     }
                 } else {
-                    $value1 = $value;
+                    //Node selection was plain @
+                    $selectedNode = $node;
                     $notNothing = true;
                 }
 
                 $comparisonResult = null;
                 if ($notNothing) {
                     $comparisonResult = match ($operator) {
-                        null => AccessHelper::keyExists($value, $key, $this->magicIsAllowed) || (!$key),
-                        "=", "==" => $this->compareEquals($value1, $comparisonValue),
-                        "!=", "!==", "<>" => !$this->compareEquals($value1, $comparisonValue),
-                        '=~' => @\preg_match($comparisonValue, $value1),
-                        '<' => $this->compareLessThan($value1, $comparisonValue),
-                        '<=' => $this->compareLessThan($value1, $comparisonValue)
-                            || $this->compareEquals($value1, $comparisonValue),
-                        '>' => $this->compareLessThan($comparisonValue, $value1), //rfc semantics
-                        '>=' => $this->compareLessThan($comparisonValue, $value1) //rfc semantics
-                            || $this->compareEquals($value1, $comparisonValue),
-                        "in" => \is_array($comparisonValue) && \in_array($value1, $comparisonValue, true),
-                        'nin', "!in" => \is_array($comparisonValue) && !\in_array($value1, $comparisonValue, true)
+                        null => AccessHelper::keyExists($node, $key, $this->magicIsAllowed) || (!$key),
+                        "=", "==" => $this->compareEquals($selectedNode, $comparisonValue),
+                        "!=", "!==", "<>" => !$this->compareEquals($selectedNode, $comparisonValue),
+                        '=~' => @\preg_match($comparisonValue, $selectedNode),
+                        '<' => $this->compareLessThan($selectedNode, $comparisonValue),
+                        '<=' => $this->compareLessThan($selectedNode, $comparisonValue)
+                            || $this->compareEquals($selectedNode, $comparisonValue),
+                        '>' => $this->compareLessThan($comparisonValue, $selectedNode), //rfc semantics
+                        '>=' => $this->compareLessThan($comparisonValue, $selectedNode) //rfc semantics
+                            || $this->compareEquals($selectedNode, $comparisonValue),
+                        "in" => \is_array($comparisonValue) && \in_array($selectedNode, $comparisonValue, true),
+                        'nin', "!in" => \is_array($comparisonValue) && !\in_array($selectedNode, $comparisonValue, true)
                     };
                 }
 
@@ -121,11 +158,13 @@ class QueryMatchFilter extends AbstractFilter
                 }
 
                 if ($comparisonResult) {
-                    $return[] = $value;
+                    $return[$nodeIndex] = $node;
                 }
             }
         }
 
+        //Keep out returned nodes in the same order they were defined in the original collection
+        \ksort($return);
         return $return;
     }
 
