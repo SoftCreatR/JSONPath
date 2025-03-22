@@ -179,6 +179,13 @@ This package is Treeware. If you use it in production, then we ask that you [**b
         </a>
     </td>
     <td align="center" style="word-wrap: break-word; width: 150.0; height: 150.0">
+        <a href=https://github.com/lucasnetau>
+            <img src=https://avatars.githubusercontent.com/u/9331242?v=4 width="100;"  alt=James Lucas/>
+            <br />
+            <sub style="font-size:14px"><b>James Lucas</b></sub>
+        </a>
+    </td>
+    <td align="center" style="word-wrap: break-word; width: 150.0; height: 150.0">
         <a href=https://github.com/Schrank>
             <img src=https://avatars.githubusercontent.com/u/379680?v=4 width="100;"  alt=Fabian Blechschmidt/>
             <br />
@@ -187,16 +194,16 @@ This package is Treeware. If you use it in production, then we ask that you [**b
     </td>
     <td align="center" style="word-wrap: break-word; width: 150.0; height: 150.0">
         <a href=https://github.com/warlof>
-            <img src=https://avatars.githubusercontent.com/u/648753?v=4 width="100;"  alt=Loïc Leuilliot/>
+            <img src=https://avatars.githubusercontent.com/u/648753?v=4 width="100;"  alt=warlof/>
             <br />
-            <sub style="font-size:14px"><b>Loïc Leuilliot</b></sub>
+            <sub style="font-size:14px"><b>warlof</b></sub>
         </a>
     </td>
     <td align="center" style="word-wrap: break-word; width: 150.0; height: 150.0">
         <a href=https://github.com/SG5>
-            <img src=https://avatars.githubusercontent.com/u/3931761?v=4 width="100;"  alt=Sergey/>
+            <img src=https://avatars.githubusercontent.com/u/3931761?v=4 width="100;"  alt=Sergey G/>
             <br />
-            <sub style="font-size:14px"><b>Sergey</b></sub>
+            <sub style="font-size:14px"><b>Sergey G</b></sub>
         </a>
     </td>
     <td align="center" style="word-wrap: break-word; width: 150.0; height: 150.0">
@@ -206,6 +213,8 @@ This package is Treeware. If you use it in production, then we ask that you [**b
             <sub style="font-size:14px"><b>Alexandru Pătrănescu</b></sub>
         </a>
     </td>
+</tr>
+<tr>
     <td align="center" style="word-wrap: break-word; width: 150.0; height: 150.0">
         <a href=https://github.com/oleg-andreyev>
             <img src=https://avatars.githubusercontent.com/u/1244112?v=4 width="100;"  alt=Oleg Andreyev/>
@@ -213,8 +222,6 @@ This package is Treeware. If you use it in production, then we ask that you [**b
             <sub style="font-size:14px"><b>Oleg Andreyev</b></sub>
         </a>
     </td>
-</tr>
-<tr>
     <td align="center" style="word-wrap: break-word; width: 150.0; height: 150.0">
         <a href=https://github.com/rcjsuen>
             <img src=https://avatars.githubusercontent.com/u/15629116?v=4 width="100;"  alt=Remy Suen/>
