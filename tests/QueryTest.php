@@ -48,7 +48,11 @@ class QueryTest extends TestCase
     ): void {
         $results = null;
         $query = \ucwords(\str_replace('_', ' ', $id));
-        $url = \sprintf('https://cburgmer.github.io/json-path-comparison/results/%s', $id);
+        if (\str_starts_with($id, 'rfc_')) {
+            $url = 'https://www.rfc-editor.org/rfc/rfc9535';
+        } else {
+            $url = \sprintf('https://cburgmer.github.io/json-path-comparison/results/%s', $id);
+        }
 
         // Avoid "This test did not perform any assertions"
         // but do not use markTestSkipped, to prevent unnecessary
@@ -69,10 +73,16 @@ class QueryTest extends TestCase
             $results = \json_encode((new JSONPath(\json_decode($data, true)))->find($selector));
 
             self::assertEquals($consensus, $results);
+
+            if (\in_array($id, self::$baselineFailedQueries, true)) {
+                throw new ExpectationFailedException(
+                    "XFAIL test {$id} unexpectedly passed, update baselineFailedQueries.txt"
+                );
+            }
         } catch (ExpectationFailedException $e) {
             try {
                 // In some cases, the consensus is just disordered, while
-                // the actual result is correct. Let's perform a canonicalized
+                // the actual result is correct. Let's perform a canonical
                 // assert in these cases. There might be still some false positives
                 // (e.g. multidimensional comparisons), but that's okay, I guess. Maybe,
                 // we can also find a way around that in the future.
@@ -92,10 +102,12 @@ class QueryTest extends TestCase
                     );
                 }
             }
-        } catch (JSONPathException $e) {
-            // ignore
-        } catch (RuntimeException) {
-            // ignore
+        } catch (JSONPathException | RuntimeException $e) {
+            if (!\in_array($id, self::$baselineFailedQueries, true)) {
+                throw new RuntimeException(
+                    $e->getMessage() . "\nQuery: {$query}\n\nMore information: {$url}",
+                );
+            }
         }
     }
 
@@ -1296,7 +1308,7 @@ class QueryTest extends TestCase
                 . 'ey":[42]},{"key":{"key":42}},{"key":{"some":42}},{"some":"value"}]',
                 '[{"key":0},{"key":-1},{"key":1},{"key":41},{"key":43},{"key":42.0001},{"key":41.9999},{"key":100},{'
                 . '"key":"some"},{"key":"42"},{"key":null},{"key":420},{"key":""},{"key":{}},{"key":[]},{"key":[42]},{'
-                . '"key":{"key":42}},{"key":{"some":42}},{"some":"value"}]',
+                . '"key":{"key":42}},{"key":{"some":42}}]',
             ],
             [ // data set #188 - unknown consensus
                 'filter_expression_with_regular_expression',
@@ -1464,7 +1476,7 @@ class QueryTest extends TestCase
                 'script_expression',
                 '$[(@.length-1)]',
                 '["first","second","third","forth","fifth"]',
-                'fifth',
+                '["fifth"]',
             ],
             [ // data set #214
                 'union',
@@ -1544,6 +1556,60 @@ class QueryTest extends TestCase
                 '$[*,1]',
                 '["first","second","third","forth","fifth"]',
                 '["first","second","third","forth","fifth","second"]',
+            ],
+            [
+                'rfc_semantics_of_null_object_value',
+                '$.a',
+                '{"a": null, "b": [null], "c": [{}], "null": 1}',
+                '[null]',
+            ],
+            [
+                'rfc_semantics_of_null_null_used_as_array',
+                '$.a[0]',
+                '{"a": null, "b": [null], "c": [{}], "null": 1}',
+                'XFAIL',
+            ],
+            [
+                'rfc_semantics_of_null_null_used_as_object',
+                '$.a.d',
+                '{"a": null, "b": [null], "c": [{}], "null": 1}',
+                'XFAIL',
+            ],
+            [
+                'rfc_semantics_of_null_array_value',
+                '$.b[0]',
+                '{"a": null, "b": [null], "c": [{}], "null": 1}',
+                '[null]',
+            ],
+            [
+                'rfc_semantics_of_null_array_value_2',
+                '$.b[*]',
+                '{"a": null, "b": [null], "c": [{}], "null": 1}',
+                '[null]',
+            ],
+            [
+                'rfc_semantics_of_null_existence',
+                '$.b[?@]',
+                '{"a": null, "b": [null], "c": [{}], "null": 1}',
+                '[null]',
+            ],
+            [
+                'rfc_semantics_of_null_comparison',
+                '$.b[?@==null]',
+                '{"a": null, "b": [null], "c": [{}], "null": 1}',
+                '[null]',
+            ],
+            [
+                'rfc_semantics_of_null_comparison_with_missing_value',
+                '$.c[?@.d==null]',
+                '{"a": null, "b": [null], "c": [{}], "null": 1}',
+                'XFAIL',
+            ],
+            [
+                'rfc_semantics_of_null_null_string',
+                '$.null',
+                '{"a": null, "b": [null], "c": [{}], "null": 1}',
+                '[1]',
             ],
         ];
     }

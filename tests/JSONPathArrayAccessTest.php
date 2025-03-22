@@ -80,7 +80,7 @@ class JSONPathArrayAccessTest extends TestCase
      * @testWith [false]
      *           [true]
      */
-    public function testDifferentStylesOfAccess(bool $asArray): void
+    public function testDifferentStylesOfAccess(bool $asArray = true): void
     {
         $container = new ArrayObject($this->getData('conferences', $asArray));
         $data = new JSONPath($container);
@@ -97,7 +97,6 @@ class JSONPathArrayAccessTest extends TestCase
     }
 
     /**
-     * @throws JsonException
      * @noinspection PhpUndefinedFieldInspection
      */
     public function testUpdate(): void

@@ -1,5 +1,28 @@
 # Changelog
 
+### 0.10.0
+- Fixed query/selector Filter Expression With Current Object
+- Fixed query/selector Filter Expression With Different Grouped Operators
+- Fixed query/selector Filter Expression With equals_on_array_of_numbers
+- Fixed query/selector Filter Expression With Negation and Equals
+- Fixed query/selector Filter Expression With Negation and Less Than
+- Fixed query/selector Filter Expression Without Value
+- Fixed query/selector Filter Expression With Boolean AND Operator (#42)
+- Fixed query/selector Filter Expression With Boolean OR Operator (#43)
+- Fixed query/selector Filter Expression With Equals (#45)
+- Fixed query/selector Filter Expression With Equals false (#46)
+- Fixed query/selector Filter Expression With Equals null (#47)
+- Fixed query/selector Filter Expression With Equals Number With Fraction (#48)
+- Fixed query/selector Filter Expression With Equals true (#50)
+- Fixed query/selector Filter Expression With Greater Than (#52)
+- Fixed query/selector Filter Expression With Greater Than or Equal (#53)
+- Fixed query/selector Filter Expression With Less Than (#54)
+- Fixed query/selector Filter Expression With Less Than or Equal (#55)
+- Fixed query/selector Filter Expression With Not Equals (#56)
+- Fixed query/selector Filter Expression With Value (#57)
+- Fixed query/selector script_expression (Expected test result corrected)
+- Added additional NULL related query tests from JSONPath RFC
+
 ### 0.9.0
 🔻 Breaking changes ahead:
 

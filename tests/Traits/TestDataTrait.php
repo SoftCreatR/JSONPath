@@ -11,7 +11,6 @@ namespace Flow\JSONPath\Test\Traits;
 use JsonException;
 use RuntimeException;
 
-use const JSON_ERROR_NONE;
 use const JSON_THROW_ON_ERROR;
 
 trait TestDataTrait
@@ -19,7 +18,7 @@ trait TestDataTrait
     /**
      * Returns decoded JSON from a given file either as array or object.
      *
-     * @throws JsonException
+     * @throws RuntimeException
      */
     protected function getData(string $type, bool|int $asArray = true): mixed
     {
@@ -29,10 +28,10 @@ trait TestDataTrait
             throw new RuntimeException("File {$filePath} does not exist.");
         }
 
-        $json = \json_decode(\file_get_contents($filePath), (bool)$asArray, 512, JSON_THROW_ON_ERROR);
-
-        if (\json_last_error() !== JSON_ERROR_NONE) {
-            throw new RuntimeException("File {$filePath} does not contain valid JSON.");
+        try {
+            $json = \json_decode(\file_get_contents($filePath), (bool)$asArray, 512, JSON_THROW_ON_ERROR);
+        } catch (JsonException $e) {
+            throw new RuntimeException("File {$filePath} does not contain valid JSON. Error: {$e->getMessage()}");
         }
 
         return $json;
