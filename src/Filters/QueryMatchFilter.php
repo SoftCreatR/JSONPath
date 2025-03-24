@@ -28,7 +28,7 @@ class QueryMatchFilter extends AbstractFilter
 
     protected const MATCH_QUERY_OPERATORS = '
       (@\.(?<key>[^\s<>!=]+)|@\[["\']?(?<keySquare>.*?)["\']?\]|(?<node>@)|(%group(?<group>\d+)%))
-      (\s*(?<operator>==|=~|=|<>|!==|!=|>=|<=|>|<|in|!in|nin)\s*(?<comparisonValue>.+?(?=(&&|$|\|\||%))))?
+      (\s*(?<operator>==|=~|=|<>|!==|!=|>=|<=|>|<|in|!in|nin)\s*(?<comparisonValue>.+?(?=\s*(?:&&|$|\|\||%))))?
       (\s*(?<logicalandor>&&|\|\|)\s*)?
     ';
 

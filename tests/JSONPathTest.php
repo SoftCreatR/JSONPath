@@ -325,6 +325,21 @@ class JSONPathTest extends TestCase
     }
 
     /**
+     * $..books[?(@.category=="fiction"  &&  @.author ==  \'Evelyn Waugh\')].title'
+     * Filter books that are in the "..." category and have an author equal to "..."
+     *
+     * @throws JSONPathException|JsonException
+     */
+    public function testQueryMatchWhitespaceIgnored(): void
+    {
+        // Additional spaces in filter string are intended to be there
+        $result = (new JSONPath($this->getData('example')))
+            ->find('$..books[?(    @.category=="fiction"  &&  @.author ==  \'Evelyn Waugh\'  )].title');
+
+        self::assertEquals('Sword of Honour', $result[0]);
+    }
+
+    /**
      * $..books[?(@.author = 1)]
      * Filter books that have a title equal to "..."
      *
