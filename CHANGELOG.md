@@ -1,5 +1,8 @@
 # Changelog
 
+### 0.10.1
+- Fixed ignore whitespace after comparison value in filter expression
+
 ### 0.10.0
 - Fixed query/selector Filter Expression With Current Object
 - Fixed query/selector Filter Expression With Different Grouped Operators
