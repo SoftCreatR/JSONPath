@@ -37,7 +37,7 @@ class AccessHelper
         }
 
         if (\is_array($collection)) {
-            return \array_key_exists($key, $collection);
+            return \array_key_exists($key ?? '', $collection);
         }
 
         if ($collection instanceof ArrayAccess) {

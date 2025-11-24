@@ -102,7 +102,7 @@ class QueryTest extends TestCase
                     );
                 }
             }
-        } catch (JSONPathException | RuntimeException $e) {
+        } catch (JSONPathException|RuntimeException $e) {
             if (!\in_array($id, self::$baselineFailedQueries, true)) {
                 throw new RuntimeException(
                     $e->getMessage() . "\nQuery: {$query}\n\nMore information: {$url}",
