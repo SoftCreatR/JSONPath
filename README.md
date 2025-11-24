@@ -193,6 +193,13 @@ This package is Treeware. If you use it in production, then we ask that you [**b
         </a>
     </td>
     <td align="center" style="word-wrap: break-word; width: 150.0; height: 150.0">
+        <a href=https://github.com/mpesari>
+            <img src=https://avatars.githubusercontent.com/u/11061725?v=4 width="100;"  alt=Mikko Pesari/>
+            <br />
+            <sub style="font-size:14px"><b>Mikko Pesari</b></sub>
+        </a>
+    </td>
+    <td align="center" style="word-wrap: break-word; width: 150.0; height: 150.0">
         <a href=https://github.com/warlof>
             <img src=https://avatars.githubusercontent.com/u/648753?v=4 width="100;"  alt=warlof/>
             <br />
@@ -206,6 +213,8 @@ This package is Treeware. If you use it in production, then we ask that you [**b
             <sub style="font-size:14px"><b>Sergey G</b></sub>
         </a>
     </td>
+</tr>
+<tr>
     <td align="center" style="word-wrap: break-word; width: 150.0; height: 150.0">
         <a href=https://github.com/drealecs>
             <img src=https://avatars.githubusercontent.com/u/209984?v=4 width="100;"  alt=Alexandru Pătrănescu/>
@@ -213,8 +222,6 @@ This package is Treeware. If you use it in production, then we ask that you [**b
             <sub style="font-size:14px"><b>Alexandru Pătrănescu</b></sub>
         </a>
     </td>
-</tr>
-<tr>
     <td align="center" style="word-wrap: break-word; width: 150.0; height: 150.0">
         <a href=https://github.com/oleg-andreyev>
             <img src=https://avatars.githubusercontent.com/u/1244112?v=4 width="100;"  alt=Oleg Andreyev/>
