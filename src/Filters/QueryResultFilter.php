@@ -6,6 +6,8 @@
  * @license https://github.com/SoftCreatR/JSONPath/blob/main/LICENSE  MIT License
  */
 
+declare(strict_types=1);
+
 namespace Flow\JSONPath\Filters;
 
 use Flow\JSONPath\AccessHelper;
@@ -15,10 +17,13 @@ class QueryResultFilter extends AbstractFilter
 {
     /**
      * @throws JSONPathException
+     * @inheritDoc
      */
-    public function filter($collection): array
+    public function filter(array|object $collection): array
     {
-        \preg_match('/@\.(?<key>\w+)\s*(?<operator>[-+*\/])\s*(?<numeric>\d+)/', $this->token->value, $matches);
+        if (!\preg_match('/@\.(?<key>\w+)\s*(?<operator>[-+*\/])\s*(?<numeric>\d+)/', $this->token->value, $matches)) {
+            throw new JSONPathException('Unsupported operator in expression');
+        }
 
         $matchKey = $matches['key'];
 
@@ -35,7 +40,6 @@ class QueryResultFilter extends AbstractFilter
             '*' => $value * $matches['numeric'],
             '-' => $value - $matches['numeric'],
             '/' => $value / $matches['numeric'],
-            default => throw new JSONPathException('Unsupported operator in expression'),
         };
 
         $result = [];

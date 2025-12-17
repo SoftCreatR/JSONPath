@@ -25,22 +25,22 @@ class JSONPathTest extends TestCase
     /**
      * $.store.books[0].title
      *
-     * @throws JSONPathException|JsonException
+     * @throws JSONPathException
      */
     public function testChildOperators(): void
     {
-        $result = (new JSONPath($this->getData('example')))
+        $result = new JSONPath($this->getData('example'))
             ->find('$.store.books[0].title');
 
         self::assertEquals('Sayings of the Century', $result[0]);
     }
 
     /**
-     * @throws JSONPathException|JsonException
+     * @throws JSONPathException
      */
     public function testIndexesObject(): void
     {
-        $result = (new JSONPath($this->getData('indexed-object')))
+        $result = new JSONPath($this->getData('indexed-object'))
             ->find('$.store.books[3].title');
 
         self::assertEquals('Sword of Honour', $result[0]);
@@ -49,11 +49,11 @@ class JSONPathTest extends TestCase
     /**
      * $['store']['books'][0]['title']
      *
-     * @throws JSONPathException|JsonException
+     * @throws JSONPathException
      */
     public function testChildOperatorsAlt(): void
     {
-        $result = (new JSONPath($this->getData('example')))
+        $result = new JSONPath($this->getData('example'))
             ->find("$['store']['books'][0]['title']");
 
         self::assertEquals('Sayings of the Century', $result[0]);
@@ -62,12 +62,12 @@ class JSONPathTest extends TestCase
     /**
      * $.array[start:end:step]
      *
-     * @throws JSONPathException|JsonException
+     * @throws JSONPathException
      */
     public function testFilterSliceA(): void
     {
         // Copy all items... similar to a wildcard
-        $result = (new JSONPath($this->getData('example')))
+        $result = new JSONPath($this->getData('example'))
             ->find("$['store']['books'][:].title");
 
         self::assertEquals(
@@ -127,17 +127,17 @@ class JSONPathTest extends TestCase
      */
     public function testFilterSliceNegativeStartIndexes(): void
     {
-        $result = (new JSONPath(['first', 'second', 'third', 'fourth', 'fifth']))
+        $result = new JSONPath(['first', 'second', 'third', 'fourth', 'fifth'])
             ->find('$[-2:]');
 
         self::assertEquals(['fourth', 'fifth'], $result->getData());
 
-        $result = (new JSONPath(['first', 'second', 'third', 'fourth', 'fifth']))
+        $result = new JSONPath(['first', 'second', 'third', 'fourth', 'fifth'])
             ->find('$[-1:]');
 
         self::assertEquals(['fifth'], $result->getData());
 
-        $result = (new JSONPath(['first', 'second', 'third']))
+        $result = new JSONPath(['first', 'second', 'third'])
             ->find('$[-4:]');
 
         self::assertEquals(['first', 'second', 'third'], $result->getData());
@@ -193,7 +193,7 @@ class JSONPathTest extends TestCase
      */
     public function testFilterSliceNegativeStartAndPositiveEnd(): void
     {
-        $result = (new JSONPath(['first', 'second', 'third', 'fourth', 'fifth']))
+        $result = new JSONPath(['first', 'second', 'third', 'fourth', 'fifth'])
             ->find('$[-2:2]');
 
         self::assertEquals([], $result->getData());
@@ -204,7 +204,7 @@ class JSONPathTest extends TestCase
      */
     public function testFilterSliceStepBy2(): void
     {
-        $result = (new JSONPath(['first', 'second', 'third', 'fourth', 'fifth']))
+        $result = new JSONPath(['first', 'second', 'third', 'fourth', 'fifth'])
             ->find('$[0:4:2]');
 
         self::assertEquals(['first', 'third'], $result->getData());
@@ -218,7 +218,7 @@ class JSONPathTest extends TestCase
      */
     public function testFilterLastIndex(): void
     {
-        $result = (new JSONPath(['first', 'second', 'third', 'fourth', 'fifth']))
+        $result = new JSONPath(['first', 'second', 'third', 'fourth', 'fifth'])
             ->find('$[-1]');
 
         self::assertEquals(['fifth'], $result->getData());
@@ -233,7 +233,7 @@ class JSONPathTest extends TestCase
     public function testFilterSliceG(): void
     {
         // Fetch up to the second index
-        $result = (new JSONPath(['first', 'second', 'third', 'fourth', 'fifth']))
+        $result = new JSONPath(['first', 'second', 'third', 'fourth', 'fifth'])
             ->find('$[:2]');
 
         self::assertEquals(['first', 'second'], $result->getData());
@@ -242,13 +242,13 @@ class JSONPathTest extends TestCase
     /**
      * $.store.books[(@.length-1)].title
      *
-     * This notation is only partially implemented eg. hacked in
+     * This notation is only partially implemented e.g. hacked in
      *
-     * @throws JSONPathException|JsonException
+     * @throws JSONPathException
      */
     public function testChildQuery(): void
     {
-        $result = (new JSONPath($this->getData('example')))
+        $result = new JSONPath($this->getData('example'))
             ->find('$.store.books[(@.length-1)].title');
 
         self::assertEquals(['The Lord of the Rings'], $result->getData());
@@ -258,11 +258,11 @@ class JSONPathTest extends TestCase
      * $.store.books[?(@.price < 10)].title
      * Filter books that have a price less than 10
      *
-     * @throws JSONPathException|JsonException
+     * @throws JSONPathException
      */
     public function testQueryMatchLessThan(): void
     {
-        $result = (new JSONPath($this->getData('example')))
+        $result = new JSONPath($this->getData('example'))
             ->find('$.store.books[?(@.price < 10)].title');
 
         self::assertEquals(['Sayings of the Century', 'Moby Dick'], $result->getData());
@@ -272,11 +272,11 @@ class JSONPathTest extends TestCase
      * $.store.books[?(@.price > 10)].title
      * Filter books that have a price more than 10
      *
-     * @throws JSONPathException|JsonException
+     * @throws JSONPathException
      */
     public function testQueryMatchMoreThan(): void
     {
-        $result = (new JSONPath($this->getData('example')))
+        $result = new JSONPath($this->getData('example'))
             ->find('$.store.books[?(@.price > 10)].title');
 
         self::assertEquals(['Sword of Honour', 'The Lord of the Rings'], $result->getData());
@@ -286,11 +286,11 @@ class JSONPathTest extends TestCase
      * $.store.books[?(@.price <= 12.99)].title
      * Filter books that have a price less or equal to 12.99
      *
-     * @throws JSONPathException|JsonException
+     * @throws JSONPathException
      */
     public function testQueryMatchLessOrEqual(): void
     {
-        $result = (new JSONPath($this->getData('example')))
+        $result = new JSONPath($this->getData('example'))
             ->find('$.store.books[?(@.price <= 12.99)].title');
 
         self::assertEquals(['Sayings of the Century', 'Sword of Honour', 'Moby Dick'], $result->getData());
@@ -300,11 +300,11 @@ class JSONPathTest extends TestCase
      * $.store.books[?(@.price >= 12.99)].title
      * Filter books that have a price less or equal to 12.99
      *
-     * @throws JSONPathException|JsonException
+     * @throws JSONPathException
      */
     public function testQueryMatchEqualOrMore(): void
     {
-        $result = (new JSONPath($this->getData('example')))
+        $result = new JSONPath($this->getData('example'))
             ->find('$.store.books[?(@.price >= 12.99)].title');
 
         self::assertEquals(['Sword of Honour', 'The Lord of the Rings'], $result->getData());
@@ -314,11 +314,11 @@ class JSONPathTest extends TestCase
      * $..books[?(@.author == "J. R. R. Tolkien")]
      * Filter books that have an author equal to "..."
      *
-     * @throws JSONPathException|JsonException
+     * @throws JSONPathException
      */
     public function testQueryMatchEquals(): void
     {
-        $result = (new JSONPath($this->getData('example')))
+        $result = new JSONPath($this->getData('example'))
             ->find('$..books[?(@.author == "J. R. R. Tolkien")].title');
 
         self::assertEquals('The Lord of the Rings', $result[0]);
@@ -328,12 +328,12 @@ class JSONPathTest extends TestCase
      * $..books[?(@.category=="fiction"  &&  @.author ==  \'Evelyn Waugh\')].title'
      * Filter books that are in the "..." category and have an author equal to "..."
      *
-     * @throws JSONPathException|JsonException
+     * @throws JSONPathException
      */
     public function testQueryMatchWhitespaceIgnored(): void
     {
         // Additional spaces in filter string are intended to be there
-        $result = (new JSONPath($this->getData('example')))
+        $result = new JSONPath($this->getData('example'))
             ->find('$..books[?(    @.category=="fiction"  &&  @.author ==  \'Evelyn Waugh\'  )].title');
 
         self::assertEquals('Sword of Honour', $result[0]);
@@ -343,11 +343,11 @@ class JSONPathTest extends TestCase
      * $..books[?(@.author = 1)]
      * Filter books that have a title equal to "..."
      *
-     * @throws JSONPathException|JsonException
+     * @throws JSONPathException
      */
     public function testQueryMatchEqualsWithUnquotedInteger(): void
     {
-        $results = (new JSONPath($this->getData('simple-integers')))
+        $results = new JSONPath($this->getData('simple-integers'))
             ->find('$..features[?(@.value = 1)]');
 
         self::assertEquals('foo', $results[0]->name);
@@ -358,7 +358,7 @@ class JSONPathTest extends TestCase
      * $..books[?(@.author != "J. R. R. Tolkien")]
      * Filter books that have an author not equal to "..."
      *
-     * @throws JSONPathException|JsonException
+     * @throws JSONPathException
      */
     public function testQueryMatchNotEqualsTo(): void
     {
@@ -387,7 +387,7 @@ class JSONPathTest extends TestCase
      * $..books[?(@.author =~ /nigel ree?s/i)]
      * Filter books where author matches regex
      *
-     * @throws JSONPathException|JsonException
+     * @throws JSONPathException
      */
     public function testQueryMatchWithRegexCaseSensitive(): void
     {
@@ -410,11 +410,11 @@ class JSONPathTest extends TestCase
      * $..books[?(@.author =~ "J. R. R. Tolkien")]
      * Filter books where author matches invalid regex
      *
-     * @throws JSONPathException|JsonException
+     * @throws JSONPathException
      */
     public function testQueryMatchWithInvalidRegex(): void
     {
-        $result = (new JSONPath($this->getData('example')))
+        $result = new JSONPath($this->getData('example'))
             ->find('$..books[?(@.author =~ "J. R. R. Tolkien")].title');
 
         self::assertEmpty($result->getData());
@@ -424,11 +424,11 @@ class JSONPathTest extends TestCase
      * $..books[?(@.author in ["J. R. R. Tolkien", "Nigel Rees"])]
      * Filter books that have a title in ["...", "..."]
      *
-     * @throws JSONPathException|JsonException
+     * @throws JSONPathException
      */
     public function testQueryMatchIn(): void
     {
-        $results = (new JSONPath($this->getData('example')))
+        $results = new JSONPath($this->getData('example'))
             ->find('$..books[?(@.author in ["J. R. R. Tolkien", "Nigel Rees"])].title');
 
         self::assertEquals(['Sayings of the Century', 'The Lord of the Rings'], $results->getData());
@@ -438,11 +438,11 @@ class JSONPathTest extends TestCase
      * $..books[?(@.author nin ["J. R. R. Tolkien", "Nigel Rees"])]
      * Filter books that don't have a title in ["...", "..."]
      *
-     * @throws JSONPathException|JsonException
+     * @throws JSONPathException
      */
     public function testQueryMatchNin(): void
     {
-        $results = (new JSONPath($this->getData('example')))
+        $results = new JSONPath($this->getData('example'))
             ->find('$..books[?(@.author nin ["J. R. R. Tolkien", "Nigel Rees"])].title');
 
         self::assertEquals(['Sword of Honour', 'Moby Dick'], $results->getData());
@@ -452,11 +452,11 @@ class JSONPathTest extends TestCase
      * $..books[?(@.author nin ["J. R. R. Tolkien", "Nigel Rees"])]
      * Filter books that don't have a title in ["...", "..."]
      *
-     * @throws JSONPathException|JsonException
+     * @throws JSONPathException
      */
     public function testQueryMatchNotIn(): void
     {
-        $results = (new JSONPath($this->getData('example')))
+        $results = new JSONPath($this->getData('example'))
             ->find('$..books[?(@.author !in ["J. R. R. Tolkien", "Nigel Rees"])].title');
 
         self::assertEquals(['Sword of Honour', 'Moby Dick'], $results->getData());
@@ -465,11 +465,11 @@ class JSONPathTest extends TestCase
     /**
      * $.store.books[*].author
      *
-     * @throws JSONPathException|JsonException
+     * @throws JSONPathException
      */
     public function testWildcardAltNotation(): void
     {
-        $results = (new JSONPath($this->getData('example')))
+        $results = new JSONPath($this->getData('example'))
             ->find('$.store.books[*].author');
 
         self::assertEquals(['Nigel Rees', 'Evelyn Waugh', 'Herman Melville', 'J. R. R. Tolkien'], $results->getData());
@@ -478,11 +478,11 @@ class JSONPathTest extends TestCase
     /**
      * $..author
      *
-     * @throws JSONPathException|JsonException
+     * @throws JSONPathException
      */
     public function testRecursiveChildSearch(): void
     {
-        $result = (new JSONPath($this->getData('example')))
+        $result = new JSONPath($this->getData('example'))
             ->find('$..author');
 
         self::assertEquals(['Nigel Rees', 'Evelyn Waugh', 'Herman Melville', 'J. R. R. Tolkien'], $result->getData());
@@ -493,11 +493,11 @@ class JSONPathTest extends TestCase
      * all things in store
      * the structure of the example data makes this test look weird
      *
-     * @throws JSONPathException|JsonException
+     * @throws JSONPathException
      */
     public function testWildCard(): void
     {
-        $result = (new JSONPath($this->getData('example')))
+        $result = new JSONPath($this->getData('example'))
             ->find('$.store.*');
 
         if (\is_object($result[0][0])) {
@@ -517,11 +517,11 @@ class JSONPathTest extends TestCase
      * $.store..price
      * the price of everything in the store.
      *
-     * @throws JSONPathException|JsonException
+     * @throws JSONPathException
      */
     public function testRecursiveChildSearchAlt(): void
     {
-        $result = (new JSONPath($this->getData('example')))
+        $result = new JSONPath($this->getData('example'))
             ->find('$.store..price');
 
         self::assertEquals([8.95, 12.99, 8.99, 22.99, 19.95], $result->getData());
@@ -531,11 +531,11 @@ class JSONPathTest extends TestCase
      * $..books[2]
      * the third book
      *
-     * @throws JSONPathException|JsonException
+     * @throws JSONPathException
      */
     public function testRecursiveChildSearchWithChildIndex(): void
     {
-        $result = (new JSONPath($this->getData('example')))
+        $result = new JSONPath($this->getData('example'))
             ->find('$..books[2].title');
 
         self::assertEquals(['Moby Dick'], $result->getData());
@@ -544,11 +544,11 @@ class JSONPathTest extends TestCase
     /**
      * $..books[(@.length-1)]
      *
-     * @throws JSONPathException|JsonException
+     * @throws JSONPathException
      */
     public function testRecursiveChildSearchWithChildQuery(): void
     {
-        $result = (new JSONPath($this->getData('example')))
+        $result = new JSONPath($this->getData('example'))
             ->find('$..books[(@.length-1)].title');
 
         self::assertEquals(['The Lord of the Rings'], $result->getData());
@@ -558,11 +558,11 @@ class JSONPathTest extends TestCase
      * $..books[-1:]
      * Return the last results
      *
-     * @throws JSONPathException|JsonException
+     * @throws JSONPathException
      */
     public function testRecursiveChildSearchWithSliceFilter(): void
     {
-        $result = (new JSONPath($this->getData('example')))
+        $result = new JSONPath($this->getData('example'))
             ->find('$..books[-1:].title');
 
         self::assertEquals(['The Lord of the Rings'], $result->getData());
@@ -570,13 +570,13 @@ class JSONPathTest extends TestCase
 
     /**
      * $..books[?(@.isbn)]
-     * filter all books with isbn number
+     * filter all books with isbn
      *
-     * @throws JSONPathException|JsonException
+     * @throws JSONPathException
      */
     public function testRecursiveWithQueryMatch(): void
     {
-        $result = (new JSONPath($this->getData('example')))
+        $result = new JSONPath($this->getData('example'))
             ->find('$..books[?(@.isbn)].isbn');
 
         self::assertEquals(['0-553-21311-3', '0-395-19395-8'], $result->getData());
@@ -590,7 +590,7 @@ class JSONPathTest extends TestCase
      */
     public function testRecursiveWithQueryMatchWithDots(): void
     {
-        $result = (new JSONPath($this->getData('with-dots')))
+        $result = new JSONPath($this->getData('with-dots'))
             ->find(".data.tokens[?(@.Employee.FirstName)]");
         $result = \json_decode(
             \json_encode($result, JSON_THROW_ON_ERROR),
@@ -610,7 +610,7 @@ class JSONPathTest extends TestCase
      */
     public function testRecursiveWithWildcard(): void
     {
-        $result = (new JSONPath($this->getData('example')))
+        $result = new JSONPath($this->getData('example'))
             ->find('$..*');
         $result = \json_decode(
             \json_encode($result, JSON_THROW_ON_ERROR),
@@ -630,7 +630,7 @@ class JSONPathTest extends TestCase
      */
     public function testSimpleArrayAccess(): void
     {
-        $result = (new JSONPath(['title' => 'test title']))
+        $result = new JSONPath(['title' => 'test title'])
             ->find('title');
 
         self::assertEquals(['test title'], $result->getData());
@@ -641,7 +641,7 @@ class JSONPathTest extends TestCase
      */
     public function testFilteringOnNoneArrays(): void
     {
-        $result = (new JSONPath(['foo' => 'asdf']))
+        $result = new JSONPath(['foo' => 'asdf'])
             ->find('$.foo.bar');
 
         self::assertEquals([], $result->getData());
@@ -653,28 +653,28 @@ class JSONPathTest extends TestCase
     public function testMagicMethods(): void
     {
         $fooClass = new JSONPathTestClass();
-        $results = (new JSONPath($fooClass, JSONPath::ALLOW_MAGIC))->find('$.foo');
+        $results = new JSONPath($fooClass, JSONPath::ALLOW_MAGIC)->find('$.foo');
 
         self::assertEquals(['bar'], $results->getData());
     }
 
     /**
-     * @throws JSONPathException|JsonException
+     * @throws JSONPathException
      */
     public function testMatchWithComplexSquareBrackets(): void
     {
-        $result = (new JSONPath($this->getData('extra')))
+        $result = new JSONPath($this->getData('extra'))
             ->find("$['http://www.w3.org/2000/01/rdf-schema#label'][?(@['@language']='en')]['@language']");
 
         self::assertEquals(["en"], $result->getData());
     }
 
     /**
-     * @throws JSONPathException|JsonException
+     * @throws JSONPathException
      */
     public function testQueryMatchWithRecursive(): void
     {
-        $result = (new JSONPath($this->getData('locations')))
+        $result = new JSONPath($this->getData('locations'))
             ->find("..[?(@.type == 'suburb')].name");
 
         self::assertEquals(["Rosebank"], $result->getData());
@@ -685,7 +685,7 @@ class JSONPathTest extends TestCase
      */
     public function testFirst(): void
     {
-        $result = (new JSONPath($this->getData('extra')))
+        $result = new JSONPath($this->getData('extra'))
             ->find("$['http://www.w3.org/2000/01/rdf-schema#label'].*");
 
         self::assertEquals(["@language" => "en"], $result->first()->getData());
@@ -696,18 +696,18 @@ class JSONPathTest extends TestCase
      */
     public function testLast(): void
     {
-        $result = (new JSONPath($this->getData('extra')))
+        $result = new JSONPath($this->getData('extra'))
             ->find("$['http://www.w3.org/2000/01/rdf-schema#label'].*");
 
         self::assertEquals(["@language" => "de"], $result->last()->getData());
     }
 
     /**
-     * @throws JSONPathException|JsonException
+     * @throws JSONPathException
      */
     public function testSlashesInIndex(): void
     {
-        $result = (new JSONPath($this->getData('with-slashes')))
+        $result = new JSONPath($this->getData('with-slashes'))
             ->find("$['mediatypes']['image/png']");
 
         self::assertEquals(["/core/img/filetypes/image.png"], $result->getData());
@@ -718,12 +718,12 @@ class JSONPathTest extends TestCase
      */
     public function testUnionWithKeys(): void
     {
-        $result = (new JSONPath(
+        $result = new JSONPath(
             [
                 "key" => "value",
                 "another" => "entry",
             ]
-        ))->find("$['key','another']");
+        )->find("$['key','another']");
 
         self::assertEquals(["value", "entry"], $result->getData());
     }
@@ -733,15 +733,15 @@ class JSONPathTest extends TestCase
      */
     public function testCyrillicText(): void
     {
-        $jsonPath = (new JSONPath(["трололо" => 1]));
+        $jsonPath = (new JSONPath(["тролило" => 1]));
 
         $result = $jsonPath
-            ->find("$['трололо']");
+            ->find("$['тролило']");
 
         self::assertEquals([1], $result->getData());
 
         $result = $jsonPath
-            ->find("$.трололо");
+            ->find("$.тролило");
 
         self::assertEquals([1], $result->getData());
     }
@@ -768,12 +768,12 @@ class JSONPathTest extends TestCase
     public function testFirstKey(): void
     {
         // Array test for array
-        $firstKey = (new JSONPath(['a' => 'A', 'b', 'B']))->firstKey();
+        $firstKey = new JSONPath(['a' => 'A', 'b', 'B'])->firstKey();
 
         self::assertEquals('a', $firstKey);
 
         // Array test for object
-        $firstKey = (new JSONPath((object)['a' => 'A', 'b', 'B']))->firstKey();
+        $firstKey = new JSONPath((object)['a' => 'A', 'b', 'B'])->firstKey();
 
         self::assertEquals('a', $firstKey);
     }
@@ -781,12 +781,12 @@ class JSONPathTest extends TestCase
     public function testLastKey(): void
     {
         // Array test for array
-        $lastKey = (new JSONPath(['a' => 'A', 'b' => 'B', 'c' => 'C']))->lastKey();
+        $lastKey = new JSONPath(['a' => 'A', 'b' => 'B', 'c' => 'C'])->lastKey();
 
         self::assertEquals('c', $lastKey);
 
         // Array test for object
-        $lastKey = (new JSONPath((object)['a' => 'A', 'b' => 'B', 'c' => 'C']))->lastKey();
+        $lastKey = new JSONPath((object)['a' => 'A', 'b' => 'B', 'c' => 'C'])->lastKey();
 
         self::assertEquals('c', $lastKey);
     }
@@ -794,11 +794,11 @@ class JSONPathTest extends TestCase
     /**
      * Test: ensure trailing comma is stripped during parsing
      *
-     * @throws JSONPathException|JsonException
+     * @throws JSONPathException
      */
     public function testTrailingComma(): void
     {
-        $result = (new JSONPath($this->getData('example')))
+        $result = new JSONPath($this->getData('example'))
             ->find("$..books[0,1,2,]");
 
         self::assertCount(3, $result);
@@ -807,27 +807,76 @@ class JSONPathTest extends TestCase
     /**
      * Test: ensure negative indexes return -n from last index
      *
-     * @throws JSONPathException|JsonException
+     * @throws JSONPathException
      */
     public function testNegativeIndex(): void
     {
-        $result = (new JSONPath($this->getData('example')))
+        $result = new JSONPath($this->getData('example'))
             ->find('$..books[-2]');
 
         self::assertEquals("Herman Melville", $result[0]['author']);
     }
 
+    public function testIteratorMetadataOnEmptyCollection(): void
+    {
+        $path = new JSONPath([]);
+
+        self::assertNull($path->key());
+        self::assertFalse($path->valid());
+        self::assertSame(0, $path->count());
+    }
+
+    public function testArrayAccessMutators(): void
+    {
+        $path = new JSONPath([]);
+        $path[] = 'foo';
+        $path['bar'] = 'baz';
+
+        self::assertSame('foo', $path[0]);
+        self::assertSame('baz', $path['bar']);
+
+        unset($path['bar']);
+        self::assertFalse(isset($path['bar']));
+    }
+
+    public function testMagicGetReturnsNullWhenMissing(): void
+    {
+        $path = new JSONPath(['foo' => 'bar']);
+        /** @phpstan-ignore-next-line */
+        self::assertNull($path->missing);
+    }
+
+    public function testIteratorRewindAndKey(): void
+    {
+        $path = new JSONPath(['alpha' => 1, 'beta' => 2]);
+
+        $path->rewind();
+        self::assertSame('alpha', $path->key());
+        $path->next();
+        self::assertSame('beta', $path->key());
+    }
+
+    public function testFirstAndLastOnEmptyReturnNull(): void
+    {
+        $path = new JSONPath([]);
+
+        self::assertNull($path->first());
+        self::assertNull($path->last());
+        self::assertNull($path->firstKey());
+        self::assertNull($path->lastKey());
+    }
+
     /**
-     * @throws JSONPathException|JsonException
+     * @throws JSONPathException
      */
     public function testQueryAccessWithNumericalIndexes(): void
     {
-        $result = (new JSONPath($this->getData('numerical-indexes-object')))
+        $result = new JSONPath($this->getData('numerical-indexes-object'))
             ->find("$.result.list[?(@.o == \"11.51000\")]");
 
         self::assertEquals("11.51000", $result[0]->o);
 
-        $result = (new JSONPath($this->getData('numerical-indexes-array')))
+        $result = new JSONPath($this->getData('numerical-indexes-array'))
             ->find("$.result.list[?(@[1] == \"11.51000\")]");
 
         self::assertEquals("11.51000", $result[0][1]);

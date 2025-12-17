@@ -6,12 +6,18 @@
  * @license https://github.com/SoftCreatR/JSONPath/blob/main/LICENSE  MIT License
  */
 
+declare(strict_types=1);
+
 namespace Flow\JSONPath;
 
 use ArrayAccess;
+use Traversable;
 
 class AccessHelper
 {
+    /**
+     * @return array<int, int|string>
+     */
     public static function collectionKeys(mixed $collection): array
     {
         if (\is_object($collection)) {
@@ -26,7 +32,7 @@ class AccessHelper
         return \is_array($collection) || \is_object($collection);
     }
 
-    public static function keyExists(mixed $collection, $key, bool $magicIsAllowed = false): bool
+    public static function keyExists(mixed $collection, int|string|null $key, bool $magicIsAllowed = false): bool
     {
         if ($magicIsAllowed && \is_object($collection) && \method_exists($collection, '__get')) {
             return true;
@@ -54,7 +60,7 @@ class AccessHelper
     /**
      * @todo Optimize conditions
      */
-    public static function getValue(mixed $collection, $key, bool $magicIsAllowed = false)
+    public static function getValue(mixed $collection, int|string|null $key, bool $magicIsAllowed = false): mixed
     {
         if (
             $magicIsAllowed
@@ -62,20 +68,20 @@ class AccessHelper
             && !$collection instanceof ArrayAccess && \method_exists($collection, '__get')
         ) {
             $return = $collection->__get($key);
+        } elseif (\is_int($key) && $collection instanceof Traversable && !$collection instanceof ArrayAccess) {
+            $return = self::getValueByIndex($collection, $key);
         } elseif (\is_object($collection) && !$collection instanceof ArrayAccess) {
             $return = $collection->{$key};
         } elseif ($collection instanceof ArrayAccess) {
-            $return = $collection->offsetGet($key);
+            $return = $collection->offsetExists($key) ? $collection->offsetGet($key) : null;
         } elseif (\is_array($collection)) {
             if (\is_int($key) && $key < 0) {
-                $return = \array_slice($collection, $key, 1)[0];
+                $return = \array_slice($collection, $key, 1)[0] ?? null;
             } else {
-                $return = $collection[$key];
+                $return = $collection[$key] ?? null;
             }
-        } elseif (\is_int($key)) {
-            $return = self::getValueByIndex($collection, $key);
         } else {
-            $return = $collection[$key];
+            $return = null;
         }
 
         return $return;
@@ -85,7 +91,7 @@ class AccessHelper
      * Find item in php collection by index
      * Written this way to handle instances ArrayAccess or Traversable objects
      */
-    private static function getValueByIndex(mixed $collection, $key): mixed
+    private static function getValueByIndex(mixed $collection, int $key): mixed
     {
         $i = 0;
 
@@ -113,21 +119,27 @@ class AccessHelper
         return null;
     }
 
-    public static function setValue(mixed &$collection, $key, $value)
+    public static function setValue(mixed &$collection, int|string|null $key, mixed $value): mixed
     {
         if (\is_object($collection) && !$collection instanceof ArrayAccess) {
-            return $collection->{$key} = $value;
+            $collection->{$key} = $value;
+
+            return $value;
         }
 
         if ($collection instanceof ArrayAccess) {
             /** @noinspection PhpVoidFunctionResultUsedInspection */
-            return $collection->offsetSet($key, $value);
+            $collection->offsetSet($key, $value);
+
+            return $value;
         }
 
-        return $collection[$key] = $value;
+        $collection[$key] = $value;
+
+        return $value;
     }
 
-    public static function unsetValue(mixed &$collection, $key): void
+    public static function unsetValue(mixed &$collection, int|string|null $key): void
     {
         if (\is_object($collection) && !$collection instanceof ArrayAccess) {
             unset($collection->{$key});
@@ -145,7 +157,11 @@ class AccessHelper
     /**
      * @throws JSONPathException
      */
-    public static function arrayValues(array|object $collection): array|ArrayAccess
+    /**
+     * @return array<int, mixed>
+     * @throws JSONPathException
+     */
+    public static function arrayValues(mixed $collection): array
     {
         if (\is_array($collection)) {
             return \array_values($collection);
@@ -155,6 +171,6 @@ class AccessHelper
             return \array_values((array)$collection);
         }
 
-        throw new JSONPathException("Invalid variable type for arrayValues");
+        throw new JSONPathException('Invalid variable type for arrayValues');
     }
 }

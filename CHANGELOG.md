@@ -1,5 +1,20 @@
 # Changelog
 
+### 0.11.0
+🔻 Breaking changes ahead:
+
+- Dropped support for PHP < 8.5
+- `JSONPathToken` now uses a `TokenType` enum and the constructor signature changed accordingly.
+- `JSONPath` options flag is now an `int` bitmask (was `bool`), requiring callers to pass integer flags.
+- `SliceFilter` returns an empty result for non-positive step values (previously iterated indefinitely).
+- `QueryResultFilter` now throws a `JSONPathException` for unsupported operators instead of silently proceeding.
+- Access helper behavior is stricter: `arrayValues` throws on invalid types; ArrayAccess lookups check `offsetExists` before reading; traversables and objects are handled distinctly.
+- Adopted PHP 8.5 features: `TokenType` enum, readonly value object for tokens, typed flags/options, and `#[\Override]` usage.
+- CI now runs on PHP 8.5 with required extensions; code style workflow updated accordingly.
+- Added coverage for AccessHelper edge cases (magic getters, ArrayAccess, traversables, negative indexes), QueryResultFilter arithmetic branches, and SliceFilter negative/null bounds.
+- Fixed empty-expression handling in lexer and improved safety in AccessHelper traversable lookups.
+- Added PHPStan static analysis to the toolchain and addressed its findings.
+
 ### 0.10.1
 - Fixed ignore whitespace after comparison value in filter expression
 

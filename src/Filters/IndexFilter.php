@@ -6,6 +6,8 @@
  * @license https://github.com/SoftCreatR/JSONPath/blob/main/LICENSE  MIT License
  */
 
+declare(strict_types=1);
+
 namespace Flow\JSONPath\Filters;
 
 use Flow\JSONPath\AccessHelper;
@@ -15,8 +17,9 @@ class IndexFilter extends AbstractFilter
 {
     /**
      * @throws JSONPathException
+     * @inheritDoc
      */
-    public function filter($collection): array
+    public function filter(array|object $collection): array
     {
         if (\is_array($this->token->value)) {
             $result = [];

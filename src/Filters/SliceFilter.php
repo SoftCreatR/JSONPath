@@ -6,13 +6,18 @@
  * @license https://github.com/SoftCreatR/JSONPath/blob/main/LICENSE  MIT License
  */
 
+declare(strict_types=1);
+
 namespace Flow\JSONPath\Filters;
 
 use Flow\JSONPath\AccessHelper;
 
 class SliceFilter extends AbstractFilter
 {
-    public function filter($collection): array
+    /**
+     * @inheritDoc
+     */
+    public function filter(array|object $collection): array
     {
         $length = \count($collection);
         $start = $this->token->value['start'];
@@ -25,6 +30,7 @@ class SliceFilter extends AbstractFilter
 
         if ($start < 0) {
             $start = $length + $start;
+
             if ($start < 0) {
                 $start = 0;
             }
@@ -41,15 +47,13 @@ class SliceFilter extends AbstractFilter
 
         $result = [];
 
+        if ($step <= 0) {
+            return $result;
+        }
+
         for ($i = $start; $i < $end; $i += $step) {
-            $index = $i;
-
-            if ($i < 0) {
-                $index = $length + $i;
-            }
-
-            if (AccessHelper::keyExists($collection, $index, $this->magicIsAllowed)) {
-                $result[] = $collection[$index];
+            if (AccessHelper::keyExists($collection, $i, $this->magicIsAllowed)) {
+                $result[] = $collection[$i];
             }
         }
 

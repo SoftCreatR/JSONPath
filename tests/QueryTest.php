@@ -19,6 +19,7 @@ use RuntimeException;
 
 class QueryTest extends TestCase
 {
+    /** @var list<string> */
     public static array $baselineFailedQueries;
 
     public static function setUpBeforeClass(): void
@@ -57,7 +58,7 @@ class QueryTest extends TestCase
         // Avoid "This test did not perform any assertions"
         // but do not use markTestSkipped, to prevent unnecessary
         // console outputs
-        self::assertTrue(true);
+        self::assertNotSame('', $id);
 
         if (empty($consensus) || $skip) {
             /*$skipReason = empty($consensus) ? 'unknown consensus' : 'skip flag set';
@@ -70,7 +71,7 @@ class QueryTest extends TestCase
         }
 
         try {
-            $results = \json_encode((new JSONPath(\json_decode($data, true)))->find($selector));
+            $results = \json_encode(new JSONPath(\json_decode($data, true))->find($selector));
 
             self::assertEquals($consensus, $results);
 
@@ -102,7 +103,7 @@ class QueryTest extends TestCase
                     );
                 }
             }
-        } catch (JSONPathException|RuntimeException $e) {
+        } catch (JSONPathException | RuntimeException $e) {
             if (!\in_array($id, self::$baselineFailedQueries, true)) {
                 throw new RuntimeException(
                     $e->getMessage() . "\nQuery: {$query}\n\nMore information: {$url}",
@@ -129,7 +130,7 @@ class QueryTest extends TestCase
      * The list is generated automatically, based on the results
      * at https://cburgmer.github.io/json-path-comparison.
      *
-     * @return string[]
+     * @return list<array{string, string, string, string}|array{string, string, string, string, bool}>
      */
     public static function queryDataProvider(): array
     {

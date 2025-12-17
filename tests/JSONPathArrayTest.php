@@ -54,7 +54,7 @@ class JSONPathArrayTest extends TestCase
     {
         $data = $this->getData('conferences');
 
-        $conferences = (new JSONPath($data))
+        $conferences = new JSONPath($data)
             ->find('.conferences.*');
 
         $names = [];

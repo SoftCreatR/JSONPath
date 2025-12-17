@@ -17,6 +17,9 @@ use PHPUnit\Framework\TestCase;
 
 class JSONPathSliceAccessTest extends TestCase
 {
+    /**
+     * @return list<array{string, array<string, mixed>, array<int, mixed>}>
+     */
     public static function sliceDataProvider(): array
     {
         return [
@@ -80,11 +83,13 @@ class JSONPathSliceAccessTest extends TestCase
 
     /**
      * @throws JSONPathException
+     * @param array<string, mixed> $data
+     * @param array<int, mixed> $expected
      */
     #[DataProvider('sliceDataProvider')]
     public function testSlice(string $path, array $data, array $expected): void
     {
-        $result = (new JSONPath($data))
+        $result = new JSONPath($data)
             ->find($path);
 
         self::assertEquals($expected, $result->getData());

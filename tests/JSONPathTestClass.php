@@ -12,6 +12,7 @@ namespace Flow\JSONPath\Test;
 
 class JSONPathTestClass
 {
+    /** @var array<string, string> */
     protected array $attributes = [
         'foo' => 'bar',
     ];

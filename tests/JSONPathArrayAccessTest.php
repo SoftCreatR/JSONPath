@@ -57,7 +57,7 @@ class JSONPathArrayAccessTest extends TestCase
     {
         $container = new ArrayObject($this->getData('conferences'));
 
-        $conferences = (new JSONPath($container))
+        $conferences = new JSONPath($container)
             ->find('.conferences.*');
 
         $names = [];
@@ -105,6 +105,7 @@ class JSONPathArrayAccessTest extends TestCase
         $data = new JSONPath($container);
 
         $data->offsetSet('name', 'Major League Football');
+        /** @phpstan-ignore-next-line */
         self::assertEquals('Major League Football', $data->name);
     }
 }

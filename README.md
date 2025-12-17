@@ -1,9 +1,8 @@
-# JSONPath for PHP 8.1+
+# JSONPath for PHP 8.5+
 
 [![Build](https://img.shields.io/github/actions/workflow/status/SoftCreatR/JSONPath/.github/workflows/Test.yml?branch=main)](https://github.com/SoftCreatR/JSONPath/actions/workflows/Test.yml) [![Latest Release](https://img.shields.io/packagist/v/SoftCreatR/JSONPath?color=blue&label=Latest%20Release)](https://packagist.org/packages/softcreatr/jsonpath)
 [![MIT licensed](https://img.shields.io/badge/license-MIT-blue.svg)](./LICENSE) [![Plant Tree](https://img.shields.io/badge/dynamic/json?color=brightgreen&label=Plant%20Tree&query=%24.total&url=https%3A%2F%2Fpublic.ecologi.com%2Fusers%2Fsoftcreatr%2Ftrees)](https://ecologi.com/softcreatr?r=61212ab3fc69b8eb8a2014f4)
 [![Codecov branch](https://img.shields.io/codecov/c/github/SoftCreatR/JSONPath)](https://codecov.io/gh/SoftCreatR/JSONPath)
-[![Code Climate maintainability](https://img.shields.io/codeclimate/maintainability-percentage/SoftCreatR/JSONPath)](https://codeclimate.com/github/SoftCreatR/JSONPath)
 
 This is a [JSONPath](http://goessner.net/articles/JsonPath/) implementation for PHP based on Stefan Goessner's JSONPath script.
 
@@ -18,8 +17,19 @@ This project aims to be a clean and simple implementation with the following goa
 
 ## Installation
 
+Requires PHP 8.5 or newer.
+
 ```bash
-composer require softcreatr/jsonpath:"^0.9"
+composer require softcreatr/jsonpath:"^0.11"
+```
+
+## Development
+
+Static analysis is done with PHPStan.
+
+```bash
+composer require --dev phpstan/phpstan
+./vendor/bin/phpstan analyse --no-progress
 ```
 
 ## JSONPath Examples

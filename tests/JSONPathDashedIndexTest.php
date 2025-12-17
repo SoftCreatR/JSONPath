@@ -18,7 +18,7 @@ use PHPUnit\Framework\TestCase;
 class JSONPathDashedIndexTest extends TestCase
 {
     /**
-     * @return array[]
+     * @return list<array{string, array<string, mixed>, array<int, mixed>}>
      */
     public static function indexDataProvider(): array
     {
@@ -38,11 +38,13 @@ class JSONPathDashedIndexTest extends TestCase
 
     /**
      * @throws JSONPathException
+     * @param array<string, mixed> $data
+     * @param array<int, mixed> $expected
      */
     #[DataProvider('indexDataProvider')]
     public function testSlice(string $path, array $data, array $expected): void
     {
-        $results = (new JSONPath($data))
+        $results = new JSONPath($data)
             ->find($path);
 
         self::assertEquals($expected, $results->getData());

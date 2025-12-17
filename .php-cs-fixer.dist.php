@@ -1,15 +1,17 @@
 <?php
-$finder = PhpCsFixer\Finder::create()
-    ->exclude('*/vendor/*')
-    ->in(__DIR__);
 
-return (new PhpCsFixer\Config())
+use PhpCsFixer\Config;
+use PhpCsFixer\Finder;
+
+$finder = Finder::create()
+    ->in(__DIR__)
+    ->notPath('vendor');
+
+return new Config()
     ->setRiskyAllowed(true)
     ->setRules([
         '@PSR1' => true,
         '@PSR2' => true,
-        '@PSR12' => true,
-        '@PER' => true,
 
         'array_push' => true,
         'backtick_to_shell_exec' => true,
@@ -27,18 +29,23 @@ return (new PhpCsFixer\Config())
 
         'non_printable_character' => ['use_escape_sequences_in_strings' => true],
 
+        'lowercase_static_reference' => true,
         'magic_constant_casing' => true,
         'magic_method_casing' => true,
         'native_function_casing' => true,
         'native_function_type_declaration_casing' => true,
 
         'cast_spaces' => ['space' => 'none'],
+        'lowercase_cast' => true,
         'no_unset_cast' => true,
+        'short_scalar_cast' => true,
 
         'class_attributes_separation' => true,
+        'no_blank_lines_after_class_opening' => true,
         'no_null_property_initialization' => true,
         'self_accessor' => true,
         'single_class_element_per_statement' => true,
+        'single_trait_insert_per_statement' => true,
 
         'no_empty_comment' => true,
         'single_line_comment_style' => ['comment_types' => ['hash']],
@@ -47,7 +54,18 @@ return (new PhpCsFixer\Config())
 
         'no_alternative_syntax' => true,
         'no_trailing_comma_in_list_call' => true,
-        'no_unneeded_control_parentheses' => ['statements' => ['break', 'clone', 'continue', 'echo_print', 'return', 'switch_case', 'yield', 'yield_from']],
+        'no_unneeded_control_parentheses' => [
+            'statements' => [
+                'break',
+                'clone',
+                'continue',
+                'echo_print',
+                'return',
+                'switch_case',
+                'yield',
+                'yield_from',
+            ],
+        ],
         'no_unneeded_curly_braces' => ['namespaces' => true],
         'switch_continue_to_break' => true,
         'trailing_comma_in_multiline' => ['elements' => ['arrays']],
@@ -57,11 +75,19 @@ return (new PhpCsFixer\Config())
         'native_function_invocation' => ['include' => ['@internal']],
         'no_unreachable_default_argument_value' => true,
         'nullable_type_declaration_for_default_null_value' => true,
+        'return_type_declaration' => true,
         'static_lambda' => true,
 
-        'fully_qualified_strict_types' => true,
+        'fully_qualified_strict_types' => ['leading_backslash_in_global_namespace' => true],
+        'no_leading_import_slash' => true,
         'no_unused_imports' => true,
+        'ordered_imports' => [
+            'imports_order' => ['class', 'function', 'const'],
+            'sort_algorithm' => 'alpha',
+        ],
+        'blank_line_between_import_groups' => true,
 
+        'declare_equal_normalize' => true,
         'dir_constant' => true,
         'explicit_indirect_variable' => true,
         'function_to_constant' => true,
@@ -72,6 +98,7 @@ return (new PhpCsFixer\Config())
 
         'clean_namespace' => true,
         'no_leading_namespace_whitespace' => true,
+        'single_blank_line_before_namespace' => true,
 
         'no_homoglyph_names' => true,
 
@@ -83,6 +110,7 @@ return (new PhpCsFixer\Config())
         'operator_linebreak' => true,
         'standardize_increment' => true,
         'standardize_not_equals' => true,
+        'ternary_operator_spaces' => true,
         'ternary_to_elvis_operator' => true,
         'ternary_to_null_coalescing' => true,
         'unary_operator_spaces' => true,
@@ -103,18 +131,22 @@ return (new PhpCsFixer\Config())
 
         'array_indentation' => true,
         'blank_line_before_statement' => ['statements' => ['return', 'exit']],
+        'compact_nullable_typehint' => true,
         'method_chaining_indentation' => true,
-        'no_extra_blank_lines' => ['tokens' => ['case', 'continue', 'curly_brace_block', 'default', 'extra', 'parenthesis_brace_block', 'square_brace_block', 'switch', 'throw', 'use']],
+        'no_extra_blank_lines' => [
+            'tokens' => [
+                'case',
+                'continue',
+                'curly_brace_block',
+                'default',
+                'extra',
+                'parenthesis_brace_block',
+                'square_brace_block',
+                'switch',
+                'throw',
+                'use',
+            ],
+        ],
         'no_spaces_around_offset' => true,
-
-        // SoftCreatR style
-        'global_namespace_import' => [
-            'import_classes' => true,
-            'import_constants' => true,
-            'import_functions' => false,
-        ],
-        'ordered_imports' => [
-            'imports_order' => ['class', 'function', 'const'],
-        ],
     ])
     ->setFinder($finder);

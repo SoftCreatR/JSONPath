@@ -22,22 +22,23 @@ use const PREG_UNMATCHED_AS_NULL;
 
 class QueryMatchFilter extends AbstractFilter
 {
-    protected const MATCH_QUERY_NEGATION_WRAPPED = '^(?<negate>!)\((?<logicalexpr>.+)\)$';
+    protected const string MATCH_QUERY_NEGATION_WRAPPED = '^(?<negate>!)\((?<logicalexpr>.+)\)$';
 
-    protected const MATCH_QUERY_NEGATION_UNWRAPPED = '^(?<negate>!)(?<logicalexpr>.+)$';
+    protected const string MATCH_QUERY_NEGATION_UNWRAPPED = '^(?<negate>!)(?<logicalexpr>.+)$';
 
-    protected const MATCH_QUERY_OPERATORS = '
+    protected const string MATCH_QUERY_OPERATORS = '
       (@\.(?<key>[^\s<>!=]+)|@\[["\']?(?<keySquare>.*?)["\']?\]|(?<node>@)|(%group(?<group>\d+)%))
       (\s*(?<operator>==|=~|=|<>|!==|!=|>=|<=|>|<|in|!in|nin)\s*(?<comparisonValue>.+?(?=\s*(?:&&|$|\|\||%))))?
       (\s*(?<logicalandor>&&|\|\|)\s*)?
     ';
 
-    protected const MATCH_GROUPED_EXPRESSION = '#\([^)(]*+(?:(?R)[^)(]*)*+\)#';
+    protected const string MATCH_GROUPED_EXPRESSION = '#\([^)(]*+(?:(?R)[^)(]*)*+\)#';
 
     /**
      * @throws JSONPathException
+     * @inheritDoc
      */
-    public function filter($collection): array
+    public function filter(array|object $collection): array
     {
         $filterExpression = $this->token->value;
         $negateFilter = false;
@@ -99,7 +100,7 @@ class QueryMatchFilter extends AbstractFilter
             //Processing a group
             if ($matches['group'][$expressionPart] !== null) {
                 $filter = '$[?(' . $filterGroups[$matches['group'][$expressionPart]] . ')]';
-                $resolve = (new JSONPath($filteredCollection))->find($filter)->getData();
+                $resolve = new JSONPath($filteredCollection)->find($filter)->getData();
                 $return = $resolve;
 
                 continue;
@@ -135,7 +136,7 @@ class QueryMatchFilter extends AbstractFilter
                     if ($notNothing) {
                         $selectedNode = AccessHelper::getValue($node, $key, $this->magicIsAllowed);
                     } elseif (\str_contains($key, '.')) {
-                        $foundValue = (new JSONPath($node))->find($key)->getData();
+                        $foundValue = new JSONPath($node)->find($key)->getData();
 
                         if ($foundValue) {
                             $selectedNode = $foundValue[0];
@@ -163,7 +164,9 @@ class QueryMatchFilter extends AbstractFilter
                         '>=' => $this->compareLessThan($comparisonValue, $selectedNode) //rfc semantics
                             || $this->compareEquals($selectedNode, $comparisonValue),
                         "in" => \is_array($comparisonValue) && \in_array($selectedNode, $comparisonValue, true),
-                        'nin', "!in" => \is_array($comparisonValue) && !\in_array($selectedNode, $comparisonValue, true)
+                        'nin', "!in" => \is_array($comparisonValue)
+                            && !\in_array($selectedNode, $comparisonValue, true),
+                        default => false,
                     };
                 }
 
@@ -183,12 +186,12 @@ class QueryMatchFilter extends AbstractFilter
         return $return;
     }
 
-    protected function isNumber($value): bool
+    protected function isNumber(mixed $value): bool
     {
         return !\is_string($value) && \is_numeric($value);
     }
 
-    protected function compareEquals($a, $b): bool
+    protected function compareEquals(mixed $a, mixed $b): bool
     {
         $type_a = \gettype($a);
         $type_b = \gettype($b);
@@ -206,7 +209,7 @@ class QueryMatchFilter extends AbstractFilter
         return false;
     }
 
-    protected function compareLessThan($a, $b): bool
+    protected function compareLessThan(mixed $a, mixed $b): bool
     {
         if ((\is_string($a) && \is_string($b)) || ($this->isNumber($a) && $this->isNumber($b))) {
             //numerical and string comparison supported only
