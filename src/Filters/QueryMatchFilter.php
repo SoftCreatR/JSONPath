@@ -152,22 +152,48 @@ class QueryMatchFilter extends AbstractFilter
                 $comparisonResult = null;
 
                 if ($notNothing) {
-                    $comparisonResult = match ($operator) {
-                        null => AccessHelper::keyExists($node, $key, $this->magicIsAllowed) || (!$key),
-                        "=", "==" => $this->compareEquals($selectedNode, $comparisonValue),
-                        "!=", "!==", "<>" => !$this->compareEquals($selectedNode, $comparisonValue),
-                        '=~' => @\preg_match($comparisonValue, $selectedNode),
-                        '<' => $this->compareLessThan($selectedNode, $comparisonValue),
-                        '<=' => $this->compareLessThan($selectedNode, $comparisonValue)
-                            || $this->compareEquals($selectedNode, $comparisonValue),
-                        '>' => $this->compareLessThan($comparisonValue, $selectedNode), //rfc semantics
-                        '>=' => $this->compareLessThan($comparisonValue, $selectedNode) //rfc semantics
-                            || $this->compareEquals($selectedNode, $comparisonValue),
-                        "in" => \is_array($comparisonValue) && \in_array($selectedNode, $comparisonValue, true),
-                        'nin', "!in" => \is_array($comparisonValue)
-                            && !\in_array($selectedNode, $comparisonValue, true),
-                        default => false,
-                    };
+                    $comparisonResult = false;
+
+                    switch ($operator) {
+                        case null:
+                            $comparisonResult = AccessHelper::keyExists($node, $key, $this->magicIsAllowed) || (!$key);
+                            break;
+                        case "=":
+                        case "==":
+                            $comparisonResult = $this->compareEquals($selectedNode, $comparisonValue);
+                            break;
+                        case "!=":
+                        case "!==":
+                        case "<>":
+                            $comparisonResult = !$this->compareEquals($selectedNode, $comparisonValue);
+                            break;
+                        case '=~':
+                            $comparisonResult = @\preg_match($comparisonValue, $selectedNode);
+                            break;
+                        case '<':
+                            $comparisonResult = $this->compareLessThan($selectedNode, $comparisonValue);
+                            break;
+                        case '<=':
+                            $comparisonResult = $this->compareLessThan($selectedNode, $comparisonValue)
+                                || $this->compareEquals($selectedNode, $comparisonValue);
+                            break;
+                        case '>':
+                            $comparisonResult = $this->compareLessThan($comparisonValue, $selectedNode); //rfc semantics
+                            break;
+                        case '>=':
+                            $comparisonResult = $this->compareLessThan($comparisonValue, $selectedNode) //rfc semantics
+                                || $this->compareEquals($selectedNode, $comparisonValue);
+                            break;
+                        case "in":
+                            $comparisonResult = \is_array($comparisonValue)
+                                && \in_array($selectedNode, $comparisonValue, true);
+                            break;
+                        case 'nin':
+                        case "!in":
+                            $comparisonResult = \is_array($comparisonValue)
+                                && !\in_array($selectedNode, $comparisonValue, true);
+                            break;
+                    }
                 }
 
                 if ($negateFilter) {
