@@ -16,8 +16,9 @@ use Flow\JSONPath\JSONPathException;
 class RecursiveFilter extends AbstractFilter
 {
     /**
-     * @throws JSONPathException
      * @inheritDoc
+     *
+     * @throws JSONPathException
      */
     public function filter(array|object $collection): array
     {
@@ -29,11 +30,10 @@ class RecursiveFilter extends AbstractFilter
     }
 
     /**
-     * @throws JSONPathException
-     */
-    /**
      * @param array<int, array<array-key, mixed>> $result
      * @param array<array-key, mixed>|object $data
+     *
+     * @throws JSONPathException
      */
     private function recurse(array &$result, array|object $data): void
     {

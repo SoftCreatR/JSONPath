@@ -16,19 +16,27 @@ class JSONPathLexer
      * Match within bracket groups
      * Matches are whitespace insensitive
      */
-    public const string MATCH_INDEX = '(?!-)[\-\w]+ | \*'; // e.g.: foo or 40f35757-2563-4790-b0b1-caa904be455f
 
-    public const string MATCH_INDEXES = '\s* -?\d+ [-?\d,\s]+'; // Eg. 0,1,2
+    // e.g.: foo or 40f35757-2563-4790-b0b1-caa904be455f or $
+    public const string MATCH_INDEX = '(?!-)[\-\w]+ | \\$ | \\*';
 
-    public const string MATCH_SLICE = '[-\d:]+ | :'; // Eg. [0:2:1]
+    // Eg. 0,1,2 or *,1 or 0,1,2,
+    public const string MATCH_INDEXES = '\s* (?:-?\d+|\*) (?: \s* , \s* (?:-?\d+|\*) )+ \s* ,? \s*';
 
-    public const string MATCH_QUERY_RESULT = '\s* \( .+? \) \s*'; // Eg. ?(@.length - 1)
+    // Eg. [0:2:1] or [-1]
+    public const string MATCH_SLICE = '(?:-?\d*:-?\d*(?::-?\d*)?|-\\d+)';
 
-    public const string MATCH_QUERY_MATCH = '\s* \?\(.+?\) \s*'; // Eg. ?(@.foo = "bar")
+    // Eg. ?(@.length - 1)
+    public const string MATCH_QUERY_RESULT = '\s* \( .+? \) \s*';
 
-    public const string MATCH_INDEX_IN_SINGLE_QUOTES = '\s* \' (.+?)? \' \s*'; // Eg. 'bar'
+    // Eg. ?(@.foo = "bar")
+    public const string MATCH_QUERY_MATCH = '\s* \?\(.+?\) \s*';
 
-    public const string MATCH_INDEX_IN_DOUBLE_QUOTES = '\s* " (.+?)? " \s*'; // Eg. "bar"
+    // Eg. 'bar'
+    public const string MATCH_INDEX_IN_SINGLE_QUOTES = '\s* \' (.+?)? \' \s*';
+
+    // Eg. "bar"
+    public const string MATCH_INDEX_IN_DOUBLE_QUOTES = '\s* " (.+?)? " \s*';
 
     private readonly string $expression;
 
@@ -74,6 +82,7 @@ class JSONPathLexer
         $squareBracketDepth = 0;
         $tokenValue = '';
         $tokens = [];
+        $inBracketQuote = null;
 
         for ($i = 0; $i < $this->expressionLength; $i++) {
             $char = $this->expression[$i];
@@ -90,14 +99,19 @@ class JSONPathLexer
                 $squareBracketDepth++;
 
                 if ($squareBracketDepth === 1) {
+                    $inBracketQuote = null;
+
                     continue;
                 }
             }
 
-            if ($char === ']') {
+            if ($char === ']' && $squareBracketDepth > 0 && $inBracketQuote === null) {
                 $squareBracketDepth--;
 
                 if ($squareBracketDepth === 0) {
+                    $tokens[] = $this->createToken($tokenValue);
+                    $tokenValue = '';
+
                     continue;
                 }
             }
@@ -106,24 +120,29 @@ class JSONPathLexer
              * Within square brackets
              */
             if ($squareBracketDepth > 0) {
+                if (($char === "'" || $char === '"')) {
+                    $escaped = $this->isEscaped($tokenValue);
+
+                    if ($inBracketQuote === null && !$escaped) {
+                        $inBracketQuote = $char;
+                    } elseif ($inBracketQuote === $char && !$escaped) {
+                        $inBracketQuote = null;
+                    }
+                }
+
                 $tokenValue .= $char;
 
-                if ($squareBracketDepth === 1 && $this->lookAhead($i) === ']') {
-                    $tokens[] = $this->createToken($tokenValue);
-                    $tokenValue = '';
-                }
+                continue;
             }
 
             /*
              * Outside square brackets
              */
-            if ($squareBracketDepth === 0) {
-                $tokenValue .= $char;
+            $tokenValue .= $char;
 
-                if ($this->atEnd($i) || \in_array($this->lookAhead($i), ['.', '['], true)) {
-                    $tokens[] = $this->createToken($tokenValue);
-                    $tokenValue = '';
-                }
+            if ($this->atEnd($i) || \in_array($this->lookAhead($i), ['.', '['], true)) {
+                $tokens[] = $this->createToken($tokenValue);
+                $tokenValue = '';
             }
         }
 
@@ -141,7 +160,7 @@ class JSONPathLexer
 
     protected function atEnd(int $pos): bool
     {
-        return $pos === $this->expressionLength;
+        return $pos === ($this->expressionLength - 1);
     }
 
     /**
@@ -165,6 +184,60 @@ class JSONPathLexer
         /** @var JSONPathToken|null $ret */
         $ret = null;
 
+        if (\str_contains($tokenValue, ',')) {
+            $parts = \array_values(\array_filter(
+                \array_map('trim', \explode(',', $tokenValue)),
+                static fn (string $part): bool => $part !== ''
+            ));
+
+            if ($parts !== []) {
+                $union = [];
+
+                $hasSlice = false;
+                $hasQuery = false;
+
+                foreach ($parts as $part) {
+                    if (\preg_match('/^-\\d+$/', $part)) {
+                        $union[] = (int)$part;
+
+                        continue;
+                    }
+
+                    if (\preg_match('/^' . static::MATCH_SLICE . '$/u', $part)) {
+                        $union[] = [
+                            'type' => 'slice',
+                            'value' => $this->parseSlice($part),
+                        ];
+                        $hasSlice = true;
+
+                        continue;
+                    }
+
+                    if (\preg_match('/^(' . static::MATCH_INDEX . ')$/xu', $part)) {
+                        $union[] = \preg_match('/^-?\d+$/', $part) ? (int)$part : $part;
+
+                        continue;
+                    }
+
+                    if (\preg_match('/^' . static::MATCH_QUERY_MATCH . '$/xu', $part)) {
+                        $union[] = [
+                            'type' => 'query',
+                            'value' => \substr($part, 2, -1),
+                        ];
+                        $hasQuery = true;
+                    }
+                }
+
+                if (($hasSlice || $hasQuery) && \count($union) === \count($parts)) {
+                    return new JSONPathToken(TokenType::Indexes, $union);
+                }
+            }
+        }
+
+        if (\preg_match('/^-\\d+$/', $tokenValue)) {
+            return new JSONPathToken(TokenType::Index, (int)$tokenValue);
+        }
+
         if (\preg_match('/^(' . static::MATCH_INDEX . ')$/xu', $tokenValue, $matches)) {
             if (\preg_match('/^-?\d+$/', $tokenValue)) {
                 $tokenValue = (int)$tokenValue;
@@ -175,23 +248,26 @@ class JSONPathLexer
             $tokenValue = \explode(',', \trim($tokenValue, ','));
 
             foreach ($tokenValue as $i => $v) {
-                $tokenValue[$i] = (int)\trim($v);
+                $v = \trim($v);
+                $tokenValue[$i] = $v === '*' ? '*' : (int)$v;
             }
 
             $ret = new JSONPathToken(TokenType::Indexes, $tokenValue);
         } elseif (\preg_match('/^' . static::MATCH_SLICE . '$/xu', $tokenValue, $matches)) {
-            $parts = \explode(':', $tokenValue);
-            $tokenValue = [
-                'start' => $parts[0] !== '' ? (int)$parts[0] : null,
-                'end' => isset($parts[1]) && $parts[1] !== '' ? (int)$parts[1] : null,
-                'step' => isset($parts[2]) && $parts[2] !== '' ? (int)$parts[2] : null,
-            ];
+            $tokenValue = $this->parseSlice($tokenValue);
 
             $ret = new JSONPathToken(TokenType::Slice, $tokenValue);
         } elseif (\preg_match('/^' . static::MATCH_QUERY_RESULT . '$/xu', $tokenValue)) {
             $tokenValue = \substr($tokenValue, 1, -1);
 
             $ret = new JSONPathToken(TokenType::QueryResult, $tokenValue);
+        } elseif ($tokenValue === '?') {
+            $ret = new JSONPathToken(TokenType::QueryMatch, '@', shorthand: true);
+        } elseif (\preg_match('/^\\?@/', $tokenValue)) {
+            $expr = \substr($tokenValue, 1);
+            $expr = $expr === '' ? '@' : $expr;
+
+            $ret = new JSONPathToken(TokenType::QueryMatch, $expr, shorthand: true);
         } elseif (\preg_match('/^' . static::MATCH_QUERY_MATCH . '$/xu', $tokenValue)) {
             $tokenValue = \substr($tokenValue, 2, -1);
 
@@ -201,7 +277,7 @@ class JSONPathLexer
             || \preg_match('/^' . static::MATCH_INDEX_IN_DOUBLE_QUOTES . '$/xu', $tokenValue, $matches)
         ) {
             if (isset($matches[1])) {
-                $tokenValue = \trim($matches[1]);
+                $tokenValue = $this->decodeQuotedIndex($matches[1], $matches[0][0]);
 
                 $possibleArray = false;
                 if ($matches[0][0] === '"') {
@@ -216,7 +292,7 @@ class JSONPathLexer
                 $tokenValue = '';
             }
 
-            $ret = new JSONPathToken(TokenType::Index, $tokenValue);
+            $ret = new JSONPathToken(TokenType::Index, $tokenValue, true);
         }
 
         if ($ret !== null) {
@@ -224,5 +300,54 @@ class JSONPathLexer
         }
 
         throw new JSONPathException("Unable to parse token {$tokenValue} in expression: {$this->expression}");
+    }
+
+    /**
+     * @return array{start: int|null, end: int|null, step: int|null}
+     */
+    private function parseSlice(string $tokenValue): array
+    {
+        $parts = \explode(':', $tokenValue);
+
+        return [
+            'start' => $parts[0] !== '' ? (int)$parts[0] : null,
+            'end' => isset($parts[1]) && $parts[1] !== '' ? (int)$parts[1] : null,
+            'step' => isset($parts[2]) && $parts[2] !== '' ? (int)$parts[2] : null,
+        ];
+    }
+
+    private function isEscaped(string $tokenValue): bool
+    {
+        $len = \strlen($tokenValue);
+        if ($len === 0) {
+            return false;
+        }
+
+        $backslashCount = 0;
+
+        for ($i = $len - 1; $i >= 0; $i--) {
+            if ($tokenValue[$i] === '\\') {
+                $backslashCount++;
+                continue;
+            }
+
+            break;
+        }
+
+        return ($backslashCount % 2) === 1;
+    }
+
+    private function decodeQuotedIndex(string $tokenValue, string $quote): string
+    {
+        // Unescape backslashes first, then the quote type used
+        $tokenValue = \str_replace('\\\\', '\\', $tokenValue);
+
+        if ($quote === "'") {
+            $tokenValue = \str_replace("\\'", "'", $tokenValue);
+        } elseif ($quote === '"') {
+            $tokenValue = \str_replace('\\"', '"', $tokenValue);
+        }
+
+        return $tokenValue;
     }
 }

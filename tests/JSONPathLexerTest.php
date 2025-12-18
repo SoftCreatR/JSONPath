@@ -13,61 +13,227 @@ namespace Flow\JSONPath\Test;
 use Flow\JSONPath\JSONPathException;
 use Flow\JSONPath\JSONPathLexer;
 use Flow\JSONPath\TokenType;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 
+#[CoversClass(JSONPathLexer::class)]
 class JSONPathLexerTest extends TestCase
 {
     /**
+     * @param list<array{type: TokenType, value: mixed, shorthand?: bool}> $expectedTokens
      * @throws JSONPathException
      */
-    public function testIndexWildcard(): void
+    #[DataProvider('expressionProvider')]
+    public function testParsesExpressions(string $expression, array $expectedTokens): void
     {
-        $tokens = new JSONPathLexer('.*')
-            ->parseExpression();
+        $tokens = new JSONPathLexer($expression)->parseExpression();
 
-        self::assertEquals(TokenType::Index, $tokens[0]->type);
-        self::assertEquals("*", $tokens[0]->value);
+        self::assertCount(\count($expectedTokens), $tokens);
+
+        foreach ($expectedTokens as $i => $expected) {
+            self::assertEquals($expected['type'], $tokens[$i]->type);
+            self::assertEquals($expected['value'], $tokens[$i]->value);
+
+            if (\array_key_exists('shorthand', $expected)) {
+                self::assertSame($expected['shorthand'], $tokens[$i]->shorthand);
+            }
+        }
     }
 
     /**
-     * @throws JSONPathException
+     * @return iterable<string, array{string, list<array{type: TokenType, value: mixed, shorthand?: bool}>}>
      */
-    public function testIndexSimple(): void
+    public static function expressionProvider(): iterable
     {
-        $tokens = new JSONPathLexer('.foo')
-            ->parseExpression();
+        yield 'wildcard index' => [
+            '.*',
+            [
+                ['type' => TokenType::Index, 'value' => '*'],
+            ],
+        ];
 
-        self::assertEquals(TokenType::Index, $tokens[0]->type);
-        self::assertEquals("foo", $tokens[0]->value);
-    }
+        yield 'simple index' => [
+            '.foo',
+            [
+                ['type' => TokenType::Index, 'value' => 'foo'],
+            ],
+        ];
 
-    /**
-     * @throws JSONPathException
-     */
-    public function testIndexRecursive(): void
-    {
-        $tokens = new JSONPathLexer('..teams.*')
-            ->parseExpression();
+        yield 'bare index normalizes dot prefix' => [
+            'foo',
+            [
+                ['type' => TokenType::Index, 'value' => 'foo'],
+            ],
+        ];
 
-        self::assertCount(3, $tokens);
-        self::assertEquals(TokenType::Recursive, $tokens[0]->type);
-        self::assertEquals(null, $tokens[0]->value);
-        self::assertEquals(TokenType::Index, $tokens[1]->type);
-        self::assertEquals('teams', $tokens[1]->value);
-        self::assertEquals(TokenType::Index, $tokens[2]->type);
-        self::assertEquals('*', $tokens[2]->value);
-    }
+        yield 'complex quoted index' => [
+            '["\'b.^*_"]',
+            [
+                ['type' => TokenType::Index, 'value' => "'b.^*_"],
+            ],
+        ];
 
-    /**
-     * @throws JSONPathException
-     */
-    public function testIndexComplex(): void
-    {
-        $tokens = new JSONPathLexer('["\'b.^*_"]')
-            ->parseExpression();
+        yield 'integer index' => [
+            '[0]',
+            [
+                ['type' => TokenType::Index, 'value' => 0],
+            ],
+        ];
 
-        self::assertEquals(TokenType::Index, $tokens[0]->type);
-        self::assertEquals("'b.^*_", $tokens[0]->value);
+        yield 'index after dot notation' => [
+            '.books[0]',
+            [
+                ['type' => TokenType::Index, 'value' => 'books'],
+                ['type' => TokenType::Index, 'value' => 0],
+            ],
+        ];
+
+        yield 'quoted index with whitespace' => [
+            '[   "foo$-/\'"     ]',
+            [
+                ['type' => TokenType::Index, 'value' => "foo$-/'"],
+            ],
+        ];
+
+        yield 'slice with explicit bounds' => [
+            '[0:1:2]',
+            [
+                ['type' => TokenType::Slice, 'value' => ['start' => 0, 'end' => 1, 'step' => 2]],
+            ],
+        ];
+
+        yield 'negative index' => [
+            '[-1]',
+            [
+                ['type' => TokenType::Index, 'value' => -1],
+            ],
+        ];
+
+        yield 'slice all nulls' => [
+            '[:]',
+            [
+                ['type' => TokenType::Slice, 'value' => ['start' => null, 'end' => null, 'step' => null]],
+            ],
+        ];
+
+        yield 'shorthand query current' => [
+            '[?@]',
+            [
+                ['type' => TokenType::QueryMatch, 'value' => '@', 'shorthand' => true],
+            ],
+        ];
+
+        yield 'shorthand query comparison' => [
+            '[?@==null]',
+            [
+                ['type' => TokenType::QueryMatch, 'value' => '@==null', 'shorthand' => true],
+            ],
+        ];
+
+        yield 'shorthand query empty expression' => [
+            '[?]',
+            [
+                ['type' => TokenType::QueryMatch, 'value' => '@', 'shorthand' => true],
+            ],
+        ];
+
+        yield 'double quoted index with escape' => [
+            '$["a\\"b"]',
+            [
+                ['type' => TokenType::Index, 'value' => 'a"b'],
+            ],
+        ];
+
+        yield 'union with slice and negative index' => [
+            '[-2,1:3]',
+            [
+                [
+                    'type' => TokenType::Indexes,
+                    'value' => [
+                        -2,
+                        [
+                            'type' => 'slice',
+                            'value' => ['start' => 1, 'end' => 3, 'step' => null],
+                        ],
+                    ],
+                ],
+            ],
+        ];
+
+        yield 'union with query' => [
+            '[1,?(@.foo>1)]',
+            [
+                [
+                    'type' => TokenType::Indexes,
+                    'value' => [
+                        1,
+                        [
+                            'type' => 'query',
+                            'value' => '@.foo>1',
+                        ],
+                    ],
+                ],
+            ],
+        ];
+
+        yield 'single quoted index with escapes' => [
+            "$['back\\\\slash\\'quote']",
+            [
+                ['type' => TokenType::Index, 'value' => "back\\slash'quote"],
+            ],
+        ];
+
+        yield 'multiple quoted indexes collapse to array' => [
+            '["first","second"]',
+            [
+                ['type' => TokenType::Index, 'value' => ['first', 'second'], 'quoted' => true],
+            ],
+        ];
+
+        yield 'empty quoted index resolves to empty string' => [
+            '[""]',
+            [
+                ['type' => TokenType::Index, 'value' => '', 'quoted' => true],
+            ],
+        ];
+
+        yield 'query result expression' => [
+            '[(@.foo + 2)]',
+            [
+                ['type' => TokenType::QueryResult, 'value' => '@.foo + 2'],
+            ],
+        ];
+
+        yield 'query match' => [
+            "[?(@['@language']='en')]",
+            [
+                ['type' => TokenType::QueryMatch, 'value' => "@['@language']='en'"],
+            ],
+        ];
+
+        yield 'recursive simple' => [
+            '..foo',
+            [
+                ['type' => TokenType::Recursive, 'value' => null],
+                ['type' => TokenType::Index, 'value' => 'foo'],
+            ],
+        ];
+
+        yield 'recursive wildcard' => [
+            '..*',
+            [
+                ['type' => TokenType::Recursive, 'value' => null],
+                ['type' => TokenType::Index, 'value' => '*'],
+            ],
+        ];
+
+        yield 'indexes with whitespace' => [
+            '[ 1,2 , 3]',
+            [
+                ['type' => TokenType::Indexes, 'value' => [1, 2, 3]],
+            ],
+        ];
     }
 
     /**
@@ -78,170 +244,7 @@ class JSONPathLexerTest extends TestCase
         $this->expectException(JSONPathException::class);
         $this->expectExceptionMessage('Unable to parse token hello* in expression: .hello*');
 
-        new JSONPathLexer('.hello*')
-            ->parseExpression();
-    }
-
-    /**
-     * @throws JSONPathException
-     */
-    public function testIndexInteger(): void
-    {
-        $tokens = new JSONPathLexer('[0]')
-            ->parseExpression();
-
-        self::assertEquals(TokenType::Index, $tokens[0]->type);
-        self::assertSame(0, $tokens[0]->value);
-    }
-
-    /**
-     * @throws JSONPathException
-     */
-    public function testIndexIntegerAfterDotNotation(): void
-    {
-        $tokens = new JSONPathLexer('.books[0]')
-            ->parseExpression();
-
-        self::assertEquals(TokenType::Index, $tokens[0]->type);
-        self::assertEquals(TokenType::Index, $tokens[1]->type);
-        self::assertEquals("books", $tokens[0]->value);
-        self::assertSame(0, $tokens[1]->value);
-    }
-
-    /**
-     * @throws JSONPathException
-     */
-    public function testIndexWord(): void
-    {
-        $tokens = new JSONPathLexer('["foo$-/\'"]')
-            ->parseExpression();
-
-        self::assertEquals(TokenType::Index, $tokens[0]->type);
-        self::assertEquals("foo$-/'", $tokens[0]->value);
-    }
-
-    /**
-     * @throws JSONPathException
-     */
-    public function testIndexWordWithWhitespace(): void
-    {
-        $tokens = new JSONPathLexer('[   "foo$-/\'"     ]')
-            ->parseExpression();
-
-        self::assertEquals(TokenType::Index, $tokens[0]->type);
-        self::assertEquals("foo$-/'", $tokens[0]->value);
-    }
-
-    /**
-     * @throws JSONPathException
-     */
-    public function testSliceSimple(): void
-    {
-        $tokens = new JSONPathLexer('[0:1:2]')
-            ->parseExpression();
-
-        self::assertEquals(TokenType::Slice, $tokens[0]->type);
-        self::assertEquals(['start' => 0, 'end' => 1, 'step' => 2], $tokens[0]->value);
-    }
-
-    /**
-     * @throws JSONPathException
-     */
-    public function testIndexNegativeIndex(): void
-    {
-        $tokens = new JSONPathLexer('[-1]')
-            ->parseExpression();
-
-        self::assertEquals(TokenType::Slice, $tokens[0]->type);
-        self::assertEquals(['start' => -1, 'end' => null, 'step' => null], $tokens[0]->value);
-    }
-
-    /**
-     * @throws JSONPathException
-     */
-    public function testSliceAllNull(): void
-    {
-        $tokens = new JSONPathLexer('[:]')
-            ->parseExpression();
-
-        self::assertEquals(TokenType::Slice, $tokens[0]->type);
-        self::assertEquals(['start' => null, 'end' => null, 'step' => null], $tokens[0]->value);
-    }
-
-    /**
-     * @throws JSONPathException
-     */
-    public function testQueryResultSimple(): void
-    {
-        $tokens = new JSONPathLexer('[(@.foo + 2)]')
-            ->parseExpression();
-
-        self::assertEquals(TokenType::QueryResult, $tokens[0]->type);
-        self::assertEquals('@.foo + 2', $tokens[0]->value);
-    }
-
-    /**
-     * @throws JSONPathException
-     */
-    public function testQueryMatchSimple(): void
-    {
-        $tokens = new JSONPathLexer('[?(@.foo < \'bar\')]')
-            ->parseExpression();
-
-        self::assertEquals(TokenType::QueryMatch, $tokens[0]->type);
-        self::assertEquals('@.foo < \'bar\'', $tokens[0]->value);
-    }
-
-    /**
-     * @throws JSONPathException
-     */
-    public function testQueryMatchNotEqualTO(): void
-    {
-        $tokens = new JSONPathLexer('[?(@.foo != \'bar\')]')
-            ->parseExpression();
-
-        self::assertEquals(TokenType::QueryMatch, $tokens[0]->type);
-        self::assertEquals('@.foo != \'bar\'', $tokens[0]->value);
-    }
-
-    /**
-     * @throws JSONPathException
-     */
-    public function testQueryMatchBrackets(): void
-    {
-        $tokens = new JSONPathLexer("[?(@['@language']='en')]")
-            ->parseExpression();
-
-        self::assertEquals(TokenType::QueryMatch, $tokens[0]->type);
-        self::assertEquals("@['@language']='en'", $tokens[0]->value);
-    }
-
-    /**
-     * @throws JSONPathException
-     */
-    public function testRecursiveSimple(): void
-    {
-        $tokens = new JSONPathLexer('..foo')
-            ->parseExpression();
-
-        self::assertEquals(TokenType::Recursive, $tokens[0]->type);
-        self::assertEquals(TokenType::Index, $tokens[1]->type);
-        self::assertEquals(null, $tokens[0]->value);
-        self::assertEquals('foo', $tokens[1]->value);
-    }
-
-    /**
-     * @throws JSONPathException
-     */
-    public function testRecursiveWildcard(): void
-    {
-        $tokens = new JSONPathLexer('..*')
-            ->parseExpression();
-
-        self::assertEquals(TokenType::Recursive, $tokens[0]->type);
-        self::assertEquals(TokenType::Index, $tokens[1]->type);
-        self::assertEquals(null, $tokens[0]->value);
-        self::assertEquals('*', $tokens[1]->value);
+        new JSONPathLexer('.hello*')->parseExpression();
     }
 
     /**
@@ -252,32 +255,7 @@ class JSONPathLexerTest extends TestCase
         $this->expectException(JSONPathException::class);
         $this->expectExceptionMessage('Unable to parse token ba^r in expression: ..ba^r');
 
-        new JSONPathLexer('..ba^r')
-            ->parseExpression();
-    }
-
-    /**
-     * @throws JSONPathException
-     */
-    public function testIndexesSimple(): void
-    {
-        $tokens = new JSONPathLexer('[1,2,3]')
-            ->parseExpression();
-
-        self::assertEquals(TokenType::Indexes, $tokens[0]->type);
-        self::assertEquals([1, 2, 3], $tokens[0]->value);
-    }
-
-    /**
-     * @throws JSONPathException
-     */
-    public function testIndexesWhitespace(): void
-    {
-        $tokens = new JSONPathLexer('[ 1,2 , 3]')
-            ->parseExpression();
-
-        self::assertEquals(TokenType::Indexes, $tokens[0]->type);
-        self::assertEquals([1, 2, 3], $tokens[0]->value);
+        new JSONPathLexer('..ba^r')->parseExpression();
     }
 
     /**
@@ -295,5 +273,15 @@ class JSONPathLexerTest extends TestCase
     public function testSingleCharacterExpressionNormalized(): void
     {
         self::assertSame([], new JSONPathLexer('.')->parseExpression());
+    }
+
+    /**
+     * @throws JSONPathException
+     */
+    public function testUnclosedBracketThrowsAfterFinalFlush(): void
+    {
+        $this->expectException(JSONPathException::class);
+
+        new JSONPathLexer("['unterminated")->parseExpression();
     }
 }

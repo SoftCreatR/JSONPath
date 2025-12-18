@@ -1,5 +1,18 @@
 # Changelog
 
+### 1.0.0
+- Rebuilt the test suite from scratch: removed bulky baseline fixtures and added compact unit/integration coverage for every filter (index, union, query, recursive, slice), lexer edge cases, and JSONPath core helpers. Runs reflection-free and deprecation-free.
+- Achieved and enforced 100% code coverage across AccessHelper, all filters, lexer, tokens, and JSONPath core while keeping phpstan and coding standards clean.
+- Added a lightweight manual query runner with curated examples to exercise selectors quickly without external datasets.
+- Major compatibility push toward the unofficial JSONPath standard: unions support slices/queries/wildcards, trailing commas parse correctly, negative indexes and bracket-escaped keys (quotes, brackets, wildcards, special chars) are honored, filters compare path-to-path and root references, equality/deep-equality/regex/in/nin semantics align with expectations, and null existence/value handling follows RFC behavior.
+- New feature highlights from this cycle:
+  - Multi-key unions with and without quotes: `$[name,year]` and `$["name","year"]`.
+  - Robust bracket notation for special/escaped keys, including `']'`, `'*'`, `$`, backslashes, and mixed punctuation.
+  - Trailing comma support in unions/slices (e.g. `$..books[0,1,2,]`).
+  - Negative index handling aligned with spec (short arrays return empty; -1 works where valid).
+  - Filter improvements: path-to-path/root comparisons, deep equality across scalars/objects/arrays/null/empties, regex matching, `in`/`nin`/`!in`, tautological expressions, and `?@` existence behavior per RFC.
+  - Unions combining slices/queries/wildcards now return complete results (e.g. `$[1:3,4]`, `$[*,1]`).
+
 ### 0.11.0
 🔻 Breaking changes ahead:
 

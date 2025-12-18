@@ -4,32 +4,32 @@
 [![MIT licensed](https://img.shields.io/badge/license-MIT-blue.svg)](./LICENSE) [![Plant Tree](https://img.shields.io/badge/dynamic/json?color=brightgreen&label=Plant%20Tree&query=%24.total&url=https%3A%2F%2Fpublic.ecologi.com%2Fusers%2Fsoftcreatr%2Ftrees)](https://ecologi.com/softcreatr?r=61212ab3fc69b8eb8a2014f4)
 [![Codecov branch](https://img.shields.io/codecov/c/github/SoftCreatR/JSONPath)](https://codecov.io/gh/SoftCreatR/JSONPath)
 
-This is a [JSONPath](http://goessner.net/articles/JsonPath/) implementation for PHP based on Stefan Goessner's JSONPath script.
+This is a [JSONPath](http://goessner.net/articles/JsonPath/) implementation for PHP that targets the de facto comparison suite/RFC semantics while keeping the API small, cached, and `eval`-free.
 
-JSONPath is an XPath-like expression language for filtering, flattening and extracting data.
+## Highlights
 
-This project aims to be a clean and simple implementation with the following goals:
-
- - Object-oriented code (should be easier to manage or extend in future)
- - Expressions are parsed into tokens using code inspired by the Doctrine Lexer. The tokens are cached internally to avoid re-parsing the expressions.
- - There is no `eval()` in use
- - Any combination of objects/arrays/ArrayAccess-objects can be used as the data input which is great if you're de-serializing JSON in to objects or if you want to process your own data structures.
+- PHP 8.5+ only, with enums/readonly tokens and no `eval`.
+- Works with arrays, objects, and `ArrayAccess`/traversables in any combination.
+- Unions cover slices/queries/wildcards/multi-key strings (quoted or unquoted); negative indexes and escaped bracket notation are supported.
+- Filters support path-to-path/root comparisons, regex, `in`/`nin`/`!in`, deep equality, and RFC-style null existence/value handling.
+- Tokenized parsing with internal caching; lightweight manual runner to try bundled examples quickly.
 
 ## Installation
 
 Requires PHP 8.5 or newer.
 
 ```bash
-composer require softcreatr/jsonpath:"^0.11"
+composer require softcreatr/jsonpath:"^1.0"
 ```
 
 ## Development
 
-Static analysis is done with PHPStan.
+Useful commands:
 
 ```bash
-composer require --dev phpstan/phpstan
-./vendor/bin/phpstan analyse --no-progress
+composer exec phpunit
+composer phpstan
+composer cs
 ```
 
 ## JSONPath Examples
@@ -43,6 +43,7 @@ JSONPath                  | Result
 `$..books[(@.length-1)]`  | the last book in order.
 `$..books[-1:]`           | the last book in order.
 `$..books[0,1]`           | the first two books
+`$..books[title,year]`    | multiple keys in a union
 `$..books[:2]`            | the first two books
 `$..books[::2]`           | every second book starting from first one
 `$..books[1:6:3]`         | every third book starting from 1 till 6
@@ -64,8 +65,8 @@ Symbol                | Description
 `*`                   | Wildcard. All child elements regardless their index.
 `[,]`                 | Array indices as a set
 `[start:end:step]`    | Array slice operator borrowed from ES4/Python.
-`?()`                 | Filters a result set by a script expression
-`()`                  | Uses the result of a script expression as the index
+`?()`                 | Filters a result set by a comparison expression
+`()`                  | Uses the result of a comparison expression as the index
 
 ## PHP Usage
 
@@ -116,8 +117,6 @@ stdClass Object
 */
 ```
 
-More examples can be found in the [Wiki](https://github.com/SoftCreatR/JSONPath/wiki/Queries)
-
 ### Magic method access
 
 The options flag `JSONPath::ALLOW_MAGIC` will instruct JSONPath when retrieving a value to first check if an object
@@ -127,40 +126,47 @@ not very predictable as:
 -  wildcard and recursive features will only look at public properties and can't smell which properties are magically accessible
 -  there is no `property_exists` check for magic methods so an object with a magic `__get()` will always return `true` when checking
    if the property exists
--   any errors thrown or unpredictable behaviour caused by fetching via `__get()` is your own problem to deal with
+-   any errors thrown or unpredictable behavior caused by fetching via `__get()` is your own problem to deal with
 
 ```php
+<?php
+
 use Flow\JSONPath\JSONPath;
 
 $myObject = (new Foo())->get('bar');
 $jsonPath = new JSONPath($myObject, JSONPath::ALLOW_MAGIC);
 ```
 
-For more examples, check the JSONPathTest.php tests file.
-
 ## Script expressions
 
-Script expressions are not supported as the original author intended because:
+Script execution is intentionally **not** supported:
 
--   This would only be achievable through `eval` (boo).
--   Using the script engine from different languages defeats the purpose of having a single expression evaluate the same way in different
-    languages which seems like a bit of a flaw if you're creating an abstract expression syntax.
+- It would require `eval`, which we avoid.
+- Behavior would diverge across languages and defeat having a portable expression syntax.
 
-So here are the types of query expressions that are supported:
+Supported filter/query patterns (200+ cases covered in the comparison suite):
 
-	[?(@._KEY_ _OPERATOR_ _VALUE_)] // <, >, <=, >=, !=, ==, =~, in and nin
-	e.g.
-	[?(@.title == "A string")] //
-	[?(@.title = "A string")]
-	// A single equals is not an assignment but the SQL-style of '=='
-	[?(@.title =~ /^a(nother)? string$/i)]
-	[?(@.title in ["A string", "Another string"])]
-	[?(@.title nin ["A string", "Another string"])]
+```
+[?(@._KEY_ _OPERATOR_ _VALUE_)]
+  Operators: ==, =, !=, <>, !==, <, >, <=, >=, =~, in, nin, !in
+
+Examples:
+[?(@.title == "A string")]      // equality
+[?(@.title = "A string")]       // SQL-style equals
+[?(@.price < 10)]               // numeric comparisons
+[?(@.title =~ /^a(nother)?/i)]  // regex
+[?(@.title in ["A","B"])]       // membership
+[?(@.title nin ["A"])]          // not in
+[?(@.title !in ["A"])]          // alternate not in
+[?(@.key == @.other)]           // path-to-path comparison
+[?(@.key == $.rootValue)]       // root reference
+[?(@)] or [?(@==@)]             // truthy/tautology
+[?(@.length)]                   // existence checks
+[?(@['weird-key']=="ok")]       // bracket-escaped keys and negative indexes
+```
+
+A full list of (un)supported filter/query patterns can be found in the [JSONPath Comparison Cheatsheet](https://cburgmer.github.io/json-path-comparison/).
 	
-## Known issues
-
-- This project has not implemented multiple string indexes e.g. `$[name,year]` or `$["name","year"]`. I have no ETA on that feature, and it would require some re-writing of the parser that uses a very basic regex implementation.
-
 ## Similar projects
 
 [FlowCommunications/JSONPath](https://github.com/FlowCommunications/JSONPath) is the predecessor of this library by Stephen Frank

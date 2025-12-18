@@ -22,7 +22,9 @@ readonly class JSONPathToken
 {
     public function __construct(
         public TokenType $type,
-        public mixed $value
+        public mixed $value,
+        public bool $quoted = false,
+        public bool $shorthand = false,
     ) {
         // ...
     }

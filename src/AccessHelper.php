@@ -38,11 +38,14 @@ class AccessHelper
             return true;
         }
 
-        if (\is_int($key) && $key < 0) {
-            $key = \abs($key);
-        }
-
         if (\is_array($collection)) {
+            if (\is_int($key) && $key < 0) {
+                $keys = \array_keys($collection);
+                $index = \count($keys) + $key;
+
+                return $index >= 0 && \array_key_exists($index, $keys);
+            }
+
             return \array_key_exists($key ?? '', $collection);
         }
 
@@ -76,7 +79,8 @@ class AccessHelper
             $return = $collection->offsetExists($key) ? $collection->offsetGet($key) : null;
         } elseif (\is_array($collection)) {
             if (\is_int($key) && $key < 0) {
-                $return = \array_slice($collection, $key, 1)[0] ?? null;
+                $index = \count($collection) + $key;
+                $return = $index >= 0 && \array_key_exists($index, $collection) ? $collection[$index] : null;
             } else {
                 $return = $collection[$key] ?? null;
             }
@@ -128,7 +132,6 @@ class AccessHelper
         }
 
         if ($collection instanceof ArrayAccess) {
-            /** @noinspection PhpVoidFunctionResultUsedInspection */
             $collection->offsetSet($key, $value);
 
             return $value;

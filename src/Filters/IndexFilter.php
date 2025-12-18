@@ -23,6 +23,7 @@ class IndexFilter extends AbstractFilter
     {
         if (\is_array($this->token->value)) {
             $result = [];
+
             foreach ($this->token->value as $value) {
                 if (AccessHelper::keyExists($collection, $value, $this->magicIsAllowed)) {
                     $result[] = AccessHelper::getValue($collection, $value, $this->magicIsAllowed);
@@ -38,7 +39,7 @@ class IndexFilter extends AbstractFilter
             ];
         }
 
-        if ($this->token->value === '*') {
+        if ($this->token->value === '*' && !$this->token->quoted) {
             return AccessHelper::arrayValues($collection);
         }
 

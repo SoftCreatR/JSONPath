@@ -17,9 +17,16 @@ abstract class AbstractFilter
 {
     protected bool $magicIsAllowed;
 
+    protected mixed $rootData = null;
+
     public function __construct(protected JSONPathToken $token, int $options = 0)
     {
         $this->magicIsAllowed = ($options & JSONPath::ALLOW_MAGIC) === JSONPath::ALLOW_MAGIC;
+    }
+
+    public function setRootData(mixed $root): void
+    {
+        $this->rootData = $root;
     }
 
     /**

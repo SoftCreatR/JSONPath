@@ -29,6 +29,16 @@ class AccessHelperTest extends TestCase
             {
                 return "magic-{$name}";
             }
+
+            public function __set(string $name, mixed $value): void
+            {
+                $this->{$name} = $value;
+            }
+
+            public function __isset(string $name): bool
+            {
+                return isset($this->{$name});
+            }
         };
 
         self::assertTrue(AccessHelper::keyExists($magic, 'foo', true));
@@ -72,6 +82,16 @@ class AccessHelperTest extends TestCase
             public function __get(string $name): string
             {
                 return "magic-{$name}";
+            }
+
+            public function __set(string $name, mixed $value): void
+            {
+                $this->{$name} = $value;
+            }
+
+            public function __isset(string $name): bool
+            {
+                return isset($this->{$name});
             }
         };
 
@@ -143,6 +163,7 @@ class AccessHelperTest extends TestCase
     {
         $obj = (object)['a' => 1, 'b' => 2];
         self::assertSame([1, 2], AccessHelper::arrayValues($obj));
+        self::assertSame([1, 2], AccessHelper::arrayValues(['a' => 1, 'b' => 2]));
     }
 
     public function testGetValueByIndexReturnsNullWhenOutOfRange(): void
@@ -160,6 +181,7 @@ class AccessHelperTest extends TestCase
         self::assertTrue(AccessHelper::keyExists($object, 'a'));
         self::assertFalse(AccessHelper::keyExists('scalar', 'a'));
         self::assertSame(['a'], AccessHelper::collectionKeys($object));
+        self::assertSame(['b'], AccessHelper::collectionKeys(['b' => 2]));
         self::assertFalse(AccessHelper::isCollectionType('scalar'));
     }
 
@@ -168,6 +190,9 @@ class AccessHelperTest extends TestCase
         $object = (object)['a' => 1];
         AccessHelper::setValue($object, 'b', 2);
         self::assertSame(2, $object->b);
+        $array = ['x' => 1];
+        AccessHelper::setValue($array, 'y', 3);
+        self::assertSame(3, $array['y']);
 
         $arrayAccess = new class implements ArrayAccess {
             /** @var array<string, string> */
@@ -199,7 +224,6 @@ class AccessHelperTest extends TestCase
         AccessHelper::unsetValue($arrayAccess, 'k');
         self::assertArrayNotHasKey('k', $arrayAccess->store);
 
-        $array = ['x' => 1];
         AccessHelper::unsetValue($array, 'x');
         self::assertArrayNotHasKey('x', $array);
 
