@@ -11,7 +11,7 @@ This is a [JSONPath](http://goessner.net/articles/JsonPath/) implementation for 
 - PHP 8.5+ only, with enums/readonly tokens and no `eval`.
 - Works with arrays, objects, and `ArrayAccess`/traversables in any combination.
 - Unions cover slices/queries/wildcards/multi-key strings (quoted or unquoted); negative indexes and escaped bracket notation are supported.
-- Filters support path-to-path/root comparisons, regex, `in`/`nin`/`!in`, deep equality, and RFC-style null existence/value handling.
+- Filters support path-to-path/root comparisons, regex, `in`/`nin`/`!in`, deep equality, RFC-style null existence/value handling, and literal-only short-circuiting (e.g., `?(true)`, `?(false)`, `&& false`, `|| true`).
 - Tokenized parsing with internal caching; lightweight manual runner to try bundled examples quickly.
 
 ## Installation
@@ -65,7 +65,7 @@ Symbol                | Description
 `*`                   | Wildcard. All child elements regardless their index.
 `[,]`                 | Array indices as a set
 `[start:end:step]`    | Array slice operator borrowed from ES4/Python.
-`?()`                 | Filters a result set by a comparison expression
+`?()`                 | Filters a result set by a comparison expression (constant expressions like `?(true)`/`?(false)` are allowed; unsupported/empty filters evaluate to an empty result)
 `()`                  | Uses the result of a comparison expression as the index
 
 ## PHP Usage

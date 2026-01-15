@@ -58,6 +58,18 @@ class QueryMatchFilter extends AbstractFilter
             $filterExpression = $negationMatches['logicalexpr'];
         }
 
+        $literalResult = $this->evaluateLiteralExpression($filterExpression, $collection);
+
+        if ($literalResult !== null) {
+            return $literalResult;
+        }
+
+        $shortCircuitResult = $this->evaluateExpressionWithTrailingLiteral($filterExpression, $collection);
+
+        if ($shortCircuitResult !== null) {
+            return $shortCircuitResult;
+        }
+
         $filterGroups = [];
 
         if (
@@ -312,6 +324,60 @@ class QueryMatchFilter extends AbstractFilter
             '<=' => $this->compareLessThan($left, $right) || $this->compareEquals($left, $right),
             '>' => $this->compareLessThan($right, $left),
             '>=' => $this->compareLessThan($right, $left) || $this->compareEquals($left, $right),
+        };
+    }
+
+    /**
+     * @param array<int, mixed>|object $collection
+     * @return array<int, mixed>|null
+     * @throws JSONPathException
+     */
+    private function evaluateLiteralExpression(string $expression, array|object $collection): ?array
+    {
+        $trimmed = \trim($expression);
+
+        if ($trimmed === '') {
+            return [];
+        }
+
+        $literalValue = $this->decodeLiteral($trimmed);
+        $literalIsBool = \is_bool($literalValue);
+
+        if (!$literalIsBool && $literalValue !== null) {
+            return null;
+        }
+
+        return $this->isTruthy($literalValue) ? AccessHelper::arrayValues($collection) : [];
+    }
+
+    /**
+     * @param array<int, mixed>|object $collection
+     * @return array<int, mixed>|null
+     * @throws JSONPathException
+     */
+    private function evaluateExpressionWithTrailingLiteral(
+        string $expression,
+        array|object $collection
+    ): ?array {
+        if (
+            !\preg_match(
+                '/^(?<left>.+?)\s*(?<op>&&|\|\|)\s*(?<literal>true|false|null)\s*$/i',
+                $expression,
+                $matches
+            )
+        ) {
+            return null;
+        }
+
+        $leftFilter = '$[?(' . $matches['left'] . ')]';
+        $leftResult = new JSONPath($collection)->find($leftFilter)->getData();
+        $literalValue = $this->decodeLiteral($matches['literal']);
+        $literalIsTrue = $this->isTruthy($literalValue);
+
+        return match ($matches['op']) {
+            '&&' => $literalIsTrue ? $leftResult : [],
+            '||' => $literalIsTrue ? AccessHelper::arrayValues($collection) : $leftResult,
+            default => [],
         };
     }
 

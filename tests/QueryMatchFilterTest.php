@@ -246,6 +246,45 @@ class QueryMatchFilterTest extends TestCase
     /**
      * @throws JSONPathException
      */
+    public function testLiteralOnlyFilterExpressionsReturnWholeCollectionOrEmpty(): void
+    {
+        $data = [1, 2, 3];
+
+        self::assertSame($data, new JSONPath($data)->find('$[?(true)]')->getData());
+        self::assertSame([], new JSONPath($data)->find('$[?(false)]')->getData());
+    }
+
+    /**
+     * @throws JSONPathException
+     */
+    public function testLogicalExpressionsWithLiteralRightOperand(): void
+    {
+        $data = [
+            ['key' => 1],
+            ['key' => -1],
+        ];
+
+        self::assertSame(
+            [],
+            new JSONPath($data)->find('$[?(@.key>0 && false)]')->getData()
+        );
+        self::assertSame(
+            $data,
+            new JSONPath($data)->find('$[?(@.key>0 || true)]')->getData()
+        );
+    }
+
+    /**
+     * @throws JSONPathException
+     */
+    public function testEmptyFilterExpressionReturnsEmpty(): void
+    {
+        self::assertSame([], new JSONPath([1, 2])->find('$[?()]')->getData());
+    }
+
+    /**
+     * @throws JSONPathException
+     */
     public function testNormalizeKeyCastsNumericStrings(): void
     {
         $token = new JSONPathToken(TokenType::QueryMatch, '@["2"]=="two"');

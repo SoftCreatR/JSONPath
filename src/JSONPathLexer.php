@@ -54,7 +54,7 @@ class JSONPathLexer
             return;
         }
 
-        if ($expression[0] === '$') {
+        if ($expression[0] === '$' || $expression[0] === '@') {
             $expression = \substr($expression, 1);
         }
 
@@ -83,11 +83,17 @@ class JSONPathLexer
         $tokenValue = '';
         $tokens = [];
         $inBracketQuote = null;
+        $inQuote = null;
 
         for ($i = 0; $i < $this->expressionLength; $i++) {
             $char = $this->expression[$i];
 
-            if (($squareBracketDepth === 0) && $char === '.') {
+            if ($squareBracketDepth === 0 && ($char === "'" || $char === '"')) {
+                $escaped = $this->isEscaped($tokenValue);
+                $inQuote = $inQuote === $char && !$escaped ? null : ($inQuote ?? $char);
+            }
+
+            if (($squareBracketDepth === 0) && $inQuote === null && $char === '.') {
                 if ($this->lookAhead($i) === '.') {
                     $tokens[] = new JSONPathToken(TokenType::Recursive, null);
                 }
@@ -140,7 +146,10 @@ class JSONPathLexer
              */
             $tokenValue .= $char;
 
-            if ($this->atEnd($i) || \in_array($this->lookAhead($i), ['.', '['], true)) {
+            if (
+                $inQuote === null
+                && ($this->atEnd($i) || \in_array($this->lookAhead($i), ['.', '['], true))
+            ) {
                 $tokens[] = $this->createToken($tokenValue);
                 $tokenValue = '';
             }
@@ -179,7 +188,7 @@ class JSONPathLexer
     {
         // The IDE doesn't like, what we do with $value, so let's
         // move it to a separate variable, to get rid of any IDE warnings
-        $tokenValue = $value;
+        $tokenValue = \trim($value);
 
         /** @var JSONPathToken|null $ret */
         $ret = null;
@@ -197,6 +206,15 @@ class JSONPathLexer
                 $hasQuery = false;
 
                 foreach ($parts as $part) {
+                    if (
+                        \preg_match('/^' . static::MATCH_INDEX_IN_SINGLE_QUOTES . '$/xu', $part, $matches)
+                        || \preg_match('/^' . static::MATCH_INDEX_IN_DOUBLE_QUOTES . '$/xu', $part, $matches)
+                    ) {
+                        $union[] = $this->decodeQuotedIndex($matches[1] ?? '', $matches[0][0]);
+
+                        continue;
+                    }
+
                     if (\preg_match('/^-\\d+$/', $part)) {
                         $union[] = (int)$part;
 
@@ -228,8 +246,21 @@ class JSONPathLexer
                     }
                 }
 
-                if (($hasSlice || $hasQuery) && \count($union) === \count($parts)) {
-                    return new JSONPathToken(TokenType::Indexes, $union);
+                if (\count($union) === \count($parts)) {
+                    $quotedPattern = '/^(' . static::MATCH_INDEX_IN_SINGLE_QUOTES . '|'
+                        . static::MATCH_INDEX_IN_DOUBLE_QUOTES . ')$/xu';
+
+                    $quotedCallback = static function (string $part) use ($quotedPattern): bool {
+                        return \preg_match($quotedPattern, $part) === 1;
+                    };
+
+                    $quotedParts = \array_filter($parts, $quotedCallback);
+
+                    $allQuoted = \count($quotedParts) === \count($parts);
+
+                    $tokenType = ($hasSlice || $hasQuery || !$allQuoted) ? TokenType::Indexes : TokenType::Index;
+
+                    return new JSONPathToken($tokenType, $union, $allQuoted);
                 }
             }
         }
@@ -238,21 +269,25 @@ class JSONPathLexer
             return new JSONPathToken(TokenType::Index, (int)$tokenValue);
         }
 
+        if ($tokenValue === '') {
+            return new JSONPathToken(TokenType::Indexes, []);
+        }
+
+        if (
+            ($tokenValue[0] === "'" || $tokenValue[0] === '"')
+            && $tokenValue[\strlen($tokenValue) - 1] === $tokenValue[0]
+        ) {
+            $tokenValue = $this->decodeQuotedIndex(\substr($tokenValue, 1, -1), $tokenValue[0]);
+
+            return new JSONPathToken(TokenType::Index, $tokenValue, true);
+        }
+
         if (\preg_match('/^(' . static::MATCH_INDEX . ')$/xu', $tokenValue, $matches)) {
             if (\preg_match('/^-?\d+$/', $tokenValue)) {
                 $tokenValue = (int)$tokenValue;
             }
 
             $ret = new JSONPathToken(TokenType::Index, $tokenValue);
-        } elseif (\preg_match('/^' . static::MATCH_INDEXES . '$/xu', $tokenValue, $matches)) {
-            $tokenValue = \explode(',', \trim($tokenValue, ','));
-
-            foreach ($tokenValue as $i => $v) {
-                $v = \trim($v);
-                $tokenValue[$i] = $v === '*' ? '*' : (int)$v;
-            }
-
-            $ret = new JSONPathToken(TokenType::Indexes, $tokenValue);
         } elseif (\preg_match('/^' . static::MATCH_SLICE . '$/xu', $tokenValue, $matches)) {
             $tokenValue = $this->parseSlice($tokenValue);
 
@@ -261,6 +296,8 @@ class JSONPathLexer
             $tokenValue = \substr($tokenValue, 1, -1);
 
             $ret = new JSONPathToken(TokenType::QueryResult, $tokenValue);
+        } elseif ($tokenValue === '?()') {
+            $ret = new JSONPathToken(TokenType::QueryMatch, '', shorthand: false);
         } elseif ($tokenValue === '?') {
             $ret = new JSONPathToken(TokenType::QueryMatch, '@', shorthand: true);
         } elseif (\preg_match('/^\\?@/', $tokenValue)) {
@@ -272,27 +309,6 @@ class JSONPathLexer
             $tokenValue = \substr($tokenValue, 2, -1);
 
             $ret = new JSONPathToken(TokenType::QueryMatch, $tokenValue);
-        } elseif (
-            \preg_match('/^' . static::MATCH_INDEX_IN_SINGLE_QUOTES . '$/xu', $tokenValue, $matches)
-            || \preg_match('/^' . static::MATCH_INDEX_IN_DOUBLE_QUOTES . '$/xu', $tokenValue, $matches)
-        ) {
-            if (isset($matches[1])) {
-                $tokenValue = $this->decodeQuotedIndex($matches[1], $matches[0][0]);
-
-                $possibleArray = false;
-                if ($matches[0][0] === '"') {
-                    $possibleArray = \explode('","', $tokenValue);
-                } elseif ($matches[0][0] === "'") {
-                    $possibleArray = \explode("','", $tokenValue);
-                }
-                if ($possibleArray !== false && \count($possibleArray) > 1) {
-                    $tokenValue = $possibleArray;
-                }
-            } else {
-                $tokenValue = '';
-            }
-
-            $ret = new JSONPathToken(TokenType::Index, $tokenValue, true);
         }
 
         if ($ret !== null) {

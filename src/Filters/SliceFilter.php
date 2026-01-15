@@ -19,6 +19,14 @@ class SliceFilter extends AbstractFilter
      */
     public function filter(array|object $collection): array
     {
+        if (
+            !\is_array($collection)
+            && !$collection instanceof \Countable
+            && !$collection instanceof \ArrayAccess
+        ) {
+            return [];
+        }
+
         $length = \count($collection);
         $start = $this->token->value['start'];
         $end = $this->token->value['end'];

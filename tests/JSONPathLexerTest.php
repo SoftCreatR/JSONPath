@@ -198,6 +198,27 @@ class JSONPathLexerTest extends TestCase
             ],
         ];
 
+        yield 'quoted index in dot notation preserves dots' => [
+            "$.'some.key'",
+            [
+                ['type' => TokenType::Index, 'value' => 'some.key', 'quoted' => true],
+            ],
+        ];
+
+        yield 'empty bracket notation yields empty index list' => [
+            '$[]',
+            [
+                ['type' => TokenType::Indexes, 'value' => []],
+            ],
+        ];
+
+        yield 'empty filter expression tokenizes to empty query match' => [
+            '$[?()]',
+            [
+                ['type' => TokenType::QueryMatch, 'value' => '', 'shorthand' => false],
+            ],
+        ];
+
         yield 'query result expression' => [
             '[(@.foo + 2)]',
             [

@@ -1,5 +1,10 @@
 # Changelog
 
+### 1.0.1
+- Aligned the query runner and lexer with the JSONPath comparison suite: JSON documents are now decoded as objects to preserve `{}` vs `[]`, unsupported selectors no longer abort the runner, and dot-notation now accepts quoted keys with dots/spaces/leading `@`.
+- Hardened filter parsing: boolean-only filters (`?(true|false|null)`), literal short-circuiting (`&& false`, `|| true`), and empty filters now return the expected collections instead of throwing.
+- Slice filters gracefully skip non-countable objects.
+
 ### 1.0.0
 - Rebuilt the test suite from scratch: removed bulky baseline fixtures and added compact unit/integration coverage for every filter (index, union, query, recursive, slice), lexer edge cases, and JSONPath core helpers. Runs reflection-free and deprecation-free.
 - Achieved and enforced 100% code coverage across AccessHelper, all filters, lexer, tokens, and JSONPath core while keeping phpstan and coding standards clean.

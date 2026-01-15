@@ -36,7 +36,7 @@ class SliceFilterTest extends TestCase
     }
 
     /**
-     * @return iterable<string, array{array<string, int|null>, array<array-key, mixed>, array<int, mixed>}>
+     * @return iterable<string, array{array<string, int|null>, array<array-key, mixed>|object, array<int, mixed>}>
      */
     public static function edgeCaseProvider(): iterable
     {
@@ -97,6 +97,12 @@ class SliceFilterTest extends TestCase
             ['a', 'b', 'c'],
             ['b', 'a'],
         ];
+
+        yield 'non countable object yields empty' => [
+            ['start' => 0, 'end' => null, 'step' => 1],
+            (object)['a' => 1],
+            [],
+        ];
     }
 
     /**
@@ -105,7 +111,7 @@ class SliceFilterTest extends TestCase
      * @param array<int, mixed> $expected
      */
     #[DataProvider('edgeCaseProvider')]
-    public function testEdgeCases(array $slice, array $input, array $expected): void
+    public function testEdgeCases(array $slice, array|object $input, array $expected): void
     {
         $token = new JSONPathToken(TokenType::Slice, $slice);
         $filter = new SliceFilter($token);
