@@ -54,7 +54,7 @@ class IndexFilterTest extends TestCase
     /**
      * @throws JSONPathException
      */
-    public function testWildcardReturnsValuesAndLengthReturnsCount(): void
+    public function testWildcardReturnsValuesAndLengthIsNotSynthetic(): void
     {
         $wildcard = new IndexFilter(new JSONPathToken(TokenType::Index, '*'));
         $length = new IndexFilter(new JSONPathToken(TokenType::Index, 'length'));
@@ -62,7 +62,21 @@ class IndexFilterTest extends TestCase
         $input = ['a' => 1, 'b' => 2];
 
         self::assertSame([1, 2], $wildcard->filter($input));
-        self::assertSame([2], $length->filter($input));
+        self::assertSame([], $length->filter($input));
+    }
+
+    /**
+     * @throws JSONPathException
+     */
+    public function testNumericSelectorsRespectTheirNotationAndCollectionType(): void
+    {
+        $bracketed = new IndexFilter(new JSONPathToken(TokenType::Index, 0, bracketed: true));
+        $shorthand = new IndexFilter(new JSONPathToken(TokenType::Index, 0));
+
+        self::assertSame([], $bracketed->filter((object)['value']));
+        self::assertSame([], $shorthand->filter(['value']));
+        self::assertSame(['value'], $bracketed->filter(new ArrayObject(['value'])));
+        self::assertSame(['value'], $shorthand->filter((object)['value']));
     }
 
     /**
@@ -80,7 +94,7 @@ class IndexFilterTest extends TestCase
      */
     public function testJSONPathFindOnScalarProducesEmptyCollection(): void
     {
-        $result = new JSONPath(123)->find('$.missing');
+        $result = (new JSONPath(123))->find('$.missing');
 
         self::assertSame([], $result->getData());
     }

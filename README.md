@@ -1,25 +1,25 @@
-# JSONPath for PHP 8.5+
+# JSONPath for PHP 8.3+
 
 [![Build](https://img.shields.io/github/actions/workflow/status/SoftCreatR/JSONPath/.github/workflows/Test.yml?branch=main)](https://github.com/SoftCreatR/JSONPath/actions/workflows/Test.yml) [![Latest Release](https://img.shields.io/packagist/v/SoftCreatR/JSONPath?color=blue&label=Latest%20Release)](https://packagist.org/packages/softcreatr/jsonpath)
 [![MIT licensed](https://img.shields.io/badge/license-MIT-blue.svg)](./LICENSE) [![Plant Tree](https://img.shields.io/badge/dynamic/json?color=brightgreen&label=Plant%20Tree&query=%24.total&url=https%3A%2F%2Fpublic.ecologi.com%2Fusers%2Fsoftcreatr%2Ftrees)](https://ecologi.com/softcreatr?r=61212ab3fc69b8eb8a2014f4)
 [![Codecov branch](https://img.shields.io/codecov/c/github/SoftCreatR/JSONPath)](https://codecov.io/gh/SoftCreatR/JSONPath)
 
-This is a [JSONPath](http://goessner.net/articles/JsonPath/) implementation for PHP that targets the de facto comparison suite/RFC semantics while keeping the API small, cached, and `eval`-free.
+This is a [JSONPath](https://www.rfc-editor.org/rfc/rfc9535) implementation for PHP that targets portable RFC semantics and the JSONPath comparison consensus while keeping the API small, cached, and `eval`-free.
 
 ## Highlights
 
-- PHP 8.5+ only, with enums/readonly tokens and no `eval`.
+- PHP 8.3+ with typed class constants, enums, readonly tokens, `#[Override]`, and no `eval`; CI covers PHP 8.3 through the PHP 8.6 nightly.
 - Works with arrays, objects, and `ArrayAccess`/traversables in any combination.
-- Unions cover slices/queries/wildcards/multi-key strings (quoted or unquoted); negative indexes and escaped bracket notation are supported.
-- Filters support path-to-path/root comparisons, regex, `in`/`nin`/`!in`, deep equality, RFC-style null existence/value handling, and literal-only short-circuiting (e.g., `?(true)`, `?(false)`, `&& false`, `|| true`).
-- Tokenized parsing with internal caching; lightweight manual runner to try bundled examples quickly.
+- Supports child and descendant selectors, wildcards, quoted name unions, indexes, negative indexes, and array slices.
+- Filters support existence tests (including descendant and nested filters), path-to-path/root comparisons, deep equality, and distinct RFC `Nothing` versus JSON `null` semantics.
+- Malformed and non-portable legacy syntax is rejected instead of being interpreted as a different valid query.
 
 ## Installation
 
-Requires PHP 8.5 or newer.
+Requires PHP 8.3 or newer.
 
 ```bash
-composer require softcreatr/jsonpath:"^1.0"
+composer require softcreatr/jsonpath:"^2.0"
 ```
 
 ## Development
@@ -40,16 +40,14 @@ JSONPath                  | Result
 `$..author`               | all authors
 `$.store..price`          | the price of everything in the store.
 `$..books[2]`             | the third book
-`$..books[(@.length-1)]`  | the last book in order.
 `$..books[-1:]`           | the last book in order.
 `$..books[0,1]`           | the first two books
-`$..books[title,year]`    | multiple keys in a union
+`$..books['title','year']`| multiple keys in a union
 `$..books[:2]`            | the first two books
 `$..books[::2]`           | every second book starting from first one
 `$..books[1:6:3]`         | every third book starting from 1 till 6
 `$..books[?(@.isbn)]`     | filter all books with isbn number
 `$..books[?(@.price<10)]` | filter all books cheaper than 10
-`$..books.length`         | the amount of books
 `$..*`                    | all elements in the data (recursively extracted)
 
 
@@ -58,15 +56,14 @@ Expression syntax
 
 Symbol                | Description
 ----------------------|-------------------------
-`$`                   | The root object/element (not strictly necessary)
-`@`                   | The current object/element
+`$`                   | The root object/element
+`@`                   | The current object/element inside a filter
 `.` or `[]`           | Child operator
 `..`                  | Recursive descent
 `*`                   | Wildcard. All child elements regardless their index.
-`[,]`                 | Array indices as a set
+`[,]`                 | Array indexes or quoted member names as a set
 `[start:end:step]`    | Array slice operator borrowed from ES4/Python.
-`?()`                 | Filters a result set by a comparison expression (constant expressions like `?(true)`/`?(false)` are allowed; unsupported/empty filters evaluate to an empty result)
-`()`                  | Uses the result of a comparison expression as the index
+`?()`                 | Filters a node list by an existence or comparison expression
 
 ## PHP Usage
 
@@ -137,36 +134,32 @@ $myObject = (new Foo())->get('bar');
 $jsonPath = new JSONPath($myObject, JSONPath::ALLOW_MAGIC);
 ```
 
-## Script expressions
+## Filter expressions
 
-Script execution is intentionally **not** supported:
+Filter evaluation is intentionally limited to portable, `eval`-free operations:
 
-- It would require `eval`, which we avoid.
-- Behavior would diverge across languages and defeat having a portable expression syntax.
-
-Supported filter/query patterns (200+ cases covered in the comparison suite):
-
-```
-[?(@._KEY_ _OPERATOR_ _VALUE_)]
-  Operators: ==, =, !=, <>, !==, <, >, <=, >=, =~, in, nin, !in
+- Comparisons support `==`, `!=`, `<`, `<=`, `>`, and `>=`.
+- Logical expressions support `!`, `&&`, `||`, and grouped subexpressions.
+- Singular current/root queries can be compared; non-singular, descendant, and nested-filter queries can be used as existence tests.
+- Missing nodes use RFC `Nothing` semantics and are not conflated with JSON `null`.
 
 Examples:
+
+```
 [?(@.title == "A string")]      // equality
-[?(@.title = "A string")]       // SQL-style equals
-[?(@.price < 10)]               // numeric comparisons
-[?(@.title =~ /^a(nother)?/i)]  // regex
-[?(@.title in ["A","B"])]       // membership
-[?(@.title nin ["A"])]          // not in
-[?(@.title !in ["A"])]          // alternate not in
+[?(@.price < 10)]               // numeric comparison
 [?(@.key == @.other)]           // path-to-path comparison
 [?(@.key == $.rootValue)]       // root reference
-[?(@)] or [?(@==@)]             // truthy/tautology
-[?(@.length)]                   // existence checks
-[?(@['weird-key']=="ok")]       // bracket-escaped keys and negative indexes
+[?(@.isbn)]                     // singular existence test
+[?(@..child)]                   // descendant existence test
+[?(@.items[?(@.price > 10)])]   // nested-filter existence test
+[?(@['weird-key']=="ok")]       // bracket-escaped member
 ```
 
-A full list of (un)supported filter/query patterns can be found in the [JSONPath Comparison Cheatsheet](https://cburgmer.github.io/json-path-comparison/).
-	
+Script expressions, synthetic `.length`, regular-expression/membership operators, array/object literals in comparisons, and the RFC function extensions (`length()`, `count()`, `match()`, `search()`, and `value()`) are not supported. Unsupported syntax raises `JSONPathException`.
+
+A full list of comparison cases can be found in the [JSONPath Comparison Cheatsheet](https://cburgmer.github.io/json-path-comparison/).
+
 ## Similar projects
 
 [FlowCommunications/JSONPath](https://github.com/FlowCommunications/JSONPath) is the predecessor of this library by Stephen Frank

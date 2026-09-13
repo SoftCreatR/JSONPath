@@ -2,7 +2,7 @@
   "name": "softcreatr/jsonpath",
   "description": "JSONPath implementation for parsing, searching and flattening arrays",
   "license": "MIT",
-  "version": "1.0.2",
+  "version": "2.0.0",
   "authors": [
     {
       "name": "Stephen Frank",
@@ -24,7 +24,7 @@
     "source": "https://github.com/SoftCreatR/JSONPath"
   },
   "require": {
-    "php": "^8.5",
+    "php": "^8.3",
     "ext-json": "*"
   },
   "require-dev": {

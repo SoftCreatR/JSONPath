@@ -198,6 +198,7 @@ class JSONPath implements ArrayAccess, Iterator, JsonSerializable, Countable
         return $this->getData();
     }
 
+    /** @noinspection PhpUnused */
     #[Override]
     public function current(): mixed
     {
@@ -206,24 +207,28 @@ class JSONPath implements ArrayAccess, Iterator, JsonSerializable, Countable
         return AccessHelper::isCollectionType($value) ? new static($value, $this->options) : $value;
     }
 
+    /** @noinspection PhpUnused */
     #[Override]
     public function next(): void
     {
         \next($this->data);
     }
 
+    /** @noinspection PhpUnused */
     #[Override]
     public function key(): string|int|null
     {
         return \key($this->data);
     }
 
+    /** @noinspection PhpUnused */
     #[Override]
     public function valid(): bool
     {
         return \key($this->data) !== null;
     }
 
+    /** @noinspection PhpUnused */
     #[Override]
     public function rewind(): void
     {

@@ -18,8 +18,15 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        php:
-        - '8.5'
+        include:
+          - php: '8.3'
+            coverage: pcov
+          - php: '8.4'
+            coverage: pcov
+          - php: '8.5'
+            coverage: pcov
+          - php: '8.6'
+            coverage: xdebug
     name: PHP ${{ matrix.php }} Test
 
     steps:
@@ -32,7 +39,7 @@ jobs:
           php-version: ${{ matrix.php }}
           extensions: dom, json, mbstring, xml, xmlwriter
           tools: phpcs
-          coverage: pcov
+          coverage: ${{ matrix.coverage }}
         env:
           COMPOSER_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -57,7 +64,7 @@ jobs:
       - name: Execute tests
         run: |
           set +e
-          output=$(composer test -- --coverage-clover=coverage.xml 2>&1)
+          output=$(composer test -- --log-junit=junit.xml --coverage-clover=coverage.xml 2>&1)
           exit_code=$?
           echo "$output"
           # If the only issue is the cache directory warning, ignore the exit code.

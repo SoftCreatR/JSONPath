@@ -20,14 +20,8 @@ class JSONPathLexer
     // e.g.: foo or 40f35757-2563-4790-b0b1-caa904be455f or $
     public const string MATCH_INDEX = '(?!-)[\-\w]+ | \\$ | \\*';
 
-    // Eg. 0,1,2 or *,1 or 0,1,2,
-    public const string MATCH_INDEXES = '\s* (?:-?\d+|\*) (?: \s* , \s* (?:-?\d+|\*) )+ \s* ,? \s*';
-
     // Eg. [0:2:1] or [-1]
     public const string MATCH_SLICE = '(?:-?\d*:-?\d*(?::-?\d*)?|-\\d+)';
-
-    // Eg. ?(@.length - 1)
-    public const string MATCH_QUERY_RESULT = '\s* \( .+? \) \s*';
 
     // Eg. ?(@.foo = "bar")
     public const string MATCH_QUERY_MATCH = '\s* \?\(.+?\) \s*';
@@ -42,20 +36,23 @@ class JSONPathLexer
 
     private readonly int $expressionLength;
 
+    /**
+     * @throws JSONPathException
+     */
     public function __construct(string $expression)
     {
         $expression = \trim($expression);
-        $len = \strlen($expression);
 
-        if ($len === 0) {
-            $this->expression = '';
-            $this->expressionLength = 0;
-
-            return;
+        if ($expression === '') {
+            throw new JSONPathException('A JSONPath query must start with the root identifier `$`');
         }
 
-        if ($expression[0] === '$' || $expression[0] === '@') {
+        if ($expression[0] === '$') {
             $expression = \substr($expression, 1);
+        } elseif (\preg_match('/^(?!-)[\-\w]+$/u', $expression)) {
+            $expression = '.' . $expression;
+        } else {
+            throw new JSONPathException('A JSONPath query must start with the root identifier `$`');
         }
 
         if ($expression === '') {
@@ -66,7 +63,7 @@ class JSONPathLexer
         }
 
         if ($expression[0] !== '.' && $expression[0] !== '[') {
-            $expression = '.' . $expression;
+            throw new JSONPathException('A JSONPath segment must start with `.` or `[`');
         }
 
         $this->expression = $expression;
@@ -83,19 +80,24 @@ class JSONPathLexer
         $tokenValue = '';
         $tokens = [];
         $inBracketQuote = null;
-        $inQuote = null;
 
         for ($i = 0; $i < $this->expressionLength; $i++) {
             $char = $this->expression[$i];
 
             if ($squareBracketDepth === 0 && ($char === "'" || $char === '"')) {
-                $escaped = $this->isEscaped($tokenValue);
-                $inQuote = $inQuote === $char && !$escaped ? null : ($inQuote ?? $char);
+                throw new JSONPathException('Quoted member names require bracket notation');
             }
 
-            if (($squareBracketDepth === 0) && $inQuote === null && $char === '.') {
+            if ($squareBracketDepth === 0 && $char === '.') {
                 if ($this->lookAhead($i) === '.') {
+                    if (\in_array($this->lookAhead($i, 2), [null, '.', "'", '"'], true)) {
+                        throw new JSONPathException('Recursive descent requires a selector');
+                    }
+
                     $tokens[] = new JSONPathToken(TokenType::Recursive, null);
+                    $i++;
+                } elseif (\in_array($this->lookAhead($i), [null, '[', "'", '"', '$'], true)) {
+                    throw new JSONPathException('Dot notation requires a member name or wildcard');
                 }
 
                 continue;
@@ -115,7 +117,7 @@ class JSONPathLexer
                 $squareBracketDepth--;
 
                 if ($squareBracketDepth === 0) {
-                    $tokens[] = $this->createToken($tokenValue);
+                    $tokens[] = $this->createToken($tokenValue, true);
                     $tokenValue = '';
 
                     continue;
@@ -146,17 +148,14 @@ class JSONPathLexer
              */
             $tokenValue .= $char;
 
-            if (
-                $inQuote === null
-                && ($this->atEnd($i) || \in_array($this->lookAhead($i), ['.', '['], true))
-            ) {
-                $tokens[] = $this->createToken($tokenValue);
+            if ($this->atEnd($i) || \in_array($this->lookAhead($i), ['.', '['], true)) {
+                $tokens[] = $this->createToken($tokenValue, false);
                 $tokenValue = '';
             }
         }
 
         if ($tokenValue !== '') {
-            $tokens[] = $this->createToken($tokenValue);
+            $tokens[] = $this->createToken($tokenValue, $squareBracketDepth > 0);
         }
 
         return $tokens;
@@ -184,16 +183,26 @@ class JSONPathLexer
     /**
      * @throws JSONPathException
      */
-    protected function createToken(string $value): JSONPathToken
+    protected function createToken(string $value, bool $bracketed): JSONPathToken
     {
         // The IDE doesn't like, what we do with $value, so let's
         // move it to a separate variable, to get rid of any IDE warnings
         $tokenValue = \trim($value);
 
+        if (!$bracketed && $tokenValue !== $value) {
+            throw new JSONPathException('Whitespace is not allowed in dot notation');
+        }
+
         /** @var JSONPathToken|null $ret */
         $ret = null;
 
-        if (\str_contains($tokenValue, ',')) {
+        $quotedIndex = $this->decodeCompleteQuotedIndex($tokenValue);
+
+        if ($quotedIndex !== null) {
+            return new JSONPathToken(TokenType::Index, $quotedIndex, true, bracketed: $bracketed);
+        }
+
+        if ($bracketed && \str_contains($tokenValue, ',')) {
             $parts = \array_values(\array_filter(
                 \array_map('trim', \explode(',', $tokenValue)),
                 static fn (string $part): bool => $part !== ''
@@ -206,11 +215,10 @@ class JSONPathLexer
                 $hasQuery = false;
 
                 foreach ($parts as $part) {
-                    if (
-                        \preg_match('/^' . static::MATCH_INDEX_IN_SINGLE_QUOTES . '$/xu', $part, $matches)
-                        || \preg_match('/^' . static::MATCH_INDEX_IN_DOUBLE_QUOTES . '$/xu', $part, $matches)
-                    ) {
-                        $union[] = $this->decodeQuotedIndex($matches[1] ?? '', $matches[0][0]);
+                    $quotedPart = $this->decodeCompleteQuotedIndex($part);
+
+                    if ($quotedPart !== null) {
+                        $union[] = $quotedPart;
 
                         continue;
                     }
@@ -231,8 +239,8 @@ class JSONPathLexer
                         continue;
                     }
 
-                    if (\preg_match('/^(' . static::MATCH_INDEX . ')$/xu', $part)) {
-                        $union[] = \preg_match('/^-?\d+$/', $part) ? (int)$part : $part;
+                    if ($part === '*' || \preg_match('/^\d+$/', $part)) {
+                        $union[] = \preg_match('/^\d+$/', $part) ? (int)$part : $part;
 
                         continue;
                     }
@@ -258,57 +266,59 @@ class JSONPathLexer
 
                     $allQuoted = \count($quotedParts) === \count($parts);
 
-                    $tokenType = ($hasSlice || $hasQuery || !$allQuoted) ? TokenType::Indexes : TokenType::Index;
+                    if ($hasQuery || (\in_array('*', $union, true) && \count($union) > 1)) {
+                        throw new JSONPathException('Unsupported selector union');
+                    }
 
-                    return new JSONPathToken($tokenType, $union, $allQuoted);
+                    $tokenType = ($hasSlice || !$allQuoted) ? TokenType::Indexes : TokenType::Index;
+
+                    return new JSONPathToken($tokenType, $union, $allQuoted, bracketed: true);
                 }
             }
         }
 
         if (\preg_match('/^-\\d+$/', $tokenValue)) {
-            return new JSONPathToken(TokenType::Index, (int)$tokenValue);
+            return new JSONPathToken(TokenType::Index, (int)$tokenValue, bracketed: $bracketed);
         }
 
         if ($tokenValue === '') {
-            return new JSONPathToken(TokenType::Indexes, []);
+            throw new JSONPathException('Empty selectors are not supported');
         }
 
         if (
             ($tokenValue[0] === "'" || $tokenValue[0] === '"')
             && $tokenValue[\strlen($tokenValue) - 1] === $tokenValue[0]
         ) {
-            $tokenValue = $this->decodeQuotedIndex(\substr($tokenValue, 1, -1), $tokenValue[0]);
-
-            return new JSONPathToken(TokenType::Index, $tokenValue, true);
+            throw new JSONPathException('Quoted member names must be atomic');
         }
 
         if (\preg_match('/^(' . static::MATCH_INDEX . ')$/xu', $tokenValue, $matches)) {
+            if ($bracketed && $tokenValue !== '*' && !\preg_match('/^\d+$/', $tokenValue)) {
+                throw new JSONPathException('Member names in bracket notation must be quoted');
+            }
+
             if (\preg_match('/^-?\d+$/', $tokenValue)) {
                 $tokenValue = (int)$tokenValue;
             }
 
-            $ret = new JSONPathToken(TokenType::Index, $tokenValue);
+            $ret = new JSONPathToken(TokenType::Index, $tokenValue, bracketed: $bracketed);
         } elseif (\preg_match('/^' . static::MATCH_SLICE . '$/xu', $tokenValue, $matches)) {
             $tokenValue = $this->parseSlice($tokenValue);
 
-            $ret = new JSONPathToken(TokenType::Slice, $tokenValue);
-        } elseif (\preg_match('/^' . static::MATCH_QUERY_RESULT . '$/xu', $tokenValue)) {
-            $tokenValue = \substr($tokenValue, 1, -1);
-
-            $ret = new JSONPathToken(TokenType::QueryResult, $tokenValue);
+            $ret = new JSONPathToken(TokenType::Slice, $tokenValue, bracketed: true);
         } elseif ($tokenValue === '?()') {
-            $ret = new JSONPathToken(TokenType::QueryMatch, '', shorthand: false);
+            throw new JSONPathException('Filter expressions must not be empty');
         } elseif ($tokenValue === '?') {
-            $ret = new JSONPathToken(TokenType::QueryMatch, '@', shorthand: true);
+            throw new JSONPathException('Filter expressions must not be empty');
         } elseif (\preg_match('/^\\?@/', $tokenValue)) {
             $expr = \substr($tokenValue, 1);
             $expr = $expr === '' ? '@' : $expr;
 
-            $ret = new JSONPathToken(TokenType::QueryMatch, $expr, shorthand: true);
+            $ret = new JSONPathToken(TokenType::QueryMatch, $expr, shorthand: true, bracketed: true);
         } elseif (\preg_match('/^' . static::MATCH_QUERY_MATCH . '$/xu', $tokenValue)) {
             $tokenValue = \substr($tokenValue, 2, -1);
 
-            $ret = new JSONPathToken(TokenType::QueryMatch, $tokenValue);
+            $ret = new JSONPathToken(TokenType::QueryMatch, $tokenValue, bracketed: true);
         }
 
         if ($ret !== null) {
@@ -365,5 +375,34 @@ class JSONPathLexer
         }
 
         return $tokenValue;
+    }
+
+    private function decodeCompleteQuotedIndex(string $tokenValue): ?string
+    {
+        $length = \strlen($tokenValue);
+
+        if ($length < 2 || !\in_array($tokenValue[0], ["'", '"'], true)) {
+            return null;
+        }
+
+        $quote = $tokenValue[0];
+
+        if ($tokenValue[$length - 1] !== $quote) {
+            return null;
+        }
+
+        $contents = '';
+
+        for ($i = 1; $i < $length - 1; $i++) {
+            $char = $tokenValue[$i];
+
+            if ($char === $quote && !$this->isEscaped($contents)) {
+                return null;
+            }
+
+            $contents .= $char;
+        }
+
+        return $this->decodeQuotedIndex($contents, $quote);
     }
 }

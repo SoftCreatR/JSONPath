@@ -25,19 +25,13 @@ class AccessHelperTest extends TestCase
     public function testKeyExistsRespectsMagicGet(): void
     {
         $magic = new class {
+            /**
+             * @noinspection MagicMethodsValidityInspection
+             * @noinspection PhpUnused
+             */
             public function __get(string $name): string
             {
                 return "magic-{$name}";
-            }
-
-            public function __set(string $name, mixed $value): void
-            {
-                $this->{$name} = $value;
-            }
-
-            public function __isset(string $name): bool
-            {
-                return isset($this->{$name});
             }
         };
 
@@ -79,19 +73,13 @@ class AccessHelperTest extends TestCase
     public function testGetValueCoversMagicArrayAndArrayAccess(): void
     {
         $magic = new class {
+            /**
+             * @noinspection MagicMethodsValidityInspection
+             * @noinspection PhpUnused
+             */
             public function __get(string $name): string
             {
                 return "magic-{$name}";
-            }
-
-            public function __set(string $name, mixed $value): void
-            {
-                $this->{$name} = $value;
-            }
-
-            public function __isset(string $name): bool
-            {
-                return isset($this->{$name});
             }
         };
 
@@ -121,6 +109,7 @@ class AccessHelperTest extends TestCase
         };
 
         self::assertSame('magic-foo', AccessHelper::getValue($magic, 'foo', true));
+        self::assertNull(AccessHelper::getValue($magic, 'foo'));
         self::assertSame('baz', AccessHelper::getValue($arrayAccess, 'bar'));
         self::assertSame('b', AccessHelper::getValue(['a', 'b'], -1));
         self::assertNull(AccessHelper::getValue(['a'], 'missing'));
@@ -131,6 +120,8 @@ class AccessHelperTest extends TestCase
     public function testGetValueByIndexSupportsTraversableAndNegativeOffset(): void
     {
         $iterable = new class implements IteratorAggregate {
+            /** @noinspection PhpUnused */
+            #[\Override]
             public function getIterator(): Traversable
             {
                 return new ArrayIterator(['first', 'second', 'third']);

@@ -18,7 +18,6 @@ use Flow\JSONPath\TokenType;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
-use RuntimeException;
 
 #[CoversClass(QueryMatchFilter::class)]
 class QueryMatchFilterTest extends TestCase
@@ -31,7 +30,7 @@ class QueryMatchFilterTest extends TestCase
         yield 'shorthand truthy filters values' => [
             'data' => [0, 1, '', 'value', false],
             'expression' => '$[?@]',
-            'expected' => [1 => 1, 3 => 'value'],
+            'expected' => [0, 1, '', 'value', false],
         ];
 
         yield 'negation wrapped' => [
@@ -112,31 +111,6 @@ class QueryMatchFilterTest extends TestCase
             'expected' => [],
         ];
 
-        yield 'regex comparison' => [
-            'data' => ['foo', 'bar'],
-            'expression' => '$[?(@ =~ /fo.*/)]',
-            'expected' => ['foo'],
-        ];
-
-        yield 'in operator' => [
-            'data' => [1, 2, 3],
-            'expression' => '$[?(@ in [1,3])]',
-            'expected' => [1, 3],
-        ];
-
-        yield 'nin operator with short circuit or' => [
-            'data' => [
-                ['a' => 1],
-                ['b' => 1],
-                ['a' => 3],
-            ],
-            'expression' => '$[?(@.a nin [2,3] || @.b==1)]',
-            'expected' => [
-                ['a' => 1],
-                ['b' => 1],
-            ],
-        ];
-
         yield 'existence check without operator' => [
             'data' => [
                 ['value' => 1],
@@ -146,12 +120,6 @@ class QueryMatchFilterTest extends TestCase
             'expected' => [
                 ['value' => 1],
             ],
-        ];
-
-        yield '!in operator' => [
-            'data' => [1, 2, 3],
-            'expression' => '$[?(@ !in [2])]',
-            'expected' => [1, 3],
         ];
 
         yield 'less than comparison' => [
@@ -186,7 +154,7 @@ class QueryMatchFilterTest extends TestCase
     #[DataProvider('filterProvider')]
     public function testFilterScenarios(mixed $data, string $expression, array $expected): void
     {
-        $result = new JSONPath($data)->find($expression)->getData();
+        $result = (new JSONPath($data))->find($expression)->getData();
 
         self::assertEquals(\array_values($expected), \array_values($result));
     }
@@ -204,7 +172,6 @@ class QueryMatchFilterTest extends TestCase
         yield 'not equals' => ['expression' => '[?(2!=3)]', 'expectMatch' => true];
         yield 'less or equal' => ['expression' => '[?(2<=2)]', 'expectMatch' => true];
         yield 'greater or equal' => ['expression' => '[?(1>=2)]', 'expectMatch' => false];
-        yield 'json literal deep equal' => ['expression' => '[?({"a":1}=={"a":1})]', 'expectMatch' => true];
     }
 
     /**
@@ -214,7 +181,7 @@ class QueryMatchFilterTest extends TestCase
     public function testConstantExpressions(string $expression, bool $expectMatch): void
     {
         $data = ['keep'];
-        $result = new JSONPath($data)->find('$' . $expression)->getData();
+        $result = (new JSONPath($data))->find('$' . $expression)->getData();
 
         self::assertSame($expectMatch ? ['keep'] : [], $result);
     }
@@ -229,35 +196,44 @@ class QueryMatchFilterTest extends TestCase
 
         $collection = [0, 1, '', 'value', false];
 
-        self::assertSame([1 => 1, 3 => 'value'], $filter->filter($collection));
+        self::assertSame($collection, $filter->filter($collection));
     }
 
     /**
      * @throws JSONPathException
      */
-    public function testMalformedFilterThrowsRuntimeException(): void
+    public function testMalformedFilterThrowsJSONPathException(): void
     {
-        $this->expectException(RuntimeException::class);
+        $this->expectException(JSONPathException::class);
         $this->expectExceptionMessage('Malformed filter query');
 
-        new JSONPath([1])->find('$[?(foo)]');
+        (new JSONPath([1]))->find('$[?(foo)]');
     }
 
     /**
      * @throws JSONPathException
      */
-    public function testLiteralOnlyFilterExpressionsReturnWholeCollectionOrEmpty(): void
+    public function testDirectEmptyFilterTokenIsRejected(): void
+    {
+        $this->expectException(JSONPathException::class);
+
+        (new QueryMatchFilter(new JSONPathToken(TokenType::QueryMatch, '')))->filter([1]);
+    }
+
+    /**
+     * @throws JSONPathException
+     */
+    public function testFalseFilterExpressionReturnsEmpty(): void
     {
         $data = [1, 2, 3];
 
-        self::assertSame($data, new JSONPath($data)->find('$[?(true)]')->getData());
-        self::assertSame([], new JSONPath($data)->find('$[?(false)]')->getData());
+        self::assertSame([], (new JSONPath($data))->find('$[?(false)]')->getData());
     }
 
     /**
      * @throws JSONPathException
      */
-    public function testLogicalExpressionsWithLiteralRightOperand(): void
+    public function testLogicalAndFalseReturnsEmpty(): void
     {
         $data = [
             ['key' => 1],
@@ -266,20 +242,163 @@ class QueryMatchFilterTest extends TestCase
 
         self::assertSame(
             [],
-            new JSONPath($data)->find('$[?(@.key>0 && false)]')->getData()
-        );
-        self::assertSame(
-            $data,
-            new JSONPath($data)->find('$[?(@.key>0 || true)]')->getData()
+            (new JSONPath($data))->find('$[?(@.key>0 && false)]')->getData()
         );
     }
 
     /**
      * @throws JSONPathException
      */
-    public function testEmptyFilterExpressionReturnsEmpty(): void
+    public function testEmptyFilterExpressionIsRejected(): void
     {
-        self::assertSame([], new JSONPath([1, 2])->find('$[?()]')->getData());
+        $this->expectException(JSONPathException::class);
+
+        (new JSONPath([1, 2]))->find('$[?()]');
+    }
+
+    /**
+     * @throws JSONPathException
+     */
+    public function testComparisonRegressionCases(): void
+    {
+        self::assertSame(
+            [['key' => 1]],
+            (new JSONPath(['key' => 42, 'another' => ['key' => 1]]))
+                ->find('$[?(@.key)]')
+                ->getData()
+        );
+        self::assertSame(
+            [[], ['left' => null, 'right' => null]],
+            (new JSONPath([[], ['left' => null], ['right' => null], ['left' => null, 'right' => null]]))
+                ->find('$[?(@.left==@.right)]')
+                ->getData()
+        );
+        self::assertEquals(
+            [['a' => [1]], ['a' => (object)['x' => 'y']]],
+            (new JSONPath([['a' => []], ['a' => [1]], ['a' => (object)['x' => 'y']]]))
+                ->find('$[?(@.a.*)]')
+                ->getData()
+        );
+        self::assertSame(
+            [['a' => [['price' => 11]]]],
+            (new JSONPath([['a' => [['price' => 1]]], ['a' => [['price' => 11]]]]))
+                ->find('$[?(@.a[?(@.price>10)])]')
+                ->getData()
+        );
+        self::assertSame(
+            [['nodes' => [['child' => 1]]]],
+            (new JSONPath([['nodes' => [['child' => 1]]], ['nodes' => [[]]]]))
+                ->find('$[?(@..child)]')
+                ->getData()
+        );
+    }
+
+    /**
+     * @throws JSONPathException
+     */
+    public function testNumericSelectorsInFiltersRespectNotation(): void
+    {
+        self::assertSame(
+            [[0, 2], [2]],
+            (new JSONPath([[2, 3], ['a'], [0, 2], [2]]))->find('$[?(@[-1]==2)]')->getData()
+        );
+        self::assertSame(
+            [],
+            (new JSONPath([['first', 'second', 'third']]))->find("$[?(@.2 == 'third')]")->getData()
+        );
+        self::assertEquals(
+            [(object)['2' => 'second']],
+            (new JSONPath([(object)['2' => 'second']]))->find("$[?(@.2 == 'second')]")->getData()
+        );
+    }
+
+    /**
+     * @throws JSONPathException
+     */
+    public function testMissingMemberIsNotEqualToScalar(): void
+    {
+        self::assertSame(
+            [['key' => 1], ['other' => 1]],
+            (new JSONPath([['key' => 1], ['key' => 42], ['other' => 1]]))
+                ->find('$[?(@.key!=42)]')
+                ->getData()
+        );
+    }
+
+    /**
+     * @throws JSONPathException
+     */
+    public function testMemberBasedRegularExpressionRemainsAnEmptyResult(): void
+    {
+        self::assertSame(
+            [],
+            (new JSONPath([['name' => 'hello', 'pattern' => 'hello']]))
+                ->find('$[?(@.name=~/@.pattern/)]')
+                ->getData()
+        );
+    }
+
+    /**
+     * @throws JSONPathException
+     */
+    public function testUnquotedStringComparisonAndOrShortCircuit(): void
+    {
+        self::assertSame(
+            [['value' => 'word']],
+            (new JSONPath([['value' => 'word'], ['value' => 'other']]))
+                ->find('$[?(@.value==word)]')
+                ->getData()
+        );
+        self::assertSame(
+            [['a' => 1, 'b' => 1], ['a' => 0, 'b' => 1]],
+            (new JSONPath([['a' => 1, 'b' => 1], ['a' => 0, 'b' => 1]]))
+                ->find('$[?(@.a==1 || @.b==1)]')
+                ->getData()
+        );
+        self::assertSame(
+            [['a' => false, 'b' => false], ['a' => true, 'c' => true]],
+            (new JSONPath([['a' => false, 'b' => false], ['a' => true, 'c' => true], ['c' => true]]))
+                ->find('$[?(@.a && (@.b || @.c))]')
+                ->getData()
+        );
+    }
+
+    /**
+     * @return iterable<string, array{string}>
+     */
+    public static function unsupportedFilterProvider(): iterable
+    {
+        yield 'single equals' => ['$[?(@.key=42)]'];
+        yield 'triple equals' => ['$[?(@.key===42)]'];
+        yield 'strict not equals' => ['$[?(@.key!==42)]'];
+        yield 'alternate not equals' => ['$[?(@.key<>42)]'];
+        yield 'regular expression' => ['$[?(@.name=~/hello.*/)]'];
+        yield 'membership' => ['$[?(@.key in [1,2])]'];
+        yield 'negated membership' => ['$[?(@.key !in [1,2])]'];
+        yield 'function extension' => ['$[?(length(@)==1)]'];
+        yield 'literal true test' => ['$[?(true)]'];
+        yield 'literal null test' => ['$[?(null)]'];
+        yield 'and true' => ['$[?(@.key>0 && true)]'];
+        yield 'or false' => ['$[?(@.key>0 || false)]'];
+        yield 'array comparison' => ['$[?(@.key==[1,2])]'];
+        yield 'object comparison' => ['$[?(@.key=={"a":1})]'];
+        yield 'leading zero number' => ['$[?(@.key==010)]'];
+        yield 'arithmetic' => ['$[?(@.key+1==2)]'];
+        yield 'dashed filter shorthand' => ["$[?(@.key-dash=='value')]"];
+        yield 'non-singular comparison' => ['$[?(@.*==1)]'];
+        yield 'logical result comparison' => ['$[?((@.key<2)==false)]'];
+        yield 'comparison without wrapper' => ['$[?@.key==42]'];
+    }
+
+    /**
+     * @throws JSONPathException
+     */
+    #[DataProvider('unsupportedFilterProvider')]
+    public function testRejectsUnsupportedFilterExpressions(string $expression): void
+    {
+        $this->expectException(JSONPathException::class);
+
+        (new JSONPath([['key' => 1]]))->find($expression);
     }
 
     /**

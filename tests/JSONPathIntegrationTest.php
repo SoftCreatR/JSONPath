@@ -29,7 +29,7 @@ class JSONPathIntegrationTest extends TestCase
             ]),
         ]);
 
-        $result = new JSONPath($data)->find('$.items[?(@.active==true)]')->getData();
+        $result = (new JSONPath($data))->find('$.items[?(@.active==true)]')->getData();
 
         self::assertSame([['name' => 'keep', 'active' => true]], $result);
     }
@@ -37,11 +37,11 @@ class JSONPathIntegrationTest extends TestCase
     /**
      * @throws JSONPathException
      */
-    public function testDashedIndexIsParsedWithoutQuotes(): void
+    public function testDashedIndexIsParsedWhenQuoted(): void
     {
         $data = ['data' => ['dash-key' => 42, 'other' => 1]];
 
-        $result = new JSONPath($data)->find('$.data[dash-key]')->getData();
+        $result = (new JSONPath($data))->find("$.data['dash-key']")->getData();
 
         self::assertSame([42], $result);
     }

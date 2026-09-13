@@ -60,9 +60,6 @@ class AccessHelper
         return false;
     }
 
-    /**
-     * @todo Optimize conditions
-     */
     public static function getValue(mixed $collection, int|string|null $key, bool $magicIsAllowed = false): mixed
     {
         if (
@@ -70,25 +67,32 @@ class AccessHelper
             && \is_object($collection)
             && !$collection instanceof ArrayAccess && \method_exists($collection, '__get')
         ) {
-            $return = $collection->__get($key);
-        } elseif (\is_int($key) && $collection instanceof Traversable && !$collection instanceof ArrayAccess) {
-            $return = self::getValueByIndex($collection, $key);
-        } elseif (\is_object($collection) && !$collection instanceof ArrayAccess) {
-            $return = $collection->{$key};
-        } elseif ($collection instanceof ArrayAccess) {
-            $return = $collection->offsetExists($key) ? $collection->offsetGet($key) : null;
-        } elseif (\is_array($collection)) {
-            if (\is_int($key) && $key < 0) {
-                $index = \count($collection) + $key;
-                $return = $index >= 0 && \array_key_exists($index, $collection) ? $collection[$index] : null;
-            } else {
-                $return = $collection[$key] ?? null;
-            }
-        } else {
-            $return = null;
+            return $collection->{(string)$key};
         }
 
-        return $return;
+        if (\is_int($key) && $collection instanceof Traversable && !$collection instanceof ArrayAccess) {
+            return self::getValueByIndex($collection, $key);
+        }
+
+        if (\is_object($collection) && !$collection instanceof ArrayAccess) {
+            return \property_exists($collection, (string)$key) ? $collection->{(string)$key} : null;
+        }
+
+        if ($collection instanceof ArrayAccess) {
+            return $collection->offsetExists($key) ? $collection->offsetGet($key) : null;
+        }
+
+        if (!\is_array($collection)) {
+            return null;
+        }
+
+        if (\is_int($key) && $key < 0) {
+            $index = \count($collection) + $key;
+
+            return $index >= 0 && \array_key_exists($index, $collection) ? $collection[$index] : null;
+        }
+
+        return $collection[$key] ?? null;
     }
 
     /**
@@ -157,9 +161,6 @@ class AccessHelper
         }
     }
 
-    /**
-     * @throws JSONPathException
-     */
     /**
      * @return array<int, mixed>
      * @throws JSONPathException

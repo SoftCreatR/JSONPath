@@ -5,9 +5,9 @@ use PhpCsFixer\Finder;
 
 $finder = Finder::create()
     ->in(__DIR__)
-    ->notPath('vendor');
+    ->notPath(['misc', 'scripts', 'vendor']);
 
-return new Config()
+return (new Config())
     ->setRiskyAllowed(true)
     ->setRules([
         '@PSR1' => true,

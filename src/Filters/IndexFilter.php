@@ -10,6 +10,7 @@ declare(strict_types=1);
 
 namespace Flow\JSONPath\Filters;
 
+use ArrayAccess;
 use Flow\JSONPath\AccessHelper;
 use Flow\JSONPath\JSONPathException;
 
@@ -21,6 +22,16 @@ class IndexFilter extends AbstractFilter
      */
     public function filter(array|object $collection): array
     {
+        if (
+            \is_int($this->token->value)
+            && (
+                (!$this->token->bracketed && \is_array($collection))
+                || ($this->token->bracketed && \is_object($collection) && !$collection instanceof ArrayAccess)
+            )
+        ) {
+            return [];
+        }
+
         if (\is_array($this->token->value)) {
             $result = [];
 
@@ -41,12 +52,6 @@ class IndexFilter extends AbstractFilter
 
         if ($this->token->value === '*' && !$this->token->quoted) {
             return AccessHelper::arrayValues($collection);
-        }
-
-        if ($this->token->value === 'length') {
-            return [
-                \count($collection),
-            ];
         }
 
         return [];

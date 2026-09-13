@@ -1,5 +1,15 @@
 # Changelog
 
+### 2.0.0
+🔻 Breaking changes ahead:
+
+- Aligned every current result with the JSONPath comparison consensus or majority.
+- Tightened selector parsing so malformed or ambiguous syntax is rejected instead of being interpreted as another query. This removes unquoted bracket members, quoted dot members, empty selectors, incomplete recursive descent, script expressions, mixed wildcard/filter unions, and synthetic `.length` handling.
+- Restricted filter operators to portable comparisons (`==`, `!=`, `<`, `<=`, `>`, `>=`) and logical expressions; legacy single/strict equality, regex, membership, arithmetic, literal-only truth tests, array/object comparison literals, and function-like expressions are now unsupported.
+- Fixed filters over objects to return node lists, added descendant and nested-filter existence tests, distinguished missing nodes from JSON `null`, and corrected missing-member/path-to-path comparisons.
+- Lowered the minimum PHP version from 8.5 to the verified PHP 8.3 floor and expanded CI to PHP 8.3 through 8.6, including the PHP 8.6 nightly.
+- Kept the PHPUnit suite at 100% class, method, and line coverage for the stricter behavior.
+
 ### 1.0.2
 - Fixed tokenizer handling for quoted bracket keys containing `$` so literals like `['[$the.size$]']` remain atomic and do not split into root tokens.
 

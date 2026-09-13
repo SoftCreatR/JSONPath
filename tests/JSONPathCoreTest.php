@@ -61,11 +61,10 @@ class JSONPathCoreTest extends TestCase
         $path['new'] = 'value';
         unset($path['child']);
 
-        $collected = [];
-
-        foreach ($path as $key => $value) {
-            $collected[$key] = $value instanceof JSONPath ? $value->getData() : $value;
-        }
+        $collected = \array_map(
+            static fn (mixed $value): mixed => $value instanceof JSONPath ? $value->getData() : $value,
+            \iterator_to_array($path)
+        );
 
         self::assertArrayHasKey(0, $collected);
         self::assertSame('appended', $collected[0]);
@@ -109,7 +108,7 @@ class JSONPathCoreTest extends TestCase
      */
     public function testFindOnScalarReturnsEmptyResult(): void
     {
-        $result = new JSONPath(123)->find('$.missing')->getData();
+        $result = (new JSONPath(123))->find('$.missing')->getData();
 
         self::assertSame([], $result);
     }

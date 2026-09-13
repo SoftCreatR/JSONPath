@@ -130,6 +130,6 @@ class QueryResultFilterTest extends TestCase
         $this->expectException(JSONPathException::class);
 
         $token = new JSONPathToken(TokenType::QueryResult, '@.foo ^ 2');
-        new QueryResultFilter($token)->filter(['foo' => 1]);
+        (new QueryResultFilter($token))->filter(['foo' => 1]);
     }
 }

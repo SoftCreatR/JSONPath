@@ -28,32 +28,32 @@ class JSONPathTokenTest extends TestCase
     {
         self::assertInstanceOf(
             IndexFilter::class,
-            new JSONPathToken(TokenType::Index, null)->buildFilter(0)
+            (new JSONPathToken(TokenType::Index, null))->buildFilter(0)
         );
 
         self::assertInstanceOf(
             IndexesFilter::class,
-            new JSONPathToken(TokenType::Indexes, [])->buildFilter(0)
+            (new JSONPathToken(TokenType::Indexes, []))->buildFilter(0)
         );
 
         self::assertInstanceOf(
             QueryMatchFilter::class,
-            new JSONPathToken(TokenType::QueryMatch, '')->buildFilter(0)
+            (new JSONPathToken(TokenType::QueryMatch, ''))->buildFilter(0)
         );
 
         self::assertInstanceOf(
             QueryResultFilter::class,
-            new JSONPathToken(TokenType::QueryResult, '')->buildFilter(0)
+            (new JSONPathToken(TokenType::QueryResult, ''))->buildFilter(0)
         );
 
         self::assertInstanceOf(
             RecursiveFilter::class,
-            new JSONPathToken(TokenType::Recursive, null)->buildFilter(0)
+            (new JSONPathToken(TokenType::Recursive, null))->buildFilter(0)
         );
 
         self::assertInstanceOf(
             SliceFilter::class,
-            new JSONPathToken(TokenType::Slice, ['start' => 0, 'end' => 0, 'step' => 1])->buildFilter(0)
+            (new JSONPathToken(TokenType::Slice, ['start' => 0, 'end' => 0, 'step' => 1]))->buildFilter(0)
         );
     }
 

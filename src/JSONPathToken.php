@@ -25,6 +25,7 @@ readonly class JSONPathToken
         public mixed $value,
         public bool $quoted = false,
         public bool $shorthand = false,
+        public bool $bracketed = false,
     ) {
         // ...
     }
