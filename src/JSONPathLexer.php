@@ -10,6 +10,8 @@ declare(strict_types=1);
 
 namespace Flow\JSONPath;
 
+use Flow\JSONPath\Filters\Expression\ExpressionParser;
+
 class JSONPathLexer
 {
     /*
@@ -315,9 +317,20 @@ class JSONPathLexer
             $expr = $expr === '' ? '@' : $expr;
 
             $ret = new JSONPathToken(TokenType::QueryMatch, $expr, shorthand: true, bracketed: true);
+        } elseif (
+            \str_starts_with($tokenValue, '?')
+            && \preg_match('/\b(?:length|count|match|search|value)\s*\(/', $tokenValue)
+        ) {
+            $expression = \ltrim(\substr($tokenValue, 1));
+            (new ExpressionParser($expression))->parse();
+            $ret = new JSONPathToken(
+                TokenType::QueryMatch,
+                $expression,
+                shorthand: true,
+                bracketed: true,
+            );
         } elseif (\preg_match('/^' . static::MATCH_QUERY_MATCH . '$/xu', $tokenValue)) {
             $tokenValue = \substr($tokenValue, 2, -1);
-
             $ret = new JSONPathToken(TokenType::QueryMatch, $tokenValue, bracketed: true);
         }
 

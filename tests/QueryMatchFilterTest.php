@@ -375,7 +375,6 @@ class QueryMatchFilterTest extends TestCase
         yield 'regular expression' => ['$[?(@.name=~/hello.*/)]'];
         yield 'membership' => ['$[?(@.key in [1,2])]'];
         yield 'negated membership' => ['$[?(@.key !in [1,2])]'];
-        yield 'function extension' => ['$[?(length(@)==1)]'];
         yield 'literal true test' => ['$[?(true)]'];
         yield 'literal null test' => ['$[?(null)]'];
         yield 'and true' => ['$[?(@.key>0 && true)]'];

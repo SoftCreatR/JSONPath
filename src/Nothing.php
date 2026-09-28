@@ -12,6 +12,7 @@ namespace Flow\JSONPath;
 
 final class Nothing
 {
+    /** @codeCoverageIgnore */
     private function __construct()
     {
     }

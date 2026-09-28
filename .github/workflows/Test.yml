@@ -31,10 +31,10 @@ jobs:
 
     steps:
       - name: Git checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7.0.1
 
       - name: Setup PHP
-        uses: shivammathur/setup-php@v2
+        uses: shivammathur/setup-php@2.37.2
         with:
           php-version: ${{ matrix.php }}
           extensions: dom, json, mbstring, xml, xmlwriter
@@ -76,6 +76,6 @@ jobs:
           fi
 
       - name: Run codecov
-        uses: codecov/codecov-action@v5
+        uses: codecov/codecov-action@v7.0.0
         with:
           token: ${{ secrets.CODECOV_TOKEN }}

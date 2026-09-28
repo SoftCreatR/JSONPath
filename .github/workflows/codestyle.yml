@@ -14,10 +14,10 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v7.0.1
 
     - name: Setup PHP with tools
-      uses: shivammathur/setup-php@v2
+      uses: shivammathur/setup-php@2.37.2
       with:
         php-version: '8.5'
         extensions: dom, json, mbstring, xml, xmlwriter

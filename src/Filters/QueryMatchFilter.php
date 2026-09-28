@@ -11,6 +11,8 @@ declare(strict_types=1);
 namespace Flow\JSONPath\Filters;
 
 use Flow\JSONPath\AccessHelper;
+use Flow\JSONPath\Filters\Expression\ExpressionEvaluator;
+use Flow\JSONPath\Filters\Expression\ExpressionParser;
 use Flow\JSONPath\JSONPath;
 use Flow\JSONPath\JSONPathException;
 use Flow\JSONPath\Nothing;
@@ -46,6 +48,10 @@ class QueryMatchFilter extends AbstractFilter
         if (\is_array($filterExpression)) {
             $isShorthand = $filterExpression['shorthand'] ?? $isShorthand;
             $filterExpression = $filterExpression['expression'] ?? '';
+        }
+
+        if (\preg_match('/\b(?:length|count|match|search|value)\s*\(/', $filterExpression)) {
+            return $this->filterFunctionExpression($collection, $filterExpression);
         }
 
         if (
@@ -266,7 +272,6 @@ class QueryMatchFilter extends AbstractFilter
 
         if (
             \preg_match('/===|!==|=~|<>|(?<![<>=!])=(?!=)|\b(?:in|nin)\b|!in\b/', $expression)
-            || \preg_match('/\b(?:length|count|match|search|value)\s*\(/', $expression)
             || \preg_match('/(?:&&|\|\|)\s*(?:true|false|null)\b/i', $expression)
             || \preg_match('/^\s*(?:true|false|null)\s*$/i', $expression)
             || \preg_match('/\)\s*(?:==|!=|<=|>=|<|>)/', $expression)
@@ -293,6 +298,27 @@ class QueryMatchFilter extends AbstractFilter
         $leftOperand = \preg_replace('/\[[^]]*]/', '', $leftOperand) ?? $leftOperand;
 
         return \strpbrk($leftOperand, '+-*/') !== false;
+    }
+
+    /**
+     * @param array<array-key, mixed>|object $collection
+     * @return list<mixed>
+     * @throws JSONPathException
+     */
+    private function filterFunctionExpression(array|object $collection, string $expression): array
+    {
+        $parsedExpression = (new ExpressionParser($expression))->parse();
+        $options = $this->magicIsAllowed ? JSONPath::ALLOW_MAGIC : 0;
+        $evaluator = new ExpressionEvaluator($this->rootData ?? $collection, $options);
+        $result = [];
+
+        foreach ($collection as $node) {
+            if ($evaluator->matches($parsedExpression, $node)) {
+                $result[] = $node;
+            }
+        }
+
+        return $result;
     }
 
     /**

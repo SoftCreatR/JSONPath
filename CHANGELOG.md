@@ -1,5 +1,11 @@
 # Changelog
 
+### 2.1.0
+
+- Added the RFC 9535 `length()`, `count()`, `match()`, `search()`, and `value()` function extensions.
+- Added a dedicated expression parser and static type checker for function expressions; malformed and ill-typed expressions are rejected without evaluating user-controlled PHP code.
+- Added checked RFC 9485 I-Regexp support for full-string and substring matching, with PCRE resource limits.
+
 ### 2.0.0
 🔻 Breaking changes ahead:
 

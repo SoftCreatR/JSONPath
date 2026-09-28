@@ -142,6 +142,7 @@ Filter evaluation is intentionally limited to portable, `eval`-free operations:
 - Logical expressions support `!`, `&&`, `||`, and grouped subexpressions.
 - Singular current/root queries can be compared; non-singular, descendant, and nested-filter queries can be used as existence tests.
 - Missing nodes use RFC `Nothing` semantics and are not conflated with JSON `null`.
+- RFC 9535 function expressions are parsed, statically type-checked, and evaluated without `eval()` or dynamic function dispatch.
 
 Examples:
 
@@ -156,7 +157,66 @@ Examples:
 [?(@['weird-key']=="ok")]       // bracket-escaped member
 ```
 
-Script expressions, synthetic `.length`, regular-expression/membership operators, array/object literals in comparisons, and the RFC function extensions (`length()`, `count()`, `match()`, `search()`, and `value()`) are not supported. Unsupported syntax raises `JSONPathException`.
+### RFC 9535 function extensions
+
+The following examples use this shared document:
+
+```php
+$data = [
+    ['name' => 'Ada', 'tags' => ['php', 'json'], 'timezone' => 'Europe/Berlin', 'colors' => ['red']],
+    ['name' => 'Bob', 'tags' => ['php'], 'timezone' => 'America/Toronto', 'colors' => ['blue', 'green']],
+    ['name' => '李', 'tags' => [], 'timezone' => 'Asia/Tokyo', 'colors' => []],
+];
+```
+
+#### `length()`
+
+Returns the number of Unicode scalar values in a string, elements in an array, or members in an object. Other values produce `Nothing`.
+
+```php
+(new JSONPath($data))->find('$[?length(@.name) == 3].name')->getData();
+// ['Ada', 'Bob']
+```
+
+#### `count()`
+
+Returns the number of nodes selected by a query, including nodes whose value is `null`.
+
+```php
+(new JSONPath($data))->find('$[?count(@.tags[*]) >= 2].name')->getData();
+// ['Ada']
+```
+
+#### `match()`
+
+Returns true when the entire input string matches an RFC 9485 I-Regexp.
+
+```php
+(new JSONPath($data))->find('$[?match(@.timezone, "Europe/.*")].name')->getData();
+// ['Ada']
+```
+
+#### `search()`
+
+Returns true when any substring of the input string matches an RFC 9485 I-Regexp.
+
+```php
+(new JSONPath($data))->find('$[?search(@.name, "ob")].name')->getData();
+// ['Bob']
+```
+
+#### `value()`
+
+Returns the value of a nodelist containing exactly one node. Empty or multi-node nodelists produce `Nothing`.
+
+```php
+(new JSONPath($data))->find('$[?value(@.colors[*]) == "red"].name')->getData();
+// ['Ada']
+```
+
+Function calls are checked against the RFC `ValueType`, `LogicalType`, and `NodesType` rules before evaluation. Invalid I-Regexps evaluate to logical false.
+
+Script expressions, synthetic `.length`, legacy regular-expression/membership operators, and array/object literals in comparisons are not supported. Unsupported or ill-typed syntax raises `JSONPathException`.
 
 A full list of comparison cases can be found in the [JSONPath Comparison Cheatsheet](https://cburgmer.github.io/json-path-comparison/).
 
