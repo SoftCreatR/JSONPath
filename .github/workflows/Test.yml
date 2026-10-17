@@ -23,6 +23,7 @@ jobs:
   run:
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
         include:
           - php: '8.3'
@@ -61,6 +62,7 @@ jobs:
         run: composer install --prefer-dist --no-interaction --no-progress
 
       - name: Run PHP CS Fixer
+        if: matrix.php == '8.3'
         run: composer cs
 
       - name: Run PHPStan
