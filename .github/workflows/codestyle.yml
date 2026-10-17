@@ -19,12 +19,12 @@ jobs:
     - name: Setup PHP with tools
       uses: shivammathur/setup-php@2.37.2
       with:
-        php-version: '8.5'
+        php-version: '8.3'
         extensions: dom, json, mbstring, xml, xmlwriter
-        tools: cs2pr, phpcs, php-cs-fixer
+        tools: composer:v2
 
-    - name: phpcs
-      run: phpcs -n -q --report=checkstyle | cs2pr
+    - name: Install dependencies
+      run: composer install --prefer-dist --no-interaction --no-progress
 
     - name: php-cs-fixer
-      run: php-cs-fixer fix --dry-run --diff
+      run: composer cs

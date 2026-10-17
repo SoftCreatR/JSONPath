@@ -13,6 +13,7 @@ namespace Flow\JSONPath\Filters\Expression;
 use Flow\JSONPath\JSONPath;
 use Flow\JSONPath\JSONPathException;
 use Flow\JSONPath\Nothing;
+use Flow\JSONPath\RFC9535\QueryEvaluator;
 
 final readonly class ExpressionEvaluator
 {
@@ -47,6 +48,7 @@ final readonly class ExpressionEvaluator
             ExpressionNode::LOGICAL_OR => $this->evaluateLogical($node->children[0], $current)
                 || $this->evaluateLogical($node->children[1], $current),
             ExpressionNode::LOGICAL_NOT => !$this->evaluateLogical($node->children[0], $current),
+            ExpressionNode::GROUP => $this->evaluateLogical($node->children[0], $current),
             default => throw new JSONPathException('Invalid logical expression'),
         };
     }
@@ -104,6 +106,10 @@ final readonly class ExpressionEvaluator
 
         $isRootQuery = \str_starts_with($node->value, '$');
         $data = $isRootQuery ? $this->root : $current;
+
+        if (($this->options & JSONPath::RFC9535) !== 0) {
+            return (new QueryEvaluator($this->root))->relativeValues($node->queryTokens, $data);
+        }
         $query = $isRootQuery ? $node->value : '$' . \substr($node->value, 1);
         $resolved = (new JSONPath($data, $this->options))->find($query)->getData();
 
@@ -190,16 +196,16 @@ final readonly class ExpressionEvaluator
 
         return \is_object($left)
             && \is_object($right)
-            && $this->deepEqual((array)$left, (array)$right);
+            && $this->deepEqual((array)$left, (array)$right, ($this->options & JSONPath::RFC9535) !== 0);
     }
 
     /**
      * @param array<array-key, mixed> $left
      * @param array<array-key, mixed> $right
      */
-    private function deepEqual(array $left, array $right): bool
+    private function deepEqual(array $left, array $right, bool $objects = false): bool
     {
-        if (\array_is_list($left) !== \array_is_list($right) || \count($left) !== \count($right)) {
+        if ((!$objects && \array_is_list($left) !== \array_is_list($right)) || \count($left) !== \count($right)) {
             return false;
         }
 
@@ -214,6 +220,10 @@ final readonly class ExpressionEvaluator
 
     private function compareLessThan(mixed $left, mixed $right): bool
     {
+        if (($this->options & JSONPath::RFC9535) !== 0 && \is_string($left) && \is_string($right)) {
+            return \strcmp($left, $right) < 0;
+        }
+
         if ((\is_string($left) && \is_string($right)) || ($this->isNumber($left) && $this->isNumber($right))) {
             return $left < $right;
         }

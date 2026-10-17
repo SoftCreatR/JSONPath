@@ -1,1 +1,6 @@
 *.php diff=php
+CHANGELOG.md whitespace=cr-at-eol
+/tests export-ignore
+/tools export-ignore
+/scripts export-ignore
+/.github export-ignore

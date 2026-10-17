@@ -11,6 +11,7 @@ declare(strict_types=1);
 namespace Flow\JSONPath\Filters\Expression;
 
 use Flow\JSONPath\JSONPathException;
+use Flow\JSONPath\RFC9535\StringLiteral;
 use JsonException;
 
 use const JSON_THROW_ON_ERROR;
@@ -21,7 +22,7 @@ final class ExpressionLexer
 
     private readonly int $length;
 
-    public function __construct(private readonly string $expression)
+    public function __construct(private readonly string $expression, private readonly bool $strict = false)
     {
         $this->length = \strlen($expression);
     }
@@ -37,7 +38,7 @@ final class ExpressionLexer
         while ($this->position < $this->length) {
             $character = $this->expression[$this->position];
 
-            if (\ctype_space($character)) {
+            if ($this->strict ? \str_contains(" \t\r\n", $character) : \ctype_space($character)) {
                 $this->position++;
 
                 continue;
@@ -77,6 +78,10 @@ final class ExpressionLexer
     private function readString(): ExpressionToken
     {
         $position = $this->position;
+
+        if ($this->strict) {
+            return new ExpressionToken(ExpressionToken::LITERAL, StringLiteral::read($this->expression, $this->position), $position);
+        }
         $quote = $this->expression[$this->position++];
         $raw = $quote;
         $escaped = false;
@@ -218,9 +223,9 @@ final class ExpressionLexer
 
         return new ExpressionToken(
             ExpressionToken::QUERY,
-            $this->normalizeQueryWhitespace(
-                \substr($this->expression, $position, $this->position - $position)
-            ),
+            $this->strict
+                ? \substr($this->expression, $position, $this->position - $position)
+                : $this->normalizeQueryWhitespace(\substr($this->expression, $position, $this->position - $position)),
             $position,
         );
     }
@@ -283,11 +288,7 @@ final class ExpressionLexer
         $raw = $matches[0];
         $this->position += \strlen($raw);
 
-        try {
-            $value = \json_decode($raw, true, 512, JSON_THROW_ON_ERROR);
-        } catch (JsonException) {
-            throw new JSONPathException("Invalid JSON");
-        }
+        $value = \json_decode($raw, true, 512, JSON_THROW_ON_ERROR);
 
         if (!\is_int($value) && (!\is_float($value) || !\is_finite($value))) {
             throw new JSONPathException("Invalid number at position {$position}");

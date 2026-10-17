@@ -30,8 +30,7 @@
   "require-dev": {
     "friendsofphp/php-cs-fixer": "^3.92",
     "phpstan/phpstan": "^2.1",
-    "phpunit/phpunit": "^12",
-    "squizlabs/php_codesniffer": "^4.0"
+    "phpunit/phpunit": "^12"
   },
   "replace": {
     "flow/jsonpath": "*"
@@ -52,7 +51,7 @@
     "preferred-install": "dist"
   },
   "scripts": {
-    "cs": "phpcs",
+    "cs": "php-cs-fixer fix --config=.php-cs-fixer.dist.php --dry-run --diff",
     "cs-fix": "php-cs-fixer fix --config=.php-cs-fixer.dist.php",
     "phpstan": "phpstan analyse --no-progress -c phpstan.neon.dist",
     "test": "phpunit"

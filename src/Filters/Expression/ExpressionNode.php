@@ -10,6 +10,8 @@ declare(strict_types=1);
 
 namespace Flow\JSONPath\Filters\Expression;
 
+use Flow\JSONPath\JSONPathToken;
+
 final readonly class ExpressionNode
 {
     public const string LITERAL = 'literal';
@@ -26,8 +28,11 @@ final readonly class ExpressionNode
 
     public const string LOGICAL_NOT = 'logical-not';
 
+    public const string GROUP = 'group';
+
     /**
      * @param list<self> $children
+     * @param list<JSONPathToken> $queryTokens
      */
     public function __construct(
         public string $kind,
@@ -35,6 +40,7 @@ final readonly class ExpressionNode
         public mixed $value = null,
         public array $children = [],
         public bool $singular = false,
+        public array $queryTokens = [],
     ) {
     }
 }

@@ -11,6 +11,9 @@ declare(strict_types=1);
 namespace Flow\JSONPath\Filters\Expression;
 
 use Flow\JSONPath\JSONPathException;
+use Flow\JSONPath\JSONPathToken;
+use Flow\JSONPath\RFC9535\QueryParser;
+use Flow\JSONPath\TokenType;
 
 final class ExpressionParser
 {
@@ -22,9 +25,9 @@ final class ExpressionParser
     /**
      * @throws JSONPathException
      */
-    public function __construct(string $expression)
+    public function __construct(string $expression, private readonly bool $strict = false)
     {
-        $this->tokens = (new ExpressionLexer($expression))->tokenize();
+        $this->tokens = (new ExpressionLexer($expression, $strict))->tokenize();
     }
 
     /**
@@ -90,7 +93,12 @@ final class ExpressionParser
             return $this->parseComparison();
         }
 
+        $parenthesized = $this->check(ExpressionToken::LEFT_PARENTHESIS);
         $operand = $this->parseUnary();
+
+        if ($this->strict && !$parenthesized && \in_array($operand->kind, [ExpressionNode::COMPARISON, ExpressionNode::LOGICAL_NOT], true)) {
+            throw new JSONPathException('Negation of a comparison or negation requires parentheses');
+        }
         $this->assertLogical($operand, 'Operand of `!`');
 
         return new ExpressionNode(
@@ -143,12 +151,19 @@ final class ExpressionParser
 
         if ($token->type === ExpressionToken::QUERY) {
             $this->position++;
+            $queryTokens = $this->strict
+                ? (new QueryParser('$' . \substr($token->value, 1)))->parse()
+                : [];
+            $singular = $this->strict
+                ? \count(\array_filter($queryTokens, static fn (JSONPathToken $selector): bool => $selector->type !== TokenType::Index || (!$selector->quoted && $selector->value === '*'))) === 0
+                : $this->isSingularQuery($token->value);
 
             return new ExpressionNode(
                 ExpressionNode::QUERY,
                 ExpressionType::Nodes,
                 $token->value,
-                singular: $this->isSingularQuery($token->value),
+                singular: $singular,
+                queryTokens: $queryTokens,
             );
         }
 
@@ -159,6 +174,12 @@ final class ExpressionParser
         if ($this->match(ExpressionToken::LEFT_PARENTHESIS)) {
             $expression = $this->parseOr();
             $this->expect(ExpressionToken::RIGHT_PARENTHESIS);
+
+            if ($this->strict) {
+                $this->assertLogical($expression, 'Parenthesized expression');
+
+                return new ExpressionNode(ExpressionNode::GROUP, ExpressionType::Logical, children: [$expression]);
+            }
 
             return $expression;
         }
@@ -171,7 +192,12 @@ final class ExpressionParser
      */
     private function parseFunction(): ExpressionNode
     {
-        $name = $this->expect(ExpressionToken::IDENTIFIER)->value;
+        $nameToken = $this->expect(ExpressionToken::IDENTIFIER);
+        $name = $nameToken->value;
+
+        if ($this->strict && $this->current()->position !== $nameToken->position + \strlen($name)) {
+            throw new JSONPathException('Function names must be adjacent to their opening parenthesis');
+        }
         $this->expect(ExpressionToken::LEFT_PARENTHESIS);
         $arguments = [];
 

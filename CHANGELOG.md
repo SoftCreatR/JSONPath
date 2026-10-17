@@ -1,5 +1,13 @@
 # Changelog
 
+### 2.2.0
+
+- Added opt-in `JSONPath::RFC9535` mode with full standard query parsing, eager type validation, Unicode and escaped member names, mixed selector unions, and RFC filter and slice semantics. Existing calls retain their previous behavior.
+- Added `findPaths()` for normalized RFC result paths, including ordered duplicate matches.
+- Integrated all 715 cases from the pinned JSONPath compliance suite, checking values and normalized paths together and rejecting invalid queries independently of document contents.
+- Kept the original compatibility tests and added regression coverage for mode isolation, nested absolute queries, and JSON value comparisons.
+- CI now enforces 100% coverage, and PHP CS Fixer is the sole code style tool.
+
 ### 2.1.0
 
 - Added the RFC 9535 `length()`, `count()`, `match()`, `search()`, and `value()` function extensions.

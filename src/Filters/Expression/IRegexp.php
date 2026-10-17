@@ -22,7 +22,7 @@ final class IRegexp
     {
         $compiled = self::compile($expression, $full);
 
-        return $compiled !== null && \preg_match($compiled, $value) === 1;
+        return $compiled !== null && @\preg_match($compiled, $value) === 1;
     }
 
     private static function compile(string $expression, bool $full): ?string

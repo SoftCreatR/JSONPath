@@ -12,6 +12,8 @@ namespace Flow\JSONPath;
 
 use ArrayAccess;
 use Countable;
+use Flow\JSONPath\RFC9535\QueryEvaluator;
+use Flow\JSONPath\RFC9535\QueryParser;
 use Iterator;
 use JsonSerializable;
 use Override;
@@ -24,7 +26,9 @@ class JSONPath implements ArrayAccess, Iterator, JsonSerializable, Countable
 {
     public const int ALLOW_MAGIC = 1;
 
-    /** @var array<int, list<JSONPathToken>> */
+    public const int RFC9535 = 2;
+
+    /** @var array<string, list<JSONPathToken>> */
     protected static array $tokenCache = [];
 
     protected mixed $data = [];
@@ -47,6 +51,11 @@ class JSONPath implements ArrayAccess, Iterator, JsonSerializable, Countable
     public function find(string $expression): self
     {
         $tokens = $this->parseTokens($expression);
+
+        if (($this->options & self::RFC9535) !== 0) {
+            return new static((new QueryEvaluator($this->data))->values($tokens), $this->options);
+        }
+
         $collectionData = [$this->data];
 
         foreach ($tokens as $token) {
@@ -133,18 +142,33 @@ class JSONPath implements ArrayAccess, Iterator, JsonSerializable, Countable
      */
     public function parseTokens(string $expression): array
     {
-        $cacheKey = \crc32($expression);
+        $strict = ($this->options & self::RFC9535) !== 0;
+        $cacheKey = ($strict ? 'rfc:' : 'legacy:') . $expression;
 
         if (isset(static::$tokenCache[$cacheKey])) {
             return static::$tokenCache[$cacheKey];
         }
 
-        $lexer = new JSONPathLexer($expression);
-        $tokens = $lexer->parseExpression();
+        $tokens = $strict
+            ? (new QueryParser($expression))->parse()
+            : (new JSONPathLexer($expression))->parseExpression();
 
         static::$tokenCache[$cacheKey] = $tokens;
 
         return $tokens;
+    }
+
+    /**
+     * Returns the normalized paths selected by an RFC 9535 query, retaining duplicates.
+     *
+     * @return list<string>
+     * @throws JSONPathException
+     */
+    public function findPaths(string $expression): array
+    {
+        $query = new self($this->data, self::RFC9535);
+
+        return (new QueryEvaluator($this->data))->paths($query->parseTokens($expression));
     }
 
     public function getData(): mixed

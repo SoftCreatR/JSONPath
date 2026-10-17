@@ -4,7 +4,7 @@
 [![MIT licensed](https://img.shields.io/badge/license-MIT-blue.svg)](./LICENSE) [![Plant Tree](https://img.shields.io/badge/dynamic/json?color=brightgreen&label=Plant%20Tree&query=%24.total&url=https%3A%2F%2Fpublic.ecologi.com%2Fusers%2Fsoftcreatr%2Ftrees)](https://ecologi.com/softcreatr?r=61212ab3fc69b8eb8a2014f4)
 [![Codecov branch](https://img.shields.io/codecov/c/github/SoftCreatR/JSONPath)](https://codecov.io/gh/SoftCreatR/JSONPath)
 
-This is a [JSONPath](https://www.rfc-editor.org/rfc/rfc9535) implementation for PHP that targets portable RFC semantics and the JSONPath comparison consensus while keeping the API small, cached, and `eval`-free.
+This is a [JSONPath](https://www.rfc-editor.org/rfc/rfc9535) implementation for PHP with an opt-in RFC 9535 mode and a backward-compatible default mode. Both use cached queries and evaluate expressions without `eval`.
 
 ## Highlights
 
@@ -13,6 +13,7 @@ This is a [JSONPath](https://www.rfc-editor.org/rfc/rfc9535) implementation for 
 - Supports child and descendant selectors, wildcards, quoted name unions, indexes, negative indexes, and array slices.
 - Filters support existence tests (including descendant and nested filters), path-to-path/root comparisons, deep equality, and distinct RFC `Nothing` versus JSON `null` semantics.
 - Malformed and non-portable legacy syntax is rejected instead of being interpreted as a different valid query.
+- RFC mode passes all 715 cases in the pinned JSONPath compliance suite, including normalized result paths and rejection of invalid selectors.
 
 ## Installation
 
@@ -31,6 +32,41 @@ composer exec phpunit
 composer phpstan
 composer cs
 ```
+
+The PHPUnit suite includes the pinned [JSONPath Compliance Test Suite](https://github.com/jsonpath-standard/jsonpath-compliance-test-suite/tree/20ebdcce5008c8a777ee9c80ad853ecf606950b5). Its 715 cases check both returned values and normalized paths, preserve objects versus arrays, and accept alternative node orderings only where the fixtures explicitly allow them. Tests run offline. CI verifies 100% class, method, and line coverage with Xdebug. Code style uses PHP CS Fixer.
+
+## RFC 9535 mode
+
+Enable `JSONPath::RFC9535` for standard query syntax and semantics. Existing calls without this flag keep their previous behavior.
+
+```php
+use Flow\JSONPath\JSONPath;
+
+$data = json_decode(
+    '{"books":[{"title":"First","price":5},{"title":"Second","price":15}]}',
+    associative: false,
+    flags: JSON_THROW_ON_ERROR,
+);
+
+$query = new JSONPath($data, JSONPath::RFC9535);
+
+$query->find('$.books[?@.price < 10].title')->getData();
+// ['First']
+
+$query->findPaths('$.books[?@.price < 10].title');
+// ["$['books'][0]['title']"]
+
+$query->find('$.books[*,0].title')->getData();
+// ['First', 'Second', 'First']
+```
+
+Decode JSON objects as objects, as above. PHP lists represent JSON arrays; objects represent JSON objects. Associative PHP arrays, magic getters, and `ArrayAccess` belong to the compatibility API. RFC mode reads public object members and does not invoke magic accessors, even when `ALLOW_MAGIC` is also set.
+
+RFC mode supports every selector kind in an ordered union, optional filter parentheses, Unicode member shorthands, JSON string escapes, negative and zero slice steps, logical precedence, and all five standard function extensions. Queries are parsed and type-checked before evaluation, including when the document is empty or a preceding segment has no matches. Invalid syntax raises `JSONPathException`.
+
+The flag is retained by returned `JSONPath` objects. Compiled queries are cached separately for each mode. `findPaths()` always uses RFC mode and returns one normalized path per match in node-list order, including duplicates. It does not change the document or the values returned by `find()`.
+
+The default mode retains its existing extensions and restrictions, including rootless member queries, trimmed surrounding whitespace, trailing-comma unions, and the older filter parser. Choose RFC mode when queries must follow the standard; passing the community comparison suite alone does not establish RFC compliance.
 
 ## JSONPath Examples
 
