@@ -14,21 +14,45 @@ use Flow\JSONPath\JSONPathToken;
 
 final readonly class ExpressionNode
 {
-    public const string LITERAL = 'literal';
+    /**
+     * @var string
+     */
+    public const LITERAL = 'literal';
 
-    public const string QUERY = 'query';
+    /**
+     * @var string
+     */
+    public const QUERY = 'query';
 
-    public const string FUNCTION = 'function';
+    /**
+     * @var string
+     */
+    public const FUNCTION = 'function';
 
-    public const string COMPARISON = 'comparison';
+    /**
+     * @var string
+     */
+    public const COMPARISON = 'comparison';
 
-    public const string LOGICAL_AND = 'logical-and';
+    /**
+     * @var string
+     */
+    public const LOGICAL_AND = 'logical-and';
 
-    public const string LOGICAL_OR = 'logical-or';
+    /**
+     * @var string
+     */
+    public const LOGICAL_OR = 'logical-or';
 
-    public const string LOGICAL_NOT = 'logical-not';
+    /**
+     * @var string
+     */
+    public const LOGICAL_NOT = 'logical-not';
 
-    public const string GROUP = 'group';
+    /**
+     * @var string
+     */
+    public const GROUP = 'group';
 
     /**
      * @param list<self> $children

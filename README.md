@@ -1,4 +1,4 @@
-# JSONPath for PHP 8.3+
+# JSONPath for PHP 8.2+
 
 [![Build](https://img.shields.io/github/actions/workflow/status/SoftCreatR/JSONPath/.github/workflows/Test.yml?branch=main)](https://github.com/SoftCreatR/JSONPath/actions/workflows/Test.yml) [![Latest Release](https://img.shields.io/packagist/v/SoftCreatR/JSONPath?color=blue&label=Latest%20Release)](https://packagist.org/packages/softcreatr/jsonpath)
 [![MIT licensed](https://img.shields.io/badge/license-MIT-blue.svg)](./LICENSE) [![Plant Tree](https://img.shields.io/badge/dynamic/json?color=brightgreen&label=Plant%20Tree&query=%24.total&url=https%3A%2F%2Fpublic.ecologi.com%2Fusers%2Fsoftcreatr%2Ftrees)](https://ecologi.com/softcreatr?r=61212ab3fc69b8eb8a2014f4)
@@ -8,7 +8,7 @@ This is a [JSONPath](https://www.rfc-editor.org/rfc/rfc9535) implementation for 
 
 ## Highlights
 
-- PHP 8.3+ with typed class constants, enums, readonly tokens, `#[Override]`, and no `eval`; CI covers PHP 8.3 through the PHP 8.6 nightly.
+- PHP 8.2+ with enums, readonly tokens, `#[Override]`, and no `eval`; CI covers PHP 8.2 through the PHP 8.6 nightly.
 - Works with arrays, objects, and `ArrayAccess`/traversables in any combination.
 - Supports child and descendant selectors, wildcards, quoted name unions, indexes, negative indexes, and array slices.
 - Filters support existence tests (including descendant and nested filters), path-to-path/root comparisons, deep equality, and distinct RFC `Nothing` versus JSON `null` semantics.
@@ -17,7 +17,7 @@ This is a [JSONPath](https://www.rfc-editor.org/rfc/rfc9535) implementation for 
 
 ## Installation
 
-Requires PHP 8.3 or newer.
+Requires PHP 8.2 or newer.
 
 ```bash
 composer require softcreatr/jsonpath:"^2.0"

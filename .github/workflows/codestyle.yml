@@ -19,7 +19,7 @@ jobs:
     - name: Setup PHP with tools
       uses: shivammathur/setup-php@2.37.2
       with:
-        php-version: '8.3'
+        php-version: '8.2'
         extensions: dom, json, mbstring, xml, xmlwriter
         tools: composer:v2
 

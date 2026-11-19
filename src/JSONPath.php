@@ -24,9 +24,15 @@ use Override;
  */
 class JSONPath implements ArrayAccess, Iterator, JsonSerializable, Countable
 {
-    public const int ALLOW_MAGIC = 1;
+    /**
+     * @var int
+     */
+    public const ALLOW_MAGIC = 1;
 
-    public const int RFC9535 = 2;
+    /**
+     * @var int
+     */
+    public const RFC9535 = 2;
 
     /** @var array<string, list<JSONPathToken>> */
     protected static array $tokenCache = [];

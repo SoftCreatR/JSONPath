@@ -20,19 +20,34 @@ class JSONPathLexer
      */
 
     // e.g.: foo or 40f35757-2563-4790-b0b1-caa904be455f or $
-    public const string MATCH_INDEX = '(?!-)[\-\w]+ | \\$ | \\*';
+    /**
+     * @var string
+     */
+    public const MATCH_INDEX = '(?!-)[\-\w]+ | \\$ | \\*';
 
     // Eg. [0:2:1] or [-1]
-    public const string MATCH_SLICE = '(?:-?\d*:-?\d*(?::-?\d*)?|-\\d+)';
+    /**
+     * @var string
+     */
+    public const MATCH_SLICE = '(?:-?\d*:-?\d*(?::-?\d*)?|-\\d+)';
 
     // Eg. ?(@.foo = "bar")
-    public const string MATCH_QUERY_MATCH = '\s* \?\(.+?\) \s*';
+    /**
+     * @var string
+     */
+    public const MATCH_QUERY_MATCH = '\s* \?\(.+?\) \s*';
 
     // Eg. 'bar'
-    public const string MATCH_INDEX_IN_SINGLE_QUOTES = '\s* \' (.+?)? \' \s*';
+    /**
+     * @var string
+     */
+    public const MATCH_INDEX_IN_SINGLE_QUOTES = '\s* \' (.+?)? \' \s*';
 
     // Eg. "bar"
-    public const string MATCH_INDEX_IN_DOUBLE_QUOTES = '\s* " (.+?)? " \s*';
+    /**
+     * @var string
+     */
+    public const MATCH_INDEX_IN_DOUBLE_QUOTES = '\s* " (.+?)? " \s*';
 
     private readonly string $expression;
 

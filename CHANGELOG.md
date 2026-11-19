@@ -1,5 +1,11 @@
 # Changelog
 
+### 2.2.1
+
+- Added PHP 8.2 support while retaining every existing query feature, including RFC 9535 mode and all 715 compliance cases.
+- Replaced typed class constants with PHPDoc-typed constants; values and public names remain unchanged.
+- Added PHPUnit 11 support and PHP 8.2 CI coverage alongside PHP 8.3 through 8.6.
+
 ### 2.2.0
 
 - Added opt-in `JSONPath::RFC9535` mode with full standard query parsing, eager type validation, Unicode and escaped member names, mixed selector unions, and RFC filter and slice semantics. Existing calls retain their previous behavior.

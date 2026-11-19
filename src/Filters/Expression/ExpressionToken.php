@@ -12,21 +12,45 @@ namespace Flow\JSONPath\Filters\Expression;
 
 final readonly class ExpressionToken
 {
-    public const string END = 'end';
+    /**
+     * @var string
+     */
+    public const END = 'end';
 
-    public const string IDENTIFIER = 'identifier';
+    /**
+     * @var string
+     */
+    public const IDENTIFIER = 'identifier';
 
-    public const string LITERAL = 'literal';
+    /**
+     * @var string
+     */
+    public const LITERAL = 'literal';
 
-    public const string QUERY = 'query';
+    /**
+     * @var string
+     */
+    public const QUERY = 'query';
 
-    public const string LEFT_PARENTHESIS = 'left-parenthesis';
+    /**
+     * @var string
+     */
+    public const LEFT_PARENTHESIS = 'left-parenthesis';
 
-    public const string RIGHT_PARENTHESIS = 'right-parenthesis';
+    /**
+     * @var string
+     */
+    public const RIGHT_PARENTHESIS = 'right-parenthesis';
 
-    public const string COMMA = 'comma';
+    /**
+     * @var string
+     */
+    public const COMMA = 'comma';
 
-    public const string OPERATOR = 'operator';
+    /**
+     * @var string
+     */
+    public const OPERATOR = 'operator';
 
     public function __construct(
         public string $type,

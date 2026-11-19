@@ -24,17 +24,29 @@ use const PREG_UNMATCHED_AS_NULL;
 
 class QueryMatchFilter extends AbstractFilter
 {
-    protected const string MATCH_QUERY_NEGATION_WRAPPED = '^(?<negate>!)\((?<logicalexpr>.+)\)$';
+    /**
+     * @var string
+     */
+    protected const MATCH_QUERY_NEGATION_WRAPPED = '^(?<negate>!)\((?<logicalexpr>.+)\)$';
 
-    protected const string MATCH_QUERY_NEGATION_UNWRAPPED = '^(?<negate>!)(?<logicalexpr>.+)$';
+    /**
+     * @var string
+     */
+    protected const MATCH_QUERY_NEGATION_UNWRAPPED = '^(?<negate>!)(?<logicalexpr>.+)$';
 
-    protected const string MATCH_QUERY_OPERATORS = '
+    /**
+     * @var string
+     */
+    protected const MATCH_QUERY_OPERATORS = '
       (@\.(?<key>[^\s<>!=]+)|@\[["\']?(?<keySquare>.*?)["\']?\]|(?<node>@)|(%group(?<group>\d+)%))
       (\s*(?<operator>==|!=|>=|<=|>|<)\s*(?<comparisonValue>.+?(?=\s*(?:&&|$|\|\||%))))?
       (\s*(?<logicalandor>&&|\|\|)\s*)?
     ';
 
-    protected const string MATCH_GROUPED_EXPRESSION = '#\([^)(]*+(?:(?R)[^)(]*)*+\)#';
+    /**
+     * @var string
+     */
+    protected const MATCH_GROUPED_EXPRESSION = '#\([^)(]*+(?:(?R)[^)(]*)*+\)#';
 
     /**
      * @throws JSONPathException

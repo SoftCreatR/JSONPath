@@ -12,11 +12,20 @@ namespace Flow\JSONPath\Filters\Expression;
 
 final class IRegexp
 {
-    private const int MAX_QUANTIFIER = 10_000;
+    /**
+     * @var int
+     */
+    private const MAX_QUANTIFIER = 10_000;
 
-    private const string SINGLE_CHARACTER_ESCAPES = '()*+-.?[\\]^{|}nrt';
+    /**
+     * @var string
+     */
+    private const SINGLE_CHARACTER_ESCAPES = '()*+-.?[\\]^{|}nrt';
 
-    private const string UNICODE_CATEGORIES = '(?:L[lmotu]?|M[cen]?|N[dlo]?|P[cdfios]?|Z[lps]?|S[ckmo]?|C[cfno]?)';
+    /**
+     * @var string
+     */
+    private const UNICODE_CATEGORIES = '(?:L[lmotu]?|M[cen]?|N[dlo]?|P[cdfios]?|Z[lps]?|S[ckmo]?|C[cfno]?)';
 
     public static function matches(string $value, string $expression, bool $full): bool
     {
